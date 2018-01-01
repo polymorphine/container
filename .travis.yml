@@ -1,0 +1,22 @@
+language: php
+
+php:
+  - 7.0
+
+env:
+  matrix:
+    - STABILITY="--prefer-lowest --prefer-stable"
+    - STABILITY=""
+
+before_install:
+  - composer self-update
+
+before_script:
+  - composer update $STABILITY
+
+script:
+  - mkdir -p build/logs
+  - composer run-tests
+
+after_script:
+   - php vendor/bin/coveralls -v
