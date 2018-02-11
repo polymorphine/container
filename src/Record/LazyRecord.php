@@ -1,9 +1,9 @@
 <?php
 
-namespace Shudd3r\Http\Src\Container\Record;
+namespace Shudd3r\Container\Record;
 
 use Psr\Container\ContainerInterface;
-use Shudd3r\Http\Src\Container\Record;
+use Shudd3r\Container\Record;
 use Closure;
 
 

@@ -1,9 +1,9 @@
 <?php
 
-namespace Shudd3r\Http\Src\Container\Factory;
+namespace Shudd3r\Container\Factory;
 
-use Shudd3r\Http\Src\Container\Factory;
-use Shudd3r\Http\Src\Container\Record;
+use Shudd3r\Container\Factory;
+use Shudd3r\Container\Record;
 use Closure;
 
 

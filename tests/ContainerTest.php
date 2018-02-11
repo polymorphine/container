@@ -1,12 +1,12 @@
 <?php
 
-namespace Shudd3r\Http\Tests\Container;
+namespace Shudd3r\Container\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Shudd3r\Http\Src\Container\Container;
-use Shudd3r\Http\Src\Container\Factory;
-use Shudd3r\Http\Src\Container\Record;
-use Shudd3r\Http\Src\Container\Exception;
+use Shudd3r\Container\Container;
+use Shudd3r\Container\Factory;
+use Shudd3r\Container\Record;
+use Shudd3r\Container\Exception;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Container\ContainerExceptionInterface;

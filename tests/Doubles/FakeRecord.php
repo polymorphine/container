@@ -1,9 +1,9 @@
 <?php
 
-namespace Shudd3r\Http\Tests\Container\Doubles;
+namespace Shudd3r\Container\Tests\Doubles;
 
 use Psr\Container\ContainerInterface;
-use Shudd3r\Http\Src\Container\Record;
+use Shudd3r\Container\Record;
 
 
 class FakeRecord implements Record

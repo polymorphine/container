@@ -20,12 +20,12 @@
     ],
     "autoload": {
         "psr-4": {
-            "Shudd3r\\Http\\Src\\": "src/"
+            "Shudd3r\\Container\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Shudd3r\\Http\\Tests\\": "tests/"
+            "Shudd3r\\Container\\Tests\\": "tests/"
         }
     },
     "scripts": {

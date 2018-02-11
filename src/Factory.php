@@ -1,6 +1,6 @@
 <?php
 
-namespace Shudd3r\Http\Src\Container;
+namespace Shudd3r\Container;
 
 use Psr\Container\ContainerInterface;
 use Closure;

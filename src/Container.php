@@ -1,9 +1,9 @@
 <?php
 
-namespace Shudd3r\Http\Src\Container;
+namespace Shudd3r\Container;
 
 use Psr\Container\ContainerInterface;
-use Shudd3r\Http\Src\Container\Exception;
+use Shudd3r\Container\Exception;
 
 
 class Container implements ContainerInterface
