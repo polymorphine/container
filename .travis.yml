@@ -1,7 +1,7 @@
 language: php
 
 php:
-  - 7.0
+  - 7.1
 
 env:
   matrix:
@@ -18,5 +18,5 @@ script:
   - mkdir -p build/logs
   - composer run-tests
 
-after_script:
-   - php vendor/bin/coveralls -v
+after_success:
+   - php vendor/bin/php-coveralls
