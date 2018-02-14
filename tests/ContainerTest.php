@@ -1,12 +1,21 @@
 <?php
 
-namespace Shudd3r\Container\Tests;
+/**
+ * This file is part of Polymorphine/Container package.
+ *
+ * (c) Shudd3r <q3.shudder@gmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
+namespace Polymorphine\Container\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Shudd3r\Container\Container;
-use Shudd3r\Container\Factory;
-use Shudd3r\Container\Record;
-use Shudd3r\Container\Exception;
+use Polymorphine\Container\Container;
+use Polymorphine\Container\Factory;
+use Polymorphine\Container\Record;
+use Polymorphine\Container\Exception;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Container\ContainerExceptionInterface;
@@ -154,7 +163,7 @@ class ContainerTest extends TestCase
     public function testInputProxyMethods($method, $id, $value, $result) {
         $factory = $this->factory();
         $proxy   = new Factory\ContainerRecordEntry($id, $factory);
-        $proxy->$method($value);
+        $proxy->{$method}($value);
         $container = $factory->container();
         $this->assertTrue($container->has($id));
         $this->assertSame($result ?: $value, $container->get($id));
@@ -163,7 +172,7 @@ class ContainerTest extends TestCase
     public function inputScenarios() {
         return [
             ['value', 'id.direct', 'direct value', 'direct value'],
-            ['lazy', 'id.lazy', function () { return 'lazy value';}, 'lazy value'],
+            ['lazy', 'id.lazy', function () { return 'lazy value'; }, 'lazy value'],
             ['record', 'id.fakeRecord', new Doubles\FakeRecord('fake record value'), 'fake record value'],
             ['record', 'id.directRecord', new Record\DirectRecord('direct record value'), 'direct record value']
         ];

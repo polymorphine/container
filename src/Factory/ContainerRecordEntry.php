@@ -1,9 +1,18 @@
 <?php
 
-namespace Shudd3r\Container\Factory;
+/**
+ * This file is part of Polymorphine/Container package.
+ *
+ * (c) Shudd3r <q3.shudder@gmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
 
-use Shudd3r\Container\Factory;
-use Shudd3r\Container\Record;
+namespace Polymorphine\Container\Factory;
+
+use Polymorphine\Container\Factory;
+use Polymorphine\Container\Record;
 use Closure;
 
 
@@ -12,7 +21,7 @@ use Closure;
  * gain access to already written values through created
  * Container.
  *
- * @see \Shudd3r\Http\Src\Container\Factory
+ * @see \Polymorphine\Container\Factory
  */
 class ContainerRecordEntry
 {
@@ -31,7 +40,7 @@ class ContainerRecordEntry
      *
      * @param $value
      */
-    public function value($value) {
+    public function value($value): void {
         $this->factory->value($this->name, $value);
     }
 
@@ -45,7 +54,7 @@ class ContainerRecordEntry
      *
      * @param Closure $closure
      */
-    public function lazy(Closure $closure) {
+    public function lazy(Closure $closure): void {
         $this->factory->lazy($this->name, $closure);
     }
 
@@ -54,7 +63,7 @@ class ContainerRecordEntry
      *
      * @param Record $record
      */
-    public function record(Record $record) {
+    public function record(Record $record): void {
         $this->factory->record($this->name, $record);
     }
 }

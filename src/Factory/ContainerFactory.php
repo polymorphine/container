@@ -1,12 +1,21 @@
 <?php
 
-namespace Shudd3r\Container\Factory;
+/**
+ * This file is part of Polymorphine/Container package.
+ *
+ * (c) Shudd3r <q3.shudder@gmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
 
-use Shudd3r\Container\Factory;
+namespace Polymorphine\Container\Factory;
+
+use Polymorphine\Container\Factory;
 use Psr\Container\ContainerInterface;
-use Shudd3r\Container\Container;
-use Shudd3r\Container\Record;
-use Shudd3r\Container\Exception;
+use Polymorphine\Container\Container;
+use Polymorphine\Container\Record;
+use Polymorphine\Container\Exception;
 use Closure;
 
 
@@ -22,22 +31,20 @@ class ContainerFactory implements Factory
         return new Container($this->records);
     }
 
-    public function value($name, $value) {
-        $id = $this->validId($name);
-        $this->records[$id] = new Record\DirectRecord($value);
+    public function value($name, $value): void {
+        $this->record($name, new Record\DirectRecord($value));
     }
 
-    public function lazy($name, Closure $closure) {
-        $id = $this->validId($name);
-        $this->records[$id] = new Record\LazyRecord($closure);
+    public function lazy($name, Closure $closure): void {
+        $this->record($name, new Record\LazyRecord($closure));
     }
 
-    public function record($name, Record $record) {
+    public function record($name, Record $record): void {
         $id = $this->validId($name);
         $this->records[$id] = $record;
     }
 
-    private function validId($id) {
+    private function validId($id): string {
         if (empty($id) || is_numeric($id)) {
             throw new Exception\InvalidIdException('Numeric id tokens are not supported');
         }

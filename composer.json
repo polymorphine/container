@@ -1,5 +1,5 @@
 {
-    "name": "shudd3r/container",
+    "name": "polymorphine/container",
     "description": "PSR-11 Container for Dependencies & Configuration",
     "type": "library",
     "minimum-stability": "stable",
@@ -8,8 +8,8 @@
         "psr/container": "^1.0"
     },
     "require-dev": {
+        "polymorphine/cs": "*",
         "phpunit/phpunit": "^6.5",
-        "friendsofphp/php-cs-fixer": "^2.10",
         "php-coveralls/php-coveralls": "^2.0"
     },
     "license": "MIT",
@@ -21,12 +21,12 @@
     ],
     "autoload": {
         "psr-4": {
-            "Shudd3r\\Container\\": "src/"
+            "Polymorphine\\Container\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Shudd3r\\Container\\Tests\\": "tests/"
+            "Polymorphine\\Container\\Tests\\": "tests/"
         }
     },
     "scripts": {

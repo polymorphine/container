@@ -1,6 +1,15 @@
 <?php
 
-namespace Shudd3r\Container;
+/**
+ * This file is part of Polymorphine/Container package.
+ *
+ * (c) Shudd3r <q3.shudder@gmail.com>
+ *
+ * This source file is subject to the MIT license that is bundled
+ * with this source code in the file LICENSE.
+ */
+
+namespace Polymorphine\Container;
 
 use Psr\Container\ContainerInterface;
 use Closure;
@@ -29,7 +38,7 @@ interface Factory
      * @param $name
      * @param $value
      */
-    public function value($name, $value);
+    public function value($name, $value): void;
 
     /**
      * Stores Closure under given $name identifier.
@@ -44,7 +53,7 @@ interface Factory
      * @param $name
      * @param Closure $closure
      */
-    public function lazy($name, Closure $closure);
+    public function lazy($name, Closure $closure): void;
 
     /**
      * Stores Record under given $name identifier.
@@ -54,5 +63,5 @@ interface Factory
      * @param $name
      * @param Record $record
      */
-    public function record($name, Record $record);
+    public function record($name, Record $record): void;
 }
