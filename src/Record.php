@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*
  * This file is part of Polymorphine/Container package.
  *
  * (c) Shudd3r <q3.shudder@gmail.com>
@@ -23,6 +23,7 @@ interface Record
      * may depend on other Container's entries.
      *
      * @param ContainerInterface $c
+     *
      * @return mixed unwrapped record value
      */
     public function value(ContainerInterface $c);

@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*
  * This file is part of Polymorphine/Container package.
  *
  * (c) Shudd3r <q3.shudder@gmail.com>

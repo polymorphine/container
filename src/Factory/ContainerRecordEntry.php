@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*
  * This file is part of Polymorphine/Container package.
  *
  * (c) Shudd3r <q3.shudder@gmail.com>
@@ -20,8 +20,6 @@ use Closure;
  * Write-only proxy that prevents configuration namespaces
  * gain access to already written values through created
  * Container.
- *
- * @see \Polymorphine\Container\Factory
  */
 class ContainerRecordEntry
 {
@@ -29,7 +27,7 @@ class ContainerRecordEntry
     private $factory;
 
     public function __construct(string $name, Factory $factory) {
-        $this->name    = $name;
+        $this->name = $name;
         $this->factory = $factory;
     }
 

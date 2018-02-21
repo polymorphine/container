@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*
  * This file is part of Polymorphine/Container package.
  *
  * (c) Shudd3r <q3.shudder@gmail.com>
@@ -12,7 +12,6 @@
 namespace Polymorphine\Container;
 
 use Psr\Container\ContainerInterface;
-use Polymorphine\Container\Exception;
 
 
 class Container implements ContainerInterface
