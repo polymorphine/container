@@ -1,6 +1,6 @@
 <?php
 
-/**
+/*
  * This file is part of Polymorphine/Container package.
  *
  * (c) Shudd3r <q3.shudder@gmail.com>
@@ -47,7 +47,7 @@ class ContainerTest extends TestCase
         $this->assertSame('Lazy Foo', $container->get('lazy'));
     }
 
-    public function testClosuresForLazyLoadedValuesCanAccessContaine() {
+    public function testClosuresForLazyLoadedValuesCanAccessContainer() {
         $factory = $this->withBasicSettings();
         $factory->lazy('bar', function (ContainerInterface $c) {
             return substr($c->get('test'), 0, 6) . $c->get('lazy') . '!';
@@ -70,24 +70,7 @@ class ContainerTest extends TestCase
     }
 
     public function testRegistryConstructorRecordsAreAvailableFromContainer() {
-        $construct = $this->registryConstructorParams();
-
-        $expected = array_merge($construct, [
-            'test' => 'Hello World!',
-            'lazy.hello' => 'Hello World!',
-            'lazy.goodbye' => 'see ya!'
-        ]);
-
-        $container = $this->factory($construct)->container();
-
-        foreach ($expected as $key => $value) {
-            $this->assertTrue($container->has($key), 'Failed for key: ' . $key);
-            $this->assertSame($value, $container->get($key), 'Failed for key: ' . $key);
-        }
-    }
-
-    protected function registryConstructorParams() {
-        return [
+        $construct = [
             'test' => new Record\DirectRecord('Hello World!'),
             'category.first' => 'one',
             'category.second' => 'two',
@@ -97,9 +80,20 @@ class ContainerTest extends TestCase
                 'one' => function () { return 'first'; },
                 'two' => function () { return 'second'; }
             ],
-            'lazy.hello' => new Record\LazyRecord(function ($c) { return $c->get('test'); }),
+            'lazy.hello' => new Record\LazyRecord(function (ContainerInterface $c) { return $c->get('test'); }),
             'lazy.goodbye' => new Record\LazyRecord(function () { return 'see ya!'; })
         ];
+
+        $container = $this->factory($construct)->container();
+
+        $construct['test'] = 'Hello World!';
+        $construct['lazy.hello'] = 'Hello World!';
+        $construct['lazy.goodbye'] = 'see ya!';
+
+        foreach ($construct as $key => $expected) {
+            $this->assertTrue($container->has($key), 'Failed for key: ' . $key);
+            $this->assertSame($expected, $container->get($key), 'Failed for key: ' . $key);
+        }
     }
 
     public function testConstructWithNotAssociativeArray_ThrowsException() {
