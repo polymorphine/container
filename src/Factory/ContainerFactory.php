@@ -50,7 +50,7 @@ class ContainerFactory implements Factory
         }
 
         if (array_key_exists($id, $this->records)) {
-            throw new Exception\InvalidIdException(sprintf('Record already exists - cannot overwrite existing `%s` id', $id));
+            throw new Exception\InvalidIdException(sprintf('Record id `%s` already defined', $id));
         }
 
         return $id;
