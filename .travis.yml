@@ -17,6 +17,7 @@ before_script:
 script:
   - mkdir -p build/logs
   - composer run-tests
+  - composer style-check
 
 after_success:
    - php vendor/bin/php-coveralls

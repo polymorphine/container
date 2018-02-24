@@ -30,6 +30,7 @@
         }
     },
     "scripts": {
-        "run-tests": "phpunit --configuration phpunit.xml.dist"
+        "run-tests": "phpunit --configuration phpunit.xml.dist",
+        "style-check": "polymorphine-cs src"
     }
 }
