@@ -9,10 +9,8 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Container\Factory;
+namespace Polymorphine\Container;
 
-use Polymorphine\Container\Factory;
-use Polymorphine\Container\Record;
 use Closure;
 
 
@@ -21,7 +19,7 @@ use Closure;
  * gain access to already written values through created
  * Container.
  */
-class ContainerRecordEntry
+class RecordEntry
 {
     private $name;
     private $factory;
@@ -32,32 +30,39 @@ class ContainerRecordEntry
     }
 
     /**
-     * Pushes value to Container's entry Record.
-     * Unchanged value will be returned from Container when this
+     * Pushes DirectRecord with given value into Container's records.
+     * The same value will be returned from Container when this
      * record is requested.
+     *
+     * @see Record\DirectRecord
      *
      * @param $value
      */
     public function value($value): void {
-        $this->factory->value($this->name, $value);
+        $this->record(new Record\DirectRecord($value));
     }
 
     /**
-     * Pushes Closure to Container's entry Record.
-     * Value returned from Container will be result of first
-     * call to this Closure call and remain the same on
+     * Pushes LazyRecord with given Closure into Container's records.
+     * Value returned from this record will be result of first
+     * call to provided Closure call and will remain the same on
      * subsequent requests.
      *
+     * Returned object state might change.
      * Closure receives Container instance as parameter.
+     *
+     * @see Record\LazyRecord
      *
      * @param Closure $closure
      */
     public function lazy(Closure $closure): void {
-        $this->factory->lazy($this->name, $closure);
+        $this->record(new Record\LazyRecord($closure));
     }
 
     /**
-     * Pushes Record instance directly into Container's entry.
+     * Pushes given Record instance directly into Container's records.
+     *
+     * @see Record
      *
      * @param Record $record
      */

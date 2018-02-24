@@ -12,11 +12,27 @@
 namespace Polymorphine\Container;
 
 use Psr\Container\ContainerInterface;
-use Closure;
+use Polymorphine\Container\Exception\InvalidArgumentException;
 
 
-interface Factory
+class Factory
 {
+    use ArgumentValidationMethods;
+
+    private $records;
+
+    /**
+     * ContainerFactory constructor.
+     *
+     * @param Record[] $records
+     *
+     * @throws InvalidArgumentException
+     */
+    public function __construct(array $records = []) {
+        $this->checkRecords($records);
+        $this->records = $records;
+    }
+
     /**
      * Creates container with provided records.
      *
@@ -27,33 +43,9 @@ interface Factory
      *
      * @return ContainerInterface
      */
-    public function container(): ContainerInterface;
-
-    /**
-     * Stores value under $name identifier.
-     *
-     * Value will be returned as passed. It means that Closures
-     * won't be invoked, but returned as Closures.
-     *
-     * @param $name
-     * @param $value
-     */
-    public function value($name, $value): void;
-
-    /**
-     * Stores Closure under given $name identifier.
-     *
-     * Value returned by container will be always the outcome
-     * of first Closure call, this way only single object can
-     * be created and same instance will be returned on each
-     * subsequent call.
-     *
-     * Closure receives Container instance as parameter.
-     *
-     * @param $name
-     * @param Closure $closure
-     */
-    public function lazy($name, Closure $closure): void;
+    public function container(): ContainerInterface {
+        return new Container($this->records);
+    }
 
     /**
      * Stores Record under given $name identifier.
@@ -63,5 +55,9 @@ interface Factory
      * @param $name
      * @param Record $record
      */
-    public function record($name, Record $record): void;
+    public function record(string $name, Record $record): void {
+        $this->checkIdFormat($name);
+        $this->checkIdExists($name);
+        $this->records[$name] = $record;
+    }
 }

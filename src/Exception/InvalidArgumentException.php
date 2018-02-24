@@ -12,9 +12,8 @@
 namespace Polymorphine\Container\Exception;
 
 use Psr\Container\ContainerExceptionInterface;
-use InvalidArgumentException;
 
 
-class InvalidStateException extends InvalidArgumentException implements ContainerExceptionInterface
+class InvalidArgumentException extends \InvalidArgumentException implements ContainerExceptionInterface
 {
 }
