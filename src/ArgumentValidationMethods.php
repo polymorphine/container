@@ -17,27 +17,27 @@ use Polymorphine\Container\Exception\InvalidIdException;
 
 trait ArgumentValidationMethods
 {
-    private function checkRecords(array $records): void
+    private function validateRecords(array $records): void
     {
         foreach ($records as $id => $record) {
-            $this->checkIdFormat($id);
+            $this->validateIdFormat($id);
             if (!$record instanceof Record) {
-                throw new InvalidArgumentException('Container requires array of Record instances');
+                throw new InvalidArgumentException('Container requires associative array of Record instances');
             }
         }
     }
 
-    private function checkIdFormat(string $id): void
+    private function validateIdFormat(string $id): void
     {
         if (empty($id) || is_numeric($id)) {
-            throw new InvalidIdException('Numeric id tokens are not supported');
+            throw new InvalidIdException('Numeric id tokens for Container Records are not supported');
         }
     }
 
-    private function checkIdExists(string $id): void
+    private function checkIdOverwrite(string $id): void
     {
         if (isset($this->records[$id])) {
-            throw new InvalidIdException(sprintf('Record id `%s` already defined', $id));
+            throw new InvalidIdException(sprintf('Record id `%s` already defined - overwrite not allowed', $id));
         }
     }
 }

@@ -37,7 +37,7 @@ class Container implements ContainerInterface
 
     public function has($id): bool
     {
-        $this->checkIdFormat($id);
+        $this->validateIdFormat($id);
 
         return isset($this->records[$id]);
     }

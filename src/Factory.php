@@ -31,7 +31,7 @@ class Factory
      */
     public function __construct(array $records = [])
     {
-        $this->checkRecords($records);
+        $this->validateRecords($records);
         $this->records = $records;
     }
 
@@ -62,8 +62,8 @@ class Factory
      */
     public function setRecord(string $name, Record $record): void
     {
-        $this->checkIdFormat($name);
-        $this->checkIdExists($name);
+        $this->validateIdFormat($name);
+        $this->checkIdOverwrite($name);
         $this->records[$name] = $record;
     }
 
