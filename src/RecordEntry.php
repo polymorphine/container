@@ -31,8 +31,6 @@ class RecordEntry
 
     /**
      * Pushes DirectRecord with given value into Container's records.
-     * The same value will be returned from Container when this
-     * record is requested.
      *
      * @see Record\DirectRecord
      *
@@ -44,11 +42,6 @@ class RecordEntry
 
     /**
      * Pushes LazyRecord with given Closure into Container's records.
-     * Value returned from this record will be result of first
-     * call to provided Closure call and will remain the same on
-     * subsequent requests.
-     *
-     * Returned object state might change.
      * Closure receives Container instance as parameter.
      *
      * @see Record\LazyRecord
@@ -57,6 +50,19 @@ class RecordEntry
      */
     public function lazy(Closure $closure): void {
         $this->record(new Record\LazyRecord($closure));
+    }
+
+    /**
+     * Pushes FactoryRecord with given className and its constructor
+     * parameters given as Container id names.
+     *
+     * @see Record\FactoryRecord
+     *
+     * @param string   $className
+     * @param string[] ...$dependencies
+     */
+    public function factory(string $className, string ...$dependencies): void {
+        $this->record(new Record\FactoryRecord($className, ...$dependencies));
     }
 
     /**

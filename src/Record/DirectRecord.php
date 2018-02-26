@@ -15,6 +15,9 @@ use Psr\Container\ContainerInterface;
 use Polymorphine\Container\Record;
 
 
+/**
+ * Record that returns stored values as they were passed into constructor.
+ */
 class DirectRecord implements Record
 {
     private $value;

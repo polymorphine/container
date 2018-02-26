@@ -15,6 +15,7 @@ use PHPUnit\Framework\TestCase;
 use Polymorphine\Container\Factory;
 use Polymorphine\Container\Record;
 use Polymorphine\Container\Exception;
+use Polymorphine\Container\Tests\Doubles\ExampleClass;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Container\ContainerExceptionInterface;
@@ -157,5 +158,34 @@ class ContainerTest extends TestCase
             ['record', 'directRecord', new Record\DirectRecord('direct value'), 'direct value'],
             ['record', 'lazyRecord', new Record\LazyRecord(function () { return 'lazy value'; }), 'lazy value']
         ];
+    }
+
+    public function testFactoryRecord() {
+        $factory = $this->factory([
+            'name' => new Record\DirectRecord('Shudd3r'),
+            'hello' => new Record\DirectRecord(function ($name) {
+                return 'Hello ' . $name;
+            })
+        ]);
+
+        $factory->recordEntry('create.welcome')->factory(ExampleClass::class, 'hello', 'name');
+        $container = $factory->container();
+        $object = $container->get('create.welcome');
+
+        $this->assertSame('Hello Shudd3r', $object->beNice());
+        $this->assertSame($object, $container->get('create.welcome'));
+    }
+
+    public function testLazyRecord() {
+        $container = $this->factory([
+            'lazy.goodbye' => new Record\LazyRecord(function () { return new ExampleClass(function ($name) {
+                return 'Goodbye ' . $name;
+            }, 'Shudd3r'); })
+        ])->container();
+
+        $object = $container->get('lazy.goodbye');
+
+        $this->assertSame('Goodbye Shudd3r', $object->beNice());
+        $this->assertSame($object, $container->get('lazy.goodbye'));
     }
 }

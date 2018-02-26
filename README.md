@@ -67,9 +67,9 @@ $container = $factory->container();
 
 #### Config proxy
 Calling `Factory::recordEntry($name)` returns `RecordEntry` helper object.
-Beside providing methods to inject new instances of `DirectRecord` and `LazyRecord`
-into `Factory` it isolates `Container` from scopes that should not be allowed to peek
-inside by calling `Factory::container()` method.
+Beside providing methods to inject new instances of `Record` implementations
+into `Factory` it also isolates `Container` from scopes that should not be
+allowed to peek inside by calling `Factory::container()` method.
 
 To make it possible `Factory` should be encapsulated in object,
 that allows for its configuration. For example, if you have front

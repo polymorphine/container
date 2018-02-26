@@ -16,6 +16,13 @@ use Polymorphine\Container\Record;
 use Closure;
 
 
+/**
+ * Record that returns value invoked from Closure passed
+ * into constructor.
+ *
+ * Returned value is remembered and returned directly when
+ * value() method is called again.
+ */
 class LazyRecord implements Record
 {
     private $value;
@@ -26,6 +33,6 @@ class LazyRecord implements Record
     }
 
     public function value(ContainerInterface $c) {
-        return isset($this->value) ? $this->value : $this->value = $this->callback->__invoke($c);
+        return $this->value ?: $this->value = $this->callback->__invoke($c);
     }
 }
