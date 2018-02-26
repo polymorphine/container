@@ -67,6 +67,6 @@ class RecordEntry
      * @param Record $record
      */
     public function record(Record $record): void {
-        $this->factory->record($this->name, $record);
+        $this->factory->setRecord($this->name, $record);
     }
 }

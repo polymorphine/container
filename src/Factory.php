@@ -13,6 +13,7 @@ namespace Polymorphine\Container;
 
 use Psr\Container\ContainerInterface;
 use Polymorphine\Container\Exception\InvalidArgumentException;
+use Polymorphine\Container\Exception\InvalidIdException;
 
 
 class Factory
@@ -26,7 +27,7 @@ class Factory
      *
      * @param Record[] $records
      *
-     * @throws InvalidArgumentException
+     * @throws InvalidArgumentException|InvalidIdException
      */
     public function __construct(array $records = []) {
         $this->checkRecords($records);
@@ -54,10 +55,24 @@ class Factory
      *
      * @param $name
      * @param Record $record
+     *
+     * @throws InvalidIdException
      */
-    public function record(string $name, Record $record): void {
+    public function setRecord(string $name, Record $record): void {
         $this->checkIdFormat($name);
         $this->checkIdExists($name);
         $this->records[$name] = $record;
+    }
+
+    /**
+     * Returns write-only proxy with helper methods to instantiate
+     * Record implementations under given registry key.
+     *
+     * @param string $name
+     *
+     * @return RecordEntry
+     */
+    public function recordEntry(string $name): RecordEntry {
+        return new RecordEntry($name, $this);
     }
 }

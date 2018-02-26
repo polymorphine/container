@@ -36,7 +36,7 @@ trait ArgumentValidationMethods
 
     private function checkIdExists(string $id): void
     {
-        if (array_key_exists($id, $this->records)) {
+        if (isset($this->records[$id])) {
             throw new InvalidIdException(sprintf('Record id `%s` already defined', $id));
         }
     }

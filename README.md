@@ -1,21 +1,26 @@
-# Polymorphine Container
+# Polymorphine/Container
 [![Build Status](https://travis-ci.org/shudd3r/polymorphine-container.svg?branch=develop)](https://travis-ci.org/shudd3r/container)
 [![Coverage Status](https://coveralls.io/repos/github/shudd3r/polymorphine-container/badge.svg?branch=develop)](https://coveralls.io/github/shudd3r/container?branch=develop)
+[![PHP from Packagist](https://img.shields.io/packagist/php-v/polymorphine/container/dev-develop.svg)](https://packagist.org/packages/polymorphine/container)
+[![Packagist](https://img.shields.io/packagist/l/polymorphine/container.svg)](https://packagist.org/packages/polymorphine/container)
 ### PSR-11 Container for Dependencies and Configuration
-#### Immutability & encapsulated configuration
+
+#### Concept features: *Immutability & encapsulated configuration*
+Stateful nature of custom `Record` implementation might return different values on
+subsequent calls or even have side effects - take some time to reconsider before you
+decide on such feature.
+
+Container configuration might be separated from container itself, so that values
+stored in container could not be accessed - see: [Config proxy](#config-proxy)
 
 ### Installation
-Requires **php 7.0** or higher
-
     composer require polymorphine/container
-
 
 ### Usage examples
 #### Create directly with constructor parameter
-Container created this way will be immutable, but all the data have to be passed at once.
-Stateful nature of custom `Record` implementations might return different values on
-subsequent calls or even have side effects - if you think you need such things,
-take some time to reconsider.
+Container created this way won't throw `Exception` from constructor,
+and all the data have to be passed at once. This method is Not recommended
+when array values are provided from different sources (fails late).
 
 ```php
 use Polymorphine\Container\Container;
@@ -61,9 +66,10 @@ $container = $factory->container();
 ```
 
 #### Config proxy
-`RecordEntry` helper, beside providing methods to inject new instances
-of `DirectRecord` and `LazyRecord` into `Factory`, isolates it from scopes
-that should not be allowed to peek inside `Container` by calling its `create()` method.
+Calling `Factory::recordEntry($name)` returns `RecordEntry` helper object.
+Beside providing methods to inject new instances of `DirectRecord` and `LazyRecord`
+into `Factory` it isolates `Container` from scopes that should not be allowed to peek
+inside by calling `Factory::container()` method.
 
 To make it possible `Factory` should be encapsulated in object,
 that allows for its configuration. For example, if you have front
@@ -81,7 +87,7 @@ class App
     //...
     
     public function config(string $name): RecordEntry {
-        return new RecordEntry($name, $this->containerFactory);
+        return $this->containerFactory->recordEntry($name);
     }
     
     public function handle(ServerRequestInterface $request): ResponseInterface {
