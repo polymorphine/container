@@ -24,7 +24,8 @@ class RecordEntry
     private $name;
     private $factory;
 
-    public function __construct(string $name, Factory $factory) {
+    public function __construct(string $name, Factory $factory)
+    {
         $this->name = $name;
         $this->factory = $factory;
     }
@@ -36,7 +37,8 @@ class RecordEntry
      *
      * @param $value
      */
-    public function value($value): void {
+    public function value($value): void
+    {
         $this->record(new Record\DirectRecord($value));
     }
 
@@ -48,7 +50,8 @@ class RecordEntry
      *
      * @param Closure $closure
      */
-    public function lazy(Closure $closure): void {
+    public function lazy(Closure $closure): void
+    {
         $this->record(new Record\LazyRecord($closure));
     }
 
@@ -61,7 +64,8 @@ class RecordEntry
      * @param string   $className
      * @param string[] ...$dependencies
      */
-    public function factory(string $className, string ...$dependencies): void {
+    public function factory(string $className, string ...$dependencies): void
+    {
         $this->record(new Record\FactoryRecord($className, ...$dependencies));
     }
 
@@ -72,7 +76,8 @@ class RecordEntry
      *
      * @param Record $record
      */
-    public function record(Record $record): void {
+    public function record(Record $record): void
+    {
         $this->factory->setRecord($this->name, $record);
     }
 }

@@ -21,11 +21,13 @@ class Container implements ContainerInterface
 
     private $records;
 
-    public function __construct(array $records = []) {
+    public function __construct(array $records = [])
+    {
         $this->records = $records;
     }
 
-    public function get($id) {
+    public function get($id)
+    {
         if (!$this->has($id)) {
             throw new EntryNotFoundException(sprintf('Record id `%s` does not exist within Container', $id));
         }
@@ -33,13 +35,15 @@ class Container implements ContainerInterface
         return $this->recordValue($this->records[$id]);
     }
 
-    public function has($id): bool {
+    public function has($id): bool
+    {
         $this->checkIdFormat($id);
 
         return isset($this->records[$id]);
     }
 
-    private function recordValue(Record $record) {
+    private function recordValue(Record $record)
+    {
         return $record->value($this);
     }
 }

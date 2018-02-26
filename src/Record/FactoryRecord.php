@@ -34,16 +34,19 @@ class FactoryRecord implements Record
      * @param string   $className
      * @param string[] ...$dependencies ContainerInterface ids to get constructor values from
      */
-    public function __construct(string $className, string ...$dependencies) {
+    public function __construct(string $className, string ...$dependencies)
+    {
         $this->className = $className;
         $this->dependencies = $dependencies;
     }
 
-    public function value(ContainerInterface $container) {
+    public function value(ContainerInterface $container)
+    {
         return $this->object ?: $this->object = new $this->className(...$this->extractDependencies($container));
     }
 
-    private function extractDependencies(ContainerInterface $container): array {
+    private function extractDependencies(ContainerInterface $container): array
+    {
         $dependencies = [];
         foreach ($this->dependencies as $dependency) {
             $dependencies[] = $container->get($dependency);

@@ -29,7 +29,8 @@ class Factory
      *
      * @throws InvalidArgumentException|InvalidIdException
      */
-    public function __construct(array $records = []) {
+    public function __construct(array $records = [])
+    {
         $this->checkRecords($records);
         $this->records = $records;
     }
@@ -44,7 +45,8 @@ class Factory
      *
      * @return ContainerInterface
      */
-    public function container(): ContainerInterface {
+    public function container(): ContainerInterface
+    {
         return new Container($this->records);
     }
 
@@ -58,7 +60,8 @@ class Factory
      *
      * @throws InvalidIdException
      */
-    public function setRecord(string $name, Record $record): void {
+    public function setRecord(string $name, Record $record): void
+    {
         $this->checkIdFormat($name);
         $this->checkIdExists($name);
         $this->records[$name] = $record;
@@ -72,7 +75,8 @@ class Factory
      *
      * @return RecordEntry
      */
-    public function recordEntry(string $name): RecordEntry {
+    public function recordEntry(string $name): RecordEntry
+    {
         return new RecordEntry($name, $this);
     }
 }

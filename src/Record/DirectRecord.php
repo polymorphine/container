@@ -22,11 +22,13 @@ class DirectRecord implements Record
 {
     private $value;
 
-    public function __construct($value) {
+    public function __construct($value)
+    {
         $this->value = $value;
     }
 
-    public function value(ContainerInterface $c) {
+    public function value(ContainerInterface $c)
+    {
         return $this->value;
     }
 }

@@ -23,23 +23,13 @@ use Psr\Container\ContainerExceptionInterface;
 
 class ContainerTest extends TestCase
 {
-    protected function factory(array $data = []) {
-        return new Factory($data);
-    }
-
-    protected function withBasicSettings() {
-        $factory = $this->factory();
-        $factory->setRecord('test', new Record\DirectRecord('Hello World!'));
-        $factory->setRecord('lazy', new Record\LazyRecord(function () { return 'Lazy Foo'; }));
-
-        return $factory;
-    }
-
-    public function testInstantiation() {
+    public function testInstantiation()
+    {
         $this->assertInstanceOf(ContainerInterface::class, $this->factory()->container());
     }
 
-    public function testConfiguredRecordsAreAvailableFromContainer() {
+    public function testConfiguredRecordsAreAvailableFromContainer()
+    {
         $container = $this->withBasicSettings()->container();
 
         $this->assertTrue($container->has('test') && $container->has('lazy'));
@@ -47,7 +37,8 @@ class ContainerTest extends TestCase
         $this->assertSame('Lazy Foo', $container->get('lazy'));
     }
 
-    public function testClosuresForLazyLoadedValuesCanAccessContainer() {
+    public function testClosuresForLazyLoadedValuesCanAccessContainer()
+    {
         $factory = $this->withBasicSettings();
         $factory->setRecord('bar', new Record\LazyRecord(function (ContainerInterface $c) {
             return substr($c->get('test'), 0, 6) . $c->get('lazy') . '!';
@@ -57,24 +48,27 @@ class ContainerTest extends TestCase
         $this->assertSame('Hello Lazy Foo!', $container->get('bar'));
     }
 
-    public function testInvalidContainerIdType_ThrowsException() {
+    public function testInvalidContainerIdType_ThrowsException()
+    {
         $container = $this->factory()->container();
         $this->expectException(ContainerExceptionInterface::class);
         $container->has(23);
     }
 
-    public function testAccessingAbsentIdFromContainer_ThrowsException() {
+    public function testAccessingAbsentIdFromContainer_ThrowsException()
+    {
         $container = $this->factory()->container();
         $this->expectException(NotFoundExceptionInterface::class);
         $container->get('not.set');
     }
 
-    public function testRegistryConstructorRecordsAreAvailableFromContainer() {
+    public function testRegistryConstructorRecordsAreAvailableFromContainer()
+    {
         $expected = [
             'test' => 'Hello World!',
             'category.first' => 'one',
             'category.second' => 'two',
-            'array' => [1,2,3],
+            'array' => [1, 2, 3],
             'assoc' => ['first' => 1, 'second' => 2],
             'callback' => function () { return 'first'; },
             'lazy.hello' => 'Hello World!',
@@ -85,7 +79,7 @@ class ContainerTest extends TestCase
             'test' => new Record\DirectRecord('Hello World!'),
             'category.first' => new Record\DirectRecord('one'),
             'category.second' => new Record\DirectRecord('two'),
-            'array' => new Record\DirectRecord([1,2,3]),
+            'array' => new Record\DirectRecord([1, 2, 3]),
             'assoc' => new Record\DirectRecord(['first' => 1, 'second' => 2]),
             'callback' => new Record\DirectRecord($expected['callback']),
             'lazy.hello' => new Record\LazyRecord(function (ContainerInterface $c) { return $c->get('test'); }),
@@ -98,39 +92,46 @@ class ContainerTest extends TestCase
         }
     }
 
-    public function testConstructWithNotAssociativeArray_ThrowsException() {
+    public function testConstructWithNotAssociativeArray_ThrowsException()
+    {
         $this->expectException(ContainerExceptionInterface::class);
         $this->factory(['first' => 'ok', 2 => 'not ok'])->container();
     }
 
-    public function testCallbacksCannotModifyRegistry() {
+    public function testCallbacksCannotModifyRegistry()
+    {
         $factory = $this->factory();
         $factory->setRecord('lazyModifier', new Record\LazyRecord(function ($c) {
             $vars = get_object_vars($c);
+
             return isset($vars['records']);
         }));
         $this->assertFalse($factory->container()->get('lazyModifier'));
     }
 
-    public function testOverwritingExistingKey_ThrowsException() {
+    public function testOverwritingExistingKey_ThrowsException()
+    {
         $factory = $this->factory(['test' => new Record\DirectRecord('foo')]);
         $this->expectException(Exception\InvalidIdException::class);
         $factory->setRecord('test', new Record\DirectRecord('bar'));
     }
 
-    public function testNumericId_ThrowsException() {
+    public function testNumericId_ThrowsException()
+    {
         $factory = $this->factory();
         $this->expectException(Exception\InvalidIdException::class);
         $factory->setRecord('74', new Record\LazyRecord(function () { return 'foo'; }));
     }
 
-    public function testEmptyFactoryId_ThrowsException() {
+    public function testEmptyFactoryId_ThrowsException()
+    {
         $factory = $this->factory();
         $this->expectException(Exception\InvalidIdException::class);
         $factory->setRecord('', new Record\DirectRecord(function () { return 'foo'; }));
     }
 
-    public function testEmptyIdContainerCall_ThrowsException() {
+    public function testEmptyIdContainerCall_ThrowsException()
+    {
         $container = $this->withBasicSettings()->container();
         $this->expectException(Exception\InvalidIdException::class);
         $container->has('');
@@ -138,12 +139,14 @@ class ContainerTest extends TestCase
 
     /**
      * @dataProvider inputScenarios
+     *
      * @param $method
      * @param $id
      * @param $value
      * @param $result
      */
-    public function testInputProxyMethods($method, $id, $value, $result) {
+    public function testInputProxyMethods($method, $id, $value, $result)
+    {
         $factory = $this->factory();
         $factory->recordEntry($id)->{$method}($value);
         $container = $factory->container();
@@ -151,7 +154,8 @@ class ContainerTest extends TestCase
         $this->assertSame($result ?: $value, $container->get($id));
     }
 
-    public function inputScenarios() {
+    public function inputScenarios()
+    {
         return [
             ['value', 'direct', 'direct value', 'direct value'],
             ['lazy', 'lazy', function () { return 'lazy value'; }, 'lazy value'],
@@ -160,7 +164,8 @@ class ContainerTest extends TestCase
         ];
     }
 
-    public function testFactoryRecord() {
+    public function testFactoryRecord()
+    {
         $factory = $this->factory([
             'name' => new Record\DirectRecord('Shudd3r'),
             'hello' => new Record\DirectRecord(function ($name) {
@@ -176,16 +181,33 @@ class ContainerTest extends TestCase
         $this->assertSame($object, $container->get('create.welcome'));
     }
 
-    public function testLazyRecord() {
+    public function testLazyRecord()
+    {
         $container = $this->factory([
-            'lazy.goodbye' => new Record\LazyRecord(function () { return new ExampleClass(function ($name) {
-                return 'Goodbye ' . $name;
-            }, 'Shudd3r'); })
+            'lazy.goodbye' => new Record\LazyRecord(function () {
+                return new ExampleClass(function ($name) {
+                    return 'Goodbye ' . $name;
+                }, 'Shudd3r');
+            })
         ])->container();
 
         $object = $container->get('lazy.goodbye');
 
         $this->assertSame('Goodbye Shudd3r', $object->beNice());
         $this->assertSame($object, $container->get('lazy.goodbye'));
+    }
+
+    protected function factory(array $data = [])
+    {
+        return new Factory($data);
+    }
+
+    protected function withBasicSettings()
+    {
+        $factory = $this->factory();
+        $factory->setRecord('test', new Record\DirectRecord('Hello World!'));
+        $factory->setRecord('lazy', new Record\LazyRecord(function () { return 'Lazy Foo'; }));
+
+        return $factory;
     }
 }

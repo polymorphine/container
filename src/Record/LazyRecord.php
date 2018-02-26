@@ -28,11 +28,13 @@ class LazyRecord implements Record
     private $value;
     private $callback;
 
-    public function __construct(Closure $callback) {
+    public function __construct(Closure $callback)
+    {
         $this->callback = $callback;
     }
 
-    public function value(ContainerInterface $c) {
+    public function value(ContainerInterface $c)
+    {
         return $this->value ?: $this->value = $this->callback->__invoke($c);
     }
 }
