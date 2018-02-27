@@ -12,6 +12,7 @@
 namespace Polymorphine\Container\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Polymorphine\Container\Container;
 use Polymorphine\Container\Factory;
 use Polymorphine\Container\Record;
 use Polymorphine\Container\Exception;
@@ -48,6 +49,17 @@ class ContainerTest extends TestCase
         $this->assertSame('Hello Lazy Foo!', $container->get('bar'));
     }
 
+    public function testGivenContainerWithFalsyValues_HasMethodReturnsTrue()
+    {
+        $container = new Container([
+            'null' => new Record\DirectRecord(null),
+            'false' => new Record\DirectRecord(false)
+        ]);
+
+        $this->assertTrue($container->has('null'));
+        $this->assertTrue($container->has('false'));
+    }
+
     public function testInvalidContainerIdType_ThrowsException()
     {
         $container = $this->factory()->container();
@@ -75,7 +87,7 @@ class ContainerTest extends TestCase
             'lazy.goodbye' => 'see ya!'
         ];
 
-        $container = $this->factory([
+        $container = new Container([
             'test' => new Record\DirectRecord('Hello World!'),
             'category.first' => new Record\DirectRecord('one'),
             'category.second' => new Record\DirectRecord('two'),
@@ -84,7 +96,7 @@ class ContainerTest extends TestCase
             'callback' => new Record\DirectRecord($expected['callback']),
             'lazy.hello' => new Record\LazyRecord(function (ContainerInterface $c) { return $c->get('test'); }),
             'lazy.goodbye' => new Record\LazyRecord(function () { return 'see ya!'; })
-        ])->container();
+        ]);
 
         foreach ($expected as $key => $value) {
             $this->assertTrue($container->has($key), 'Failed for key: ' . $key);
@@ -195,6 +207,17 @@ class ContainerTest extends TestCase
 
         $this->assertSame('Goodbye Shudd3r', $object->beNice());
         $this->assertSame($object, $container->get('lazy.goodbye'));
+    }
+
+    public function testContainerSingleInstance()
+    {
+        $factory = $this->factory(['exists' => new Record\DirectRecord(true)]);
+        $container1 = $factory->container();
+        $factory->setRecord('too.late', new Record\DirectRecord(true));
+        $container2 = $factory->container();
+
+        $this->assertFalse($container2->has('too.late'));
+        $this->assertSame($container1, $container2);
     }
 
     protected function factory(array $data = [])

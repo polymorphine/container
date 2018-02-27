@@ -21,6 +21,7 @@ class Factory
     use ArgumentValidationMethods;
 
     private $records;
+    private $container;
 
     /**
      * ContainerFactory constructor.
@@ -47,7 +48,7 @@ class Factory
      */
     public function container(): ContainerInterface
     {
-        return new Container($this->records);
+        return $this->container ?: $this->container = new Container($this->records);
     }
 
     /**
