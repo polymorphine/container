@@ -11,16 +11,23 @@ subsequent calls or even have side effects - take some time to reconsider before
 decide on such feature.
 
 Container configuration might be separated from container itself, so that values
-stored in container could not be accessed - see: [Config proxy](#config-proxy)
+stored in container could not be (easily) accessed - see: [Config proxy](#config-proxy)
 
 ### Installation
     composer require polymorphine/container
 
-### Usage examples
-#### Create directly with constructor parameter
+### Container Instance
+#### Records
+Values returned from Container are all wrapped into [`Record`](src/Record.php) abstraction that allows
+for different strategies of unwrapping them - it may be either returned directly or internally created
+by calling its (lazy) initialization procedure. Read comments in the default [records](src/Record) sourcecode
+to get more information.
+
+#### Constructor
 Container created this way won't throw `Exception` from constructor,
 and all the data have to be passed at once. This method is Not recommended
-when array values are provided from different sources (fails late).
+when array values are provided from different sources - source of error
+will be hard to locate, because it fails late (when trying to call Record instance).
 
 ```php
 use Polymorphine\Container\Container;
@@ -39,9 +46,9 @@ $container = new Container([
 ]);
 ```    
 
-#### Create with Factory
+#### Factory
 Factory takes the same array parameter, but has method allowing to add new `Record`
-before instantiating `Container`. Same result as above with different execution flow:
+instances before creating `Container`. Same result as above with different execution flow:
 
 ```php
 use Polymorphine\Container\Factory;
@@ -120,4 +127,7 @@ $app->config('lazy.Psr-uri')->lazy(function (ContainerInterface $c) {
 $response = $app->handle($request);
 ```
 
-Nothing in outer scope can use instance of `Container` created within `App`.
+Nothing in outer scope can use instance of `Container` created within `App`.  
+It is possible to achieve, but it needs to be done by explicitly passing
+stateful object identifier within callback passing container through one of
+object's methods. Still, this is not recommended, so it won't be covered in details.
