@@ -12,12 +12,12 @@
 namespace Polymorphine\Container;
 
 use Psr\Container\ContainerInterface;
-use Polymorphine\Container\Exception\EntryNotFoundException;
+use Polymorphine\Container\Exception\RecordNotFoundException;
 
 
 class Container implements ContainerInterface
 {
-    use ArgumentValidationMethods;
+    use TokenFormatValidation;
 
     private $records;
 
@@ -29,7 +29,7 @@ class Container implements ContainerInterface
     public function get($id)
     {
         if (!$this->has($id)) {
-            throw new EntryNotFoundException(sprintf('Record id `%s` does not exist within Container', $id));
+            throw new RecordNotFoundException(sprintf('Record id `%s` does not exist within Container', $id));
         }
 
         return $this->recordValue($this->records[$id]);

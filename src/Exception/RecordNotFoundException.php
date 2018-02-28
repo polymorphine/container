@@ -15,6 +15,6 @@ use Psr\Container\NotFoundExceptionInterface;
 use InvalidArgumentException;
 
 
-class EntryNotFoundException extends InvalidArgumentException implements NotFoundExceptionInterface
+class RecordNotFoundException extends InvalidArgumentException implements NotFoundExceptionInterface
 {
 }

@@ -12,22 +12,36 @@
 namespace Polymorphine\Container;
 
 use Closure;
+use Polymorphine\Container\Exception\RecordNotFoundException;
 
 
 /**
- * Write-only proxy that prevents configuration namespaces
- * gain access to already written values through created
- * Container.
+ * Write-only proxy with helper methods to instantiate
+ * Record implementations under given registry key.
  */
 class RecordEntry
 {
     private $name;
-    private $factory;
+    private $records;
 
-    public function __construct(string $name, Factory $factory)
+    public function __construct(string $name, RecordCollection $records)
     {
         $this->name = $name;
-        $this->factory = $factory;
+        $this->records = $records;
+    }
+
+    /**
+     * Pushes given Record instance directly into Container's records.
+     *
+     * @see Record
+     *
+     * @param Record $record
+     *
+     * @throws Exception\InvalidIdException
+     */
+    public function record(Record $record): void
+    {
+        $this->records->push($this->name, $record);
     }
 
     /**
@@ -57,7 +71,14 @@ class RecordEntry
 
     /**
      * Pushes FactoryRecord with given className and its constructor
-     * parameters given as Container id names.
+     * parameters given as Container id names. Each dependency has
+     * to be defined within collection (otherwise circular references
+     * cannot be avoided).
+     *
+     * When dependency id equals this instance name it is not overwritten and
+     * circular dependency is not created - it is decorated instead.
+     * Now every class depending on decorated object will take product of this
+     * record as its dependency. Objects can be decorated multiple times.
      *
      * @see Record\FactoryRecord
      *
@@ -66,18 +87,34 @@ class RecordEntry
      */
     public function factory(string $className, string ...$dependencies): void
     {
+        $dependencies = $this->validDependencies($dependencies);
         $this->record(new Record\FactoryRecord($className, ...$dependencies));
     }
 
-    /**
-     * Pushes given Record instance directly into Container's records.
-     *
-     * @see Record
-     *
-     * @param Record $record
-     */
-    public function record(Record $record): void
+    private function validDependencies(array $dependencies): array
     {
-        $this->factory->setRecord($this->name, $record);
+        foreach ($dependencies as &$name) {
+            if (!$this->records->isDefined($name)) {
+                throw new RecordNotFoundException(sprintf('Dependency `%s` Record has to be defined', $name));
+            }
+
+            if ($name === $this->name) {
+                $name = $this->decoratedDependency();
+            }
+        }
+
+        return $dependencies;
+    }
+
+    private function decoratedDependency(): string
+    {
+        $newAlias = $this->name . '.DEC';
+        while ($this->records->isDefined($newAlias)) {
+            $newAlias .= '.DEC';
+        }
+
+        $this->records->push($newAlias, $this->records->pull($this->name));
+
+        return $newAlias;
     }
 }

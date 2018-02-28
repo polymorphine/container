@@ -12,32 +12,12 @@
 namespace Polymorphine\Container;
 
 use Psr\Container\ContainerInterface;
-use Polymorphine\Container\Exception\InvalidArgumentException;
-use Polymorphine\Container\Exception\InvalidIdException;
 
 
-class Factory
+interface Factory
 {
-    use ArgumentValidationMethods;
-
-    private $records;
-    private $container;
-
     /**
-     * ContainerFactory constructor.
-     *
-     * @param Record[] $records
-     *
-     * @throws InvalidArgumentException|InvalidIdException
-     */
-    public function __construct(array $records = [])
-    {
-        $this->validateRecords($records);
-        $this->records = $records;
-    }
-
-    /**
-     * Creates container with provided records.
+     * Creates new Container instance with provided records.
      *
      * Immutability of container depends on stored records
      * implementation, because although no new entries can
@@ -46,38 +26,5 @@ class Factory
      *
      * @return ContainerInterface
      */
-    public function container(): ContainerInterface
-    {
-        return $this->container ?: $this->container = new Container($this->records);
-    }
-
-    /**
-     * Stores Record under given $name identifier.
-     * Behavior of Container returning given Record's value
-     * depends on passed Record's implementation.
-     *
-     * @param $name
-     * @param Record $record
-     *
-     * @throws InvalidIdException
-     */
-    public function setRecord(string $name, Record $record): void
-    {
-        $this->validateIdFormat($name);
-        $this->checkIdOverwrite($name);
-        $this->records[$name] = $record;
-    }
-
-    /**
-     * Returns write-only proxy with helper methods to instantiate
-     * Record implementations under given registry key.
-     *
-     * @param string $name
-     *
-     * @return RecordEntry
-     */
-    public function recordEntry(string $name): RecordEntry
-    {
-        return new RecordEntry($name, $this);
-    }
+    public function container(): ContainerInterface;
 }

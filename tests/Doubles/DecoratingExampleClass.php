@@ -11,22 +11,20 @@
 
 namespace Polymorphine\Container\Tests\Doubles;
 
-use Closure;
 
-
-class ExampleClass implements Example
+class DecoratingExampleClass implements Example
 {
-    private $name;
-    private $callback;
+    private $decorated;
+    private $sentence;
 
-    public function __construct(Closure $callback, string $name)
+    public function __construct(Example $decorated, string $sentence)
     {
-        $this->name = $name;
-        $this->callback = $callback;
+        $this->decorated = $decorated;
+        $this->sentence = $sentence;
     }
 
     public function beNice()
     {
-        return $this->callback->__invoke($this->name);
+        return $this->decorated->beNice() . ' ' . $this->sentence;
     }
 }
