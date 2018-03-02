@@ -13,16 +13,23 @@ decide on such feature.
 Container configuration might be separated from container itself, so that values
 stored in container could not be (easily) accessed - see: [Config proxy](#config-proxy)
 
-### Installation
-    composer require polymorphine/container
+### Installation with [Composer](https://getcomposer.org/)
+    php composer.phar require polymorphine/container
 
-### Container Instance
-#### Records
+### Records decide how it works internally
 Values returned from Container are all wrapped into [`Record`](src/Setup/Record.php) abstraction that allows
 for different strategies of unwrapping them - it may be either returned directly or internally created
-by calling its (lazy) initialization procedure. Read comments in the provided default [records](src/Setup/Record)
-sourcecode to get more information.
+by calling its (lazy) initialization procedure. You may read DocBlock comments in the provided default
+[records](src/Setup/Record) sourcecode to get more information. Here's short explanation of package's
+Record implementations:
 
+- `DirectRecord`: Just a value, that will be returned as it was passed. No evaluation for callbacks.
+- `LazyRecord`: Takes `Closure` that will be called with `Container` as parameter, and value of this call will be stored
+and returned on subsequent calls.
+- `FactoryRecord`: Lazy instantiated object using constructor parameters for given class. Constructor parameters are
+passed as aliases to container entries.
+
+### Container Instance
 #### Constructor
 Container can't be instantiated with invalid state, because [`RecordCollection`](src/Setup/RecordCollection.php)
 will throw [`Exception`](src/Exception) from constructor. Container is immutable (but not necessary objects within it)
@@ -36,13 +43,13 @@ use Polymorphine\Container\Container;
 use Polymorphine\Container\Setup\Record;
 
 $container = Container::fromRecordsArray([
-    'config.uriString' => new Record\DirectRecord('www.example.com'),
-    'Psr-uri.fromString.callback' => new Record\DirectRecord(function (string $x) {
+    'uriString' => new Record\DirectRecord('www.example.com'),
+    'Psr-uri' => new Record\DirectRecord(function (string $x) {
         return new Psr\Implementation\Uri($x);
     }),
-    'lazy.Psr-uri' => new Record\LazyRecord(function (ContainerInterface $c) {
-        $callback = $this->get('Psr-uri.fromString.callback');
-        return $callback($this->get('config.uriString'))->withScheme('https');
+    'https.uri' => new Record\LazyRecord(function (ContainerInterface $c) {
+        $callback = $this->get('Psr-uri');
+        return $callback($this->get('uriString'))->withScheme('https');
     })
 ]);
 ```
@@ -56,23 +63,23 @@ use Polymorphine\Container\ContainerSetup;
 use Polymorphine\Container\Record;
 
 $setup = new ContainerSetup([
-    'config.uriString' => new DirectRecord('www.example.com'),
-    'Psr-uri.fromString.callback' => new DirectRecord(function (string $x) {
+    'uriString' => new DirectRecord('www.example.com'),
+    'Psr-uri' => new DirectRecord(function (string $x) {
         return new Psr\Implementation\Uri($x);
     })
 ]);
 
 // do something else, resolve dependencies then...
 
-$setup->entry('lazy.instantiated.Psr-uri')->lazy(function (ContainerInterface $c) {
-    $callback = $this->get('Psr-uri.fromString.callback');
-    return $callback($this->get('config.uriString'));
+$setup->entry('https.uri')->lazy(function (ContainerInterface $c) {
+    $callback = $this->get('Psr-uri');
+    return $callback($this->get('uriString'));
 });
 
 $container = $setup->container();
 ```
 
-#### Config proxy
+#### RecordSetup as configuration proxy
 Calling `ContainerSetup::entry($name)` returns `RecordSetup` helper object.
 Beside providing methods to inject new instances of `Record` implementations
 into `RecordCollection` it also isolates `Container` from scopes that should
@@ -108,16 +115,16 @@ class App
 
 ```php
 $app = new App([
-    'config.uriString' => new DirectRecord('www.example.com')
+    'uriString' => new DirectRecord('www.example.com')
 ]);
 
-$app->config('Psr-uri.fromString.callback')->value(function (string $x) {
+$app->config('Psr-uri')->value(function (string $x) {
     return new Psr\Implementation\Uri($x);
 });
 
-$app->config('lazy.instantiated.Psr-uri')->lazy(function (ContainerInterface $c) {
-    $callback = $this->get('Psr-uri.fromString.callback');
-    return $callback($this->get('config.uriString'))->withScheme('https');
+$app->config('https.uri')->lazy(function (ContainerInterface $c) {
+    $callback = $this->get('Psr-uri');
+    return $callback($this->get('uriString'))->withScheme('https');
 });
 
 //...
@@ -129,3 +136,5 @@ Nothing in outer scope can use instance of `Container` created within `App`.
 It is possible to achieve, but it needs to be done by explicitly passing
 stateful object identifier within callback passing container through one of
 object's methods. Still, this is not recommended, so it won't be covered in details.
+
+
