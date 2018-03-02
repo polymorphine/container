@@ -12,38 +12,30 @@
 namespace Polymorphine\Container;
 
 use Psr\Container\ContainerInterface;
-use Polymorphine\Container\Exception\RecordNotFoundException;
+use Polymorphine\Container\Setup\RecordCollection;
 
 
 class Container implements ContainerInterface
 {
-    use TokenFormatValidation;
-
     private $records;
 
-    public function __construct(array $records = [])
+    public function __construct(RecordCollection $records)
     {
         $this->records = $records;
     }
 
+    public static function fromRecordsArray(array $records): self
+    {
+        return new self(new RecordCollection($records));
+    }
+
     public function get($id)
     {
-        if (!$this->has($id)) {
-            throw new RecordNotFoundException(sprintf('Record id `%s` does not exist within Container', $id));
-        }
-
-        return $this->recordValue($this->records[$id]);
+        return $this->records->get($id)->value($this);
     }
 
     public function has($id): bool
     {
-        $this->validateIdFormat($id);
-
-        return isset($this->records[$id]);
-    }
-
-    private function recordValue(Record $record)
-    {
-        return $record->value($this);
+        return $this->records->has($id);
     }
 }

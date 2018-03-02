@@ -14,68 +14,58 @@ namespace Polymorphine\Container;
 use Psr\Container\ContainerInterface;
 
 
-class ContainerSetup implements RecordCollection, Factory
+class ContainerSetup
 {
-    use TokenFormatValidation;
-
     private $records;
 
     /**
      * ContainerFactory constructor.
      *
-     * @param Record[] $records
+     * @param Setup\Record[] $records
      *
      * @throws Exception\InvalidArgumentException | Exception\InvalidIdException
      */
     public function __construct(array $records = [])
     {
-        $this->validateRecords($records);
-        $this->records = $records;
+        $this->records = $this->recordCollection($records);
     }
 
+    /**
+     * Creates new Container instance with provided records.
+     * After that ContainerSetup gets back to is default state
+     * with empty RecordCollection and is ready to build
+     * another Container instance.
+     *
+     * Immutability of container depends on stored records
+     * implementation, because although no new entries can
+     * be added, side-effects can change subsequent call
+     * outcomes for stored identifiers.
+     *
+     * @return ContainerInterface
+     */
     public function container(): ContainerInterface
     {
-        return new Container($this->records);
+        $container = new Container($this->records);
+        $this->records = $this->recordCollection();
+
+        return $container;
     }
 
-    public function isDefined(string $name): bool
+    /**
+     * Returns RecordSetup object able to configure Container's
+     * Record slot under given name id.
+     *
+     * @param string $name
+     *
+     * @return Setup\RecordSetup
+     */
+    public function entry(string $name): Setup\RecordSetup
     {
-        return isset($this->records[$name]);
+        return new Setup\RecordSetup($name, $this->records);
     }
 
-    public function push(string $name, Record $record): void
+    protected function recordCollection(array $records = [])
     {
-        $this->validateIdFormat($name);
-        $this->preventOverwrite($name);
-        $this->records[$name] = $record;
-    }
-
-    public function pull(string $name): Record
-    {
-        if (!isset($this->records[$name])) {
-            throw new Exception\RecordNotFoundException(sprintf('Record with `%s` id not found', $name));
-        }
-
-        $record = $this->records[$name];
-        unset($this->records[$name]);
-
-        return $record;
-    }
-
-    private function validateRecords(array $records): void
-    {
-        foreach ($records as $id => $record) {
-            $this->validateIdFormat($id);
-            if (!$record instanceof Record) {
-                throw new Exception\InvalidArgumentException('Expected associative array of Record instances');
-            }
-        }
-    }
-
-    private function preventOverwrite(string $id): void
-    {
-        if (isset($this->records[$id])) {
-            throw new Exception\InvalidIdException(sprintf('Cannot overwrite defined `%s` Record', $id));
-        }
+        return new Setup\RecordCollection($records);
     }
 }

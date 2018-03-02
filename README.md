@@ -18,44 +18,44 @@ stored in container could not be (easily) accessed - see: [Config proxy](#config
 
 ### Container Instance
 #### Records
-Values returned from Container are all wrapped into [`Record`](src/Record.php) abstraction that allows
+Values returned from Container are all wrapped into [`Record`](src/Setup/Record.php) abstraction that allows
 for different strategies of unwrapping them - it may be either returned directly or internally created
-by calling its (lazy) initialization procedure. Read comments in the default [records](src/Record) sourcecode
-to get more information.
+by calling its (lazy) initialization procedure. Read comments in the provided default [records](src/Setup/Record)
+sourcecode to get more information.
 
 #### Constructor
-Container created this way won't throw `Exception` from constructor,
-and all the data have to be passed at once. This method is Not recommended
-when array values are provided from different sources - source of error
-will be hard to locate, because it fails late (when trying to call Record instance).
+Container can't be instantiated with invalid state, because [`RecordCollection`](src/Setup/RecordCollection.php)
+will throw [`Exception`](src/Exception) from constructor. Container is immutable (but not necessary objects within it)
+so all the data have to be passed at once.
+
+There's also static named constructor `Container::fromRecordsArray()` that instantiates `Container` with given array
+of Record instances.
 
 ```php
 use Polymorphine\Container\Container;
-use Polymorphine\Container\Record\DirectRecord;
-use Polymorphine\Container\Record\LazyRecord;
+use Polymorphine\Container\Setup\Record;
 
-$container = new Container([
-    'config.uriString' => new DirectRecord('www.example.com'),
-    'Psr-uri.fromString.callback' => new DirectRecord(function (string $x) {
+$container = Container::fromRecordsArray([
+    'config.uriString' => new Record\DirectRecord('www.example.com'),
+    'Psr-uri.fromString.callback' => new Record\DirectRecord(function (string $x) {
         return new Psr\Implementation\Uri($x);
     }),
-    'lazy.Psr-uri' => new LazyRecord(function (ContainerInterface $c) {
+    'lazy.Psr-uri' => new Record\LazyRecord(function (ContainerInterface $c) {
         $callback = $this->get('Psr-uri.fromString.callback');
         return $callback($this->get('config.uriString'))->withScheme('https');
     })
 ]);
-```    
+```
 
-#### Factory
-Factory takes the same array parameter, but has method allowing to add new `Record`
+#### ContainerSetup
+`ContainerSetup` takes the same array parameter, but has a method allowing to add new `Record`
 instances before creating `Container`. Same result as above with different execution flow:
 
 ```php
-use Polymorphine\Container\Factory;
-use Polymorphine\Container\Record\DirectRecord;
-use Polymorphine\Container\Record\LazyRecord;
+use Polymorphine\Container\ContainerSetup;
+use Polymorphine\Container\Record;
 
-$factory = new Factory([
+$setup = new ContainerSetup([
     'config.uriString' => new DirectRecord('www.example.com'),
     'Psr-uri.fromString.callback' => new DirectRecord(function (string $x) {
         return new Psr\Implementation\Uri($x);
@@ -64,41 +64,41 @@ $factory = new Factory([
 
 // do something else, resolve dependencies then...
 
-$factory->record('lazy.instantiated.Psr-uri', new LazyRecord(function (ContainerInterface $c) {
-    $callback = $this->get('uriInterface.');
-    return $callback($this->get('config.value'));
+$setup->entry('lazy.instantiated.Psr-uri')->lazy(function (ContainerInterface $c) {
+    $callback = $this->get('Psr-uri.fromString.callback');
+    return $callback($this->get('config.uriString'));
 });
 
-$container = $factory->container();
+$container = $setup->container();
 ```
 
 #### Config proxy
-Calling `Factory::recordEntry($name)` returns `RecordEntry` helper object.
+Calling `ContainerSetup::entry($name)` returns `RecordSetup` helper object.
 Beside providing methods to inject new instances of `Record` implementations
-into `Factory` it also isolates `Container` from scopes that should not be
-allowed to peek inside by calling `Factory::container()` method.
+into `RecordCollection` it also isolates `Container` from scopes that should
+not be allowed to peek inside by calling `ContainerSetup::container()` method.
 
-To make it possible `Factory` should be encapsulated in object,
+To make it possible `ContainerSetup` should be encapsulated in object,
 that allows for its configuration. For example, if you have front
 controller bootstrap class similar to...
 
 ```php
 class App
 {
-    private $contaierFactory;
+    private $containerSetup;
     
-    public function __construct(ContainerFactory $factory) {
-        $this->containerFactory = $factory;
+    public function __construct(array $records = []) {
+        $this->containerSetup = new ContainerSetup($records);
     }
     
     //...
     
     public function config(string $name): RecordEntry {
-        return $this->containerFactory->recordEntry($name);
+        return $this->containerSetup->entry($name);
     }
     
     public function handle(ServerRequestInterface $request): ResponseInterface {
-        $container = $this->containerFactory->container();
+        $container = $this->containerSetup->container();
         //...
     }
 }
@@ -107,17 +107,15 @@ class App
 ...creating same container as with methods above might go like this:
 
 ```php
-$app = new App(
-    new Factory([
-        'config.uriString' => new DirectRecord('www.example.com')
-    ])
-);
+$app = new App([
+    'config.uriString' => new DirectRecord('www.example.com')
+]);
 
 $app->config('Psr-uri.fromString.callback')->value(function (string $x) {
     return new Psr\Implementation\Uri($x);
 });
 
-$app->config('lazy.Psr-uri')->lazy(function (ContainerInterface $c) {
+$app->config('lazy.instantiated.Psr-uri')->lazy(function (ContainerInterface $c) {
     $callback = $this->get('Psr-uri.fromString.callback');
     return $callback($this->get('config.uriString'))->withScheme('https');
 });

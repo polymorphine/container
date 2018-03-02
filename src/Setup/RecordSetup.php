@@ -9,17 +9,17 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Container;
+namespace Polymorphine\Container\Setup;
 
+use Polymorphine\Container\Exception;
 use Closure;
-use Polymorphine\Container\Exception\RecordNotFoundException;
 
 
 /**
- * Write-only proxy with helper methods to instantiate
- * Record implementations under given registry key.
+ * Write-only proxy with helper methods to instantiate and
+ * set Record implementations for given Container name id.
  */
-class RecordEntry
+class RecordSetup
 {
     private $name;
     private $records;
@@ -41,13 +41,13 @@ class RecordEntry
      */
     public function record(Record $record): void
     {
-        $this->records->push($this->name, $record);
+        $this->records->set($this->name, $record);
     }
 
     /**
      * Pushes DirectRecord with given value into Container's records.
      *
-     * @see Record\DirectRecord
+     * @see DirectRecord
      *
      * @param $value
      */
@@ -60,7 +60,7 @@ class RecordEntry
      * Pushes LazyRecord with given Closure into Container's records.
      * Closure receives Container instance as parameter.
      *
-     * @see Record\LazyRecord
+     * @see LazyRecord
      *
      * @param Closure $closure
      */
@@ -80,7 +80,7 @@ class RecordEntry
      * Now every class depending on decorated object will take product of this
      * record as its dependency. Objects can be decorated multiple times.
      *
-     * @see Record\FactoryRecord
+     * @see FactoryRecord
      *
      * @param string   $className
      * @param string[] ...$dependencies
@@ -94,10 +94,7 @@ class RecordEntry
     private function validDependencies(array $dependencies): array
     {
         foreach ($dependencies as &$name) {
-            if (!$this->records->isDefined($name)) {
-                throw new RecordNotFoundException(sprintf('Dependency `%s` Record has to be defined', $name));
-            }
-
+            $this->checkIfDefined($name);
             if ($name === $this->name) {
                 $name = $this->decoratedDependency();
             }
@@ -106,14 +103,24 @@ class RecordEntry
         return $dependencies;
     }
 
+    private function checkIfDefined(string $name): void
+    {
+        if (!$this->records->has($name)) {
+            throw new Exception\RecordNotFoundException(
+                sprintf('FactoryRecord requires defined dependencies - `%s` Record not found', $name)
+            );
+        }
+    }
+
     private function decoratedDependency(): string
     {
         $newAlias = $this->name . '.DEC';
-        while ($this->records->isDefined($newAlias)) {
+        while ($this->records->has($newAlias)) {
             $newAlias .= '.DEC';
         }
 
-        $this->records->push($newAlias, $this->records->pull($this->name));
+        $this->records->set($newAlias, $this->records->get($this->name));
+        $this->records->remove($this->name);
 
         return $newAlias;
     }
