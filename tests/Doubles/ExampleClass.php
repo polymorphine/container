@@ -21,7 +21,7 @@ class ExampleClass implements Example
 
     public function __construct(Closure $callback, string $name)
     {
-        $this->name = $name;
+        $this->name     = $name;
         $this->callback = $callback;
     }
 

@@ -36,7 +36,7 @@ class FactoryRecord implements Record
      */
     public function __construct(string $className, string ...$dependencies)
     {
-        $this->className = $className;
+        $this->className    = $className;
         $this->dependencies = $dependencies;
     }
 

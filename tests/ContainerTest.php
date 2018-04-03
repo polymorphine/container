@@ -53,7 +53,7 @@ class ContainerTest extends TestCase
     public function testGivenContainerWithFalsyValues_HasMethodReturnsTrue()
     {
         $container = new Container(new RecordCollection([
-            'null' => new Record\DirectRecord(null),
+            'null'  => new Record\DirectRecord(null),
             'false' => new Record\DirectRecord(false)
         ]));
 
@@ -78,24 +78,24 @@ class ContainerTest extends TestCase
     public function testRegistryConstructorRecordsAreAvailableFromContainer()
     {
         $expected = [
-            'test' => 'Hello World!',
-            'category.first' => 'one',
+            'test'            => 'Hello World!',
+            'category.first'  => 'one',
             'category.second' => 'two',
-            'array' => [1, 2, 3],
-            'assoc' => ['first' => 1, 'second' => 2],
-            'callback' => function () { return 'first'; },
-            'lazy.hello' => 'Hello World!',
+            'array'           => [1, 2, 3],
+            'assoc'           => ['first' => 1, 'second' => 2],
+            'callback'        => function () { return 'first'; },
+            'lazy.hello'   => 'Hello World!',
             'lazy.goodbye' => 'see ya!'
         ];
 
         $container = new Container(new RecordCollection([
-            'test' => new Record\DirectRecord('Hello World!'),
-            'category.first' => new Record\DirectRecord('one'),
+            'test'            => new Record\DirectRecord('Hello World!'),
+            'category.first'  => new Record\DirectRecord('one'),
             'category.second' => new Record\DirectRecord('two'),
-            'array' => new Record\DirectRecord([1, 2, 3]),
-            'assoc' => new Record\DirectRecord(['first' => 1, 'second' => 2]),
-            'callback' => new Record\DirectRecord($expected['callback']),
-            'lazy.hello' => new Record\LazyRecord(function (ContainerInterface $c) { return $c->get('test'); }),
+            'array'           => new Record\DirectRecord([1, 2, 3]),
+            'assoc'           => new Record\DirectRecord(['first' => 1, 'second' => 2]),
+            'callback'        => new Record\DirectRecord($expected['callback']),
+            'lazy.hello'      => new Record\LazyRecord(function (ContainerInterface $c) { return $c->get('test'); }),
             'lazy.goodbye' => new Record\LazyRecord(function () { return 'see ya!'; })
         ]));
 
@@ -180,7 +180,7 @@ class ContainerTest extends TestCase
 
     public function testSetupContainer_ReturnsNewInstanceAndClearsConfiguration()
     {
-        $setup = $this->factory(['exists' => new Record\DirectRecord(true)]);
+        $setup      = $this->factory(['exists' => new Record\DirectRecord(true)]);
         $container1 = $setup->container();
         $setup->entry('too.late')->value(true);
         $container2 = $setup->container();
@@ -211,7 +211,7 @@ class ContainerTest extends TestCase
     public function testFactorRecord()
     {
         $records = [
-            'name' => new Record\DirectRecord('Shudd3r'),
+            'name'  => new Record\DirectRecord('Shudd3r'),
             'hello' => new Record\DirectRecord(function ($name) { return 'Hello ' . $name . '.'; }),
             'polite' => new Record\DirectRecord('How are you?')
         ];

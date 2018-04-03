@@ -20,7 +20,7 @@ class DecoratingExampleClass implements Example
     public function __construct(Example $decorated, string $sentence)
     {
         $this->decorated = $decorated;
-        $this->sentence = $sentence;
+        $this->sentence  = $sentence;
     }
 
     public function beNice()
