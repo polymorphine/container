@@ -45,7 +45,7 @@ class ContainerSetup
      */
     public function container(): ContainerInterface
     {
-        $container = new Container($this->records);
+        $container     = new Container($this->records);
         $this->records = $this->recordCollection();
 
         return $container;
