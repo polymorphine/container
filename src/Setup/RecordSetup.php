@@ -82,8 +82,8 @@ class RecordSetup
      *
      * @see FactoryRecord
      *
-     * @param string   $className
-     * @param string[] ...$dependencies
+     * @param string $className
+     * @param string ...$dependencies
      */
     public function factory(string $className, string ...$dependencies): void
     {

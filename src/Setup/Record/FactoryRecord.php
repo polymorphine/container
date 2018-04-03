@@ -31,8 +31,8 @@ class FactoryRecord implements Record
     /**
      * FactoryRecord constructor.
      *
-     * @param string   $className
-     * @param string[] ...$dependencies ContainerInterface ids to get constructor values from
+     * @param string $className
+     * @param string ...$dependencies ContainerInterface ids to get constructor values from
      */
     public function __construct(string $className, string ...$dependencies)
     {
