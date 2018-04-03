@@ -13,12 +13,12 @@ before_install:
 
 before_script:
   - composer update $STABILITY
-
+  - CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB $TRAVIS_COMMIT_RANGE)
 script:
   - mkdir -p build/logs
   - composer run-tests
-  - composer style-check src
-  - composer style-check tests
+  - composer style-check src ${CHANGED_FILES}
+  - composer style-check tests ${CHANGED_FILES}
 
 after_success:
    - php vendor/bin/php-coveralls
