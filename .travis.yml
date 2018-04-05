@@ -4,21 +4,27 @@ php:
   - 7.1
 
 env:
-  matrix:
-    - STABILITY="--prefer-lowest --prefer-stable"
-    - STABILITY=""
+  - STABILITY="--prefer-lowest --prefer-stable"
+  - STABILITY="" STYLE_CHECK=true
 
 before_install:
+  - if [[ $STYLE_CHECK ]]; then phpenv config-rm xdebug.ini; fi;
   - composer self-update
 
 before_script:
+  - if [[ ! $STYLE_CHECK ]]; then mkdir -p build/logs; fi;
   - composer update $STABILITY
-  - CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB $TRAVIS_COMMIT_RANGE)
+  - if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then COMMIT_RANGE=$TRAVIS_COMMIT_RANGE; else COMMIT_RANGE="HEAD~..HEAD"; fi;
+  - if [[ $STYLE_CHECK ]]; then CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRTUXB $COMMIT_RANGE); fi;
 script:
-  - mkdir -p build/logs
-  - composer run-tests
-  - composer style-check src ${CHANGED_FILES}
-  - composer style-check tests ${CHANGED_FILES}
+  - |
+    if [[ $STYLE_CHECK ]]; then
+      composer style-check src $CHANGED_FILES;
+      composer style-check tests $CHANGED_FILES;
+      phpunit --no-coverage;
+    else
+      phpunit;
+    fi;
 
 after_success:
-   - php vendor/bin/php-coveralls
+   - if [[ ! $STYLE_CHECK ]]; then php vendor/bin/php-coveralls; fi;
