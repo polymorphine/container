@@ -6,12 +6,13 @@
 ### PSR-11 Container for Dependencies and Configuration
 
 #### Concept features: *Immutability & encapsulated configuration*
+Until [`ContainerSetup`](src/ContainerSetup.php) is accessible new records can be added
+to existing container. It's recommended to use [Config proxy](#config-proxy) that allows
+for controlled scope for both configuration and early access to stored values.
+
 Stateful nature of custom `Record` implementation might return different values on
 subsequent calls or even have side effects - take some time to reconsider before you
 decide on such feature.
-
-Container configuration might be separated from container itself, so that values
-stored in container could not be (easily) accessed - see: [Config proxy](#config-proxy)
 
 ### Installation with [Composer](https://getcomposer.org/)
     php composer.phar require polymorphine/container
@@ -136,5 +137,3 @@ Nothing in outer scope can use instance of `Container` created within `App`.
 It is possible to achieve, but it needs to be done by explicitly passing
 stateful object identifier within callback passing container through one of
 object's methods. Still, this is not recommended, so it won't be covered in details.
-
-

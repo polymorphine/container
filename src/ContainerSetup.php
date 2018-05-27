@@ -17,6 +17,7 @@ use Psr\Container\ContainerInterface;
 class ContainerSetup
 {
     private $records;
+    private $container;
 
     /**
      * ContainerFactory constructor.
@@ -28,27 +29,26 @@ class ContainerSetup
     public function __construct(array $records = [])
     {
         $this->records = $this->recordCollection($records);
+        $this->container = new Container($this->records);
     }
 
     /**
-     * Creates new Container instance with provided records.
-     * After that ContainerSetup gets back to is default state
-     * with empty RecordCollection and is ready to build
-     * another Container instance.
+     * Returns Container instance with provided records.
      *
-     * Immutability of container depends on stored records
-     * implementation, because although no new entries can
-     * be added, side-effects can change subsequent call
-     * outcomes for stored identifiers.
+     * Adding new entries to container is possible only through
+     * this setup instance, but early access to container might be
+     * necessary. Cannot lock instance right after exposing it - for
+     * example routing is both stored within container and built
+     * with references to its records.
+     *
+     * Strict immutability cannot be ensured, because side-effects
+     * can change subsequent call outcomes for stored identifiers.
      *
      * @return ContainerInterface
      */
     public function container(): ContainerInterface
     {
-        $container     = new Container($this->records);
-        $this->records = $this->recordCollection();
-
-        return $container;
+        return $this->container;
     }
 
     /**

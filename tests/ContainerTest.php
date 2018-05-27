@@ -178,18 +178,14 @@ class ContainerTest extends TestCase
         ];
     }
 
-    public function testSetupContainer_ReturnsNewInstanceAndClearsConfiguration()
+    public function testSetupContainer_ReturnsSameInstanceOfContainer()
     {
         $setup      = $this->factory(['exists' => new Record\DirectRecord(true)]);
         $container1 = $setup->container();
-        $setup->entry('too.late')->value(true);
+        $setup->entry('not.too.late')->value(true);
         $container2 = $setup->container();
 
-        $this->assertTrue($container1->has('exists'));
-        $this->assertFalse($container1->has('too.late'));
-
-        $this->assertTrue($container2->has('too.late'));
-        $this->assertFalse($container2->has('exists'));
+        $this->assertSame($container1, $container2);
     }
 
     public function testLazyRecord()
