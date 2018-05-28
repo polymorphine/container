@@ -64,6 +64,11 @@ class ContainerSetup
         return new Setup\RecordSetup($name, $this->records);
     }
 
+    public function exists(string $name): bool
+    {
+        return $this->records->has($name);
+    }
+
     protected function recordCollection(array $records = [])
     {
         return new Setup\RecordCollection($records);

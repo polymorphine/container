@@ -188,6 +188,14 @@ class ContainerTest extends TestCase
         $this->assertSame($container1, $container2);
     }
 
+    public function testSetupContainerExistsCheck()
+    {
+        $setup = $this->factory(['defined' => new Record\DirectRecord(true)]);
+
+        $this->assertTrue($setup->exists('defined'));
+        $this->assertFalse($setup->exists('undefined'));
+    }
+
     public function testLazyRecord()
     {
         $container = $this->factory([
