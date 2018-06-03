@@ -70,7 +70,7 @@ class RecordSetup
     }
 
     /**
-     * Pushes FactoryRecord with given className and its constructor
+     * Pushes CompositeRecord with given className and its constructor
      * parameters given as Container id names. Each dependency has
      * to be defined within collection (otherwise circular references
      * cannot be avoided).
@@ -80,15 +80,15 @@ class RecordSetup
      * Now every class depending on decorated object will take product of this
      * record as its dependency. Objects can be decorated multiple times.
      *
-     * @see FactoryRecord
+     * @see CompositeRecord
      *
      * @param string $className
      * @param string ...$dependencies
      */
-    public function factory(string $className, string ...$dependencies): void
+    public function composite(string $className, string ...$dependencies): void
     {
         $dependencies = $this->validDependencies($dependencies);
-        $this->record(new Record\FactoryRecord($className, ...$dependencies));
+        $this->record(new Record\CompositeRecord($className, ...$dependencies));
     }
 
     private function validDependencies(array $dependencies): array

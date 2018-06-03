@@ -27,8 +27,21 @@ Record implementations:
 - `DirectRecord`: Just a value, that will be returned as it was passed. No evaluation for callbacks.
 - `LazyRecord`: Takes `Closure` that will be called with `Container` as parameter, and value of this call will be stored
 and returned on subsequent calls.
-- `FactoryRecord`: Lazy instantiated object using constructor parameters for given class. Constructor parameters are
+- `CompositeRecord`: Lazy instantiated object using constructor parameters for given class. Constructor parameters are
 passed as aliases to container entries.
+
+**Decorator feature**: `CompositeRecord` can reassign existing entry if it's also used as one of the constructor parameters.
+Of course it should return the same type as overwritten record returns, because all clients currently using it will fail.
+Example (using ContainerSetup):
+
+```php
+//Standard container setup...
+$setup = new ContainerSetup(...);
+$setup->entry('html.response')->composite(HtmlResponse::class, 'auth.user', 'template.system');
+
+//Suppose we are in dev environment and want to add a diagnostic toolbar for all html views...
+$setup->entry('html.response')->commposite(DevToolbarHtmlResponse::class, 'html.response', 'system.info');
+```
 
 ### Container Instance
 #### Constructor

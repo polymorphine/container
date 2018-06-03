@@ -22,17 +22,15 @@ use Psr\Container\ContainerInterface;
  * Returned object is remembered and returned directly when
  * value() method is called again.
  */
-class FactoryRecord implements Record
+class CompositeRecord implements Record
 {
     private $className;
     private $dependencies;
     private $object;
 
     /**
-     * FactoryRecord constructor.
-     *
      * @param string $className
-     * @param string ...$dependencies ContainerInterface ids to get constructor values from
+     * @param string[] $dependencies ContainerInterface ids to get constructor values from
      */
     public function __construct(string $className, string ...$dependencies)
     {

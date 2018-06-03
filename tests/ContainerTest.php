@@ -212,7 +212,7 @@ class ContainerTest extends TestCase
         $this->assertSame($object, $container->get('lazy.goodbye'));
     }
 
-    public function testFactorRecord()
+    public function testCompositeRecord()
     {
         $records = [
             'name'  => new Record\DirectRecord('Shudd3r'),
@@ -221,7 +221,7 @@ class ContainerTest extends TestCase
         ];
 
         $setup = $this->factory($records);
-        $setup->entry('small.talk')->factory(Doubles\ExampleClass::class, 'hello', 'name');
+        $setup->entry('small.talk')->composite(Doubles\ExampleClass::class, 'hello', 'name');
         $container = $setup->container();
 
         $expect = 'Hello Shudd3r.';
@@ -229,8 +229,8 @@ class ContainerTest extends TestCase
 
         // Decorated record
         $setup = $this->factory($records);
-        $setup->entry('small.talk')->factory(Doubles\ExampleClass::class, 'hello', 'name');
-        $setup->entry('small.talk')->factory(Doubles\DecoratingExampleClass::class, 'small.talk', 'polite');
+        $setup->entry('small.talk')->composite(Doubles\ExampleClass::class, 'hello', 'name');
+        $setup->entry('small.talk')->composite(Doubles\DecoratingExampleClass::class, 'small.talk', 'polite');
         $container = $setup->container();
 
         $expect = 'Hello Shudd3r. How are you?';
@@ -239,20 +239,20 @@ class ContainerTest extends TestCase
         // Decorated Again
         $setup = $this->factory($records);
         $setup->entry('ask.football')->value('Have you seen that ridiculous display last night?');
-        $setup->entry('small.talk')->factory(Doubles\ExampleClass::class, 'hello', 'name');
-        $setup->entry('small.talk')->factory(Doubles\DecoratingExampleClass::class, 'small.talk', 'polite');
-        $setup->entry('small.talk')->factory(Doubles\DecoratingExampleClass::class, 'small.talk', 'ask.football');
+        $setup->entry('small.talk')->composite(Doubles\ExampleClass::class, 'hello', 'name');
+        $setup->entry('small.talk')->composite(Doubles\DecoratingExampleClass::class, 'small.talk', 'polite');
+        $setup->entry('small.talk')->composite(Doubles\DecoratingExampleClass::class, 'small.talk', 'ask.football');
         $container = $setup->container();
 
         $expect = 'Hello Shudd3r. How are you? Have you seen that ridiculous display last night?';
         $this->assertSame($expect, $container->get('small.talk')->beNice());
     }
 
-    public function testFactoryForUndefinedDependencies_ThrowsException()
+    public function testCompositeForUndefinedDependencies_ThrowsException()
     {
         $entry = $this->withBasicSettings()->entry('someClass');
         $this->expectException(Exception\RecordNotFoundException::class);
-        $entry->factory(Doubles\ExampleClass::class, 'undefined.record', 'test');
+        $entry->composite(Doubles\ExampleClass::class, 'undefined.record', 'test');
     }
 
     protected function factory(array $data = [])
