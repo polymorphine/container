@@ -7,7 +7,7 @@
 
 #### Concept features: *Immutability & encapsulated configuration*
 Until [`ContainerSetup`](src/ContainerSetup.php) is accessible new records can be added
-to existing container. It's recommended to use [Config proxy](#config-proxy) that allows
+to existing container. It's recommended to use [Config proxy](#recordsetup-as-configuration-proxy) that allows
 for controlled scope for both configuration and early access to stored values.
 
 Stateful nature of custom `Record` implementation might return different values on
