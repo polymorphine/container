@@ -17,83 +17,103 @@ decide on such feature.
 ### Installation with [Composer](https://getcomposer.org/)
     php composer.phar require polymorphine/container
 
-### Records decide how it works internally
+### Container Setup
+
+    <?php
+    
+    use Polymorphine\Container\ContainerSetup;
+    use Polymorphine\Container\Record;
+
+    require_once __DIR__ . '/vendor/autoload.php';
+    
+    $setup = new ContainerSetup();
+    ...
+    
+#### Records decide how it works internally
 Values returned from Container are all wrapped into [`Record`](src/Setup/Record.php) abstraction that allows
 for different strategies of unwrapping them - it may be either returned directly or internally created
 by calling its (lazy) initialization procedure. You may read DocBlock comments in the provided default
 [records](src/Setup/Record) sourcecode to get more information. Here's short explanation of package's
 Record implementations:
 
-- `DirectRecord`: Just a value, that will be returned as it was passed. No evaluation for callbacks.
-- `LazyRecord`: Takes `Closure` that will be called with `Container` as parameter, and value of this call will be stored
+- `DirectRecord`: Just a value, that will be returned as it was passed (callbacks will be returned without
+ evaluation as well).
+
+      $setup->entry('direct.object')->value(new ClassInstance());
+      $setup->entry('direct.value')->value('Hello world!');
+
+- `LazyRecord`: Takes anonymous function that will be called with `Container` as parameter, and value of this call will be stored
 and returned on subsequent calls.
+
+      $setup->entry('deferred')->lazy(function (ContainerInterface $c) {
+          return new DeferredClassInstance($c->get('direct.value'));
+      });
+
 - `CompositeRecord`: Lazy instantiated object using constructor parameters for given class. Constructor parameters are
 passed as aliases to container entries.
 
-**Decorator feature**: `CompositeRecord` can reassign existing entry if it's also used as one of the constructor parameters.
-Of course it should return the same type as overwritten record returns, because all clients currently using it will fail.
-Example (using ContainerSetup):
+      $setup->entry('composed')->lazy(ComposedClass::class, 'direct.object', 'deferred');
 
-```php
-//Standard container setup...
-$setup = new ContainerSetup(...);
-$setup->entry('html.response')->composite(HtmlResponse::class, 'auth.user', 'template.system');
+#### Container instance
+Instantiating container with previous setup and getting record stored under `composed` key.
 
-//Suppose we are in dev environment and want to add a diagnostic toolbar for all html views...
-$setup->entry('html.response')->commposite(DevToolbarHtmlResponse::class, 'html.response', 'system.info');
-```
+    $container = $setup->container();
+    $composedObject = $container->get('composed');
+    
+`$composedObject` will be equivalent to instantiated directly with `new` operator:
 
-### Container Instance
-#### Constructor
+    $composedObject = new ComposedClass(new ClassInstance(), new DeferredClassInstance('Hello world!'));   
+
+> **Decorator feature (ContainerSetup)**: `CompositeRecord` can reassign existing entry if it's also used as one of the
+constructor parameters. Of course it should return the same type as overwritten record returns, because all clients
+currently using it will fail. Example:
+>
+>     $setup->entry('html.response')->composite(HtmlResponse::class, 'auth.user', 'template.system');
+>    
+>     //suppose when we are in dev environment we want to add a diagnostic toolbar for all html views...
+>     if ($env === 'develop') {
+>         $setup->entry('html.response')->commposite(DevToolbarHtmlResponse::class, 'html.response', 'system.info');
+>     }
+
+#### Constructor instantiation
 Container can't be instantiated with invalid state, because [`RecordCollection`](src/Setup/RecordCollection.php)
-will throw [`Exception`](src/Exception) from constructor. Container is immutable (but not necessary objects within it)
+will throw [`Exception`](src/Exception) from constructor. It is immutable (but not necessary objects within it)
 so all the data have to be passed at once.
 
 There's also static named constructor `Container::fromRecordsArray()` that instantiates `Container` with given array
 of Record instances.
 
-```php
-use Polymorphine\Container\Container;
-use Polymorphine\Container\Setup\Record;
+    use Polymorphine\Container\Container;
+    use Polymorphine\Container\Setup\Record;
+    
+    $records = [
+        'direct.object' => new Record\DirectRecord(new ClassInstance()),
+        'direct.value'  => new Record\DirectRecord('Hello world!'),
+        'deferred'      => new Record\LazyRecord(function (ContainerInterface $c) {
+           return new DeferredClassInstance($c->get('direct.value'));
+        }),
+        'composed'      => new Record\CompositeRecord(ComposedClass::class, 'direct.object', 'deferred');
+    ]
+    $container = Container::fromRecordsArray($records);
 
-$container = Container::fromRecordsArray([
-    'uriString' => new Record\DirectRecord('www.example.com'),
-    'Psr-uri' => new Record\DirectRecord(function (string $x) {
-        return new Psr\Implementation\Uri($x);
-    }),
-    'https.uri' => new Record\LazyRecord(function (ContainerInterface $c) {
-        $callback = $this->get('Psr-uri');
-        return $callback($this->get('uriString'))->withScheme('https');
-    })
-]);
-```
+#### ContainerSetup with constructor parameters
+`ContainerSetup` takes the same array parameter as container's static method, but allows for
+adding new `Record` instances before creating `Container`.
+Same result as above with different execution flow:
 
-#### ContainerSetup
-`ContainerSetup` takes the same array parameter, but has a method allowing to add new `Record`
-instances before creating `Container`. Same result as above with different execution flow:
+    $records = [
+        'direct.object' => new Record\DirectRecord(new ClassInstance()),
+        'direct.value'  => new Record\DirectRecord('Hello world!'),
+        'deferred'      => new Record\LazyRecord(function (ContainerInterface $c) {
+            return new DeferredClassInstance($c->get('direct.value'));
+        })
+    ];
 
-```php
-use Polymorphine\Container\ContainerSetup;
-use Polymorphine\Container\Record;
+    $setup = new ContainerSetup($records);
+    $setup->entry('composed')->lazy(ComposedClass::class, 'direct.object', 'deferred');
+    $container = $setup->container();
 
-$setup = new ContainerSetup([
-    'uriString' => new DirectRecord('www.example.com'),
-    'Psr-uri' => new DirectRecord(function (string $x) {
-        return new Psr\Implementation\Uri($x);
-    })
-]);
-
-// do something else, resolve dependencies then...
-
-$setup->entry('https.uri')->lazy(function (ContainerInterface $c) {
-    $callback = $this->get('Psr-uri');
-    return $callback($this->get('uriString'));
-});
-
-$container = $setup->container();
-```
-
-#### RecordSetup as configuration proxy
+### RecordSetup as configuration proxy
 Calling `ContainerSetup::entry($name)` returns `RecordSetup` helper object.
 Beside providing methods to inject new instances of `Record` implementations
 into `RecordCollection` it also isolates `Container` from scopes that should
@@ -103,50 +123,46 @@ To make it possible `ContainerSetup` should be encapsulated in object,
 that allows for its configuration. For example, if you have front
 controller bootstrap class similar to...
 
-```php
-class App
-{
-    private $containerSetup;
-    
-    public function __construct(array $records = []) {
-        $this->containerSetup = new ContainerSetup($records);
-    }
-    
-    //...
-    
-    public function config(string $name): RecordEntry {
-        return $this->containerSetup->entry($name);
-    }
-    
-    public function handle(ServerRequestInterface $request): ResponseInterface {
-        $container = $this->containerSetup->container();
+    class App
+    {
+        private $containerSetup;
+        
+        public function __construct(array $records = []) {
+            $this->containerSetup = new ContainerSetup($records);
+        }
+        
         //...
+        
+        public function config(string $name): RecordEntry {
+            return $this->containerSetup->entry($name);
+        }
+        
+        public function handle(ServerRequestInterface $request): ResponseInterface {
+            $container = $this->containerSetup->container();
+            //...
+        }
     }
-}
-```
 
 ...creating same container as with methods above might go like this:
 
-```php
-$app = new App([
-    'uriString' => new DirectRecord('www.example.com')
-]);
-
-$app->config('Psr-uri')->value(function (string $x) {
-    return new Psr\Implementation\Uri($x);
-});
-
-$app->config('https.uri')->lazy(function (ContainerInterface $c) {
-    $callback = $this->get('Psr-uri');
-    return $callback($this->get('uriString'))->withScheme('https');
-});
-
-//...
-
-$response = $app->handle($request);
-```
+    $app = new App([
+        'uriString' => new DirectRecord('www.example.com')
+    ]);
+    
+    $app->config('Psr-uri')->value(function (string $x) {
+        return new Psr\Implementation\Uri($x);
+    });
+    
+    $app->config('https.uri')->lazy(function (ContainerInterface $c) {
+        $callback = $this->get('Psr-uri');
+        return $callback($this->get('uriString'))->withScheme('https');
+    });
+    
+    //...
+    
+    $response = $app->handle($request);
 
 Nothing in outer scope can use instance of `Container` created within `App`.  
 It is possible to achieve, but it needs to be done by explicitly passing
-stateful object identifier within callback passing container through one of
-object's methods. Still, this is not recommended, so it won't be covered in details.
+stateful object identifier that can return container through one of object's
+methods. This is not recommended though, so it won't be covered in details.
