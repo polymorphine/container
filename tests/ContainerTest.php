@@ -84,8 +84,8 @@ class ContainerTest extends TestCase
             'array'           => [1, 2, 3],
             'assoc'           => ['first' => 1, 'second' => 2],
             'callback'        => function () { return 'first'; },
-            'lazy.hello'   => 'Hello World!',
-            'lazy.goodbye' => 'see ya!'
+            'lazy.hello'      => 'Hello World!',
+            'lazy.goodbye'    => 'see ya!'
         ];
 
         $container = new Container(new RecordCollection([
@@ -96,7 +96,7 @@ class ContainerTest extends TestCase
             'assoc'           => new Record\DirectRecord(['first' => 1, 'second' => 2]),
             'callback'        => new Record\DirectRecord($expected['callback']),
             'lazy.hello'      => new Record\LazyRecord(function (ContainerInterface $c) { return $c->get('test'); }),
-            'lazy.goodbye' => new Record\LazyRecord(function () { return 'see ya!'; })
+            'lazy.goodbye'    => new Record\LazyRecord(function () { return 'see ya!'; })
         ]));
 
         foreach ($expected as $key => $value) {
@@ -215,8 +215,8 @@ class ContainerTest extends TestCase
     public function testCompositeRecord()
     {
         $records = [
-            'name'  => new Record\DirectRecord('Shudd3r'),
-            'hello' => new Record\DirectRecord(function ($name) { return 'Hello ' . $name . '.'; }),
+            'name'   => new Record\DirectRecord('Shudd3r'),
+            'hello'  => new Record\DirectRecord(function ($name) { return 'Hello ' . $name . '.'; }),
             'polite' => new Record\DirectRecord('How are you?')
         ];
 

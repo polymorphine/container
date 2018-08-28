@@ -29,7 +29,7 @@ class CompositeRecord implements Record
     private $object;
 
     /**
-     * @param string $className
+     * @param string   $className
      * @param string[] $dependencies ContainerInterface ids to get constructor values from
      */
     public function __construct(string $className, string ...$dependencies)

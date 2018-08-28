@@ -28,7 +28,7 @@ class ContainerSetup
      */
     public function __construct(array $records = [])
     {
-        $this->records = $this->recordCollection($records);
+        $this->records   = $this->recordCollection($records);
         $this->container = new Container($this->records);
     }
 
