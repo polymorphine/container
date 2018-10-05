@@ -11,8 +11,8 @@
 
 namespace Polymorphine\Container;
 
-use Polymorphine\Container\Setup\RecordCollection;
 use Psr\Container\ContainerInterface;
+use Polymorphine\Container\Setup\RecordCollection;
 use Polymorphine\Container\Exception\CircularReferenceException;
 
 

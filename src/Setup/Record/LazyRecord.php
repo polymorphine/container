@@ -33,8 +33,8 @@ class LazyRecord implements Record
         $this->callback = $callback;
     }
 
-    public function value(ContainerInterface $c)
+    public function value(ContainerInterface $container)
     {
-        return $this->value ?: $this->value = $this->callback->__invoke($c);
+        return $this->value ?: $this->value = $this->callback->__invoke($container);
     }
 }

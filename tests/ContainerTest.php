@@ -200,7 +200,7 @@ class ContainerTest extends TestCase
     {
         $container = $this->factory([
             'lazy.goodbye' => new Record\LazyRecord(function () {
-                return new Doubles\ExampleClass(function ($name) {
+                return new Fixtures\ExampleClass(function ($name) {
                     return 'Goodbye ' . $name;
                 }, 'Shudd3r');
             })
@@ -221,7 +221,7 @@ class ContainerTest extends TestCase
         ];
 
         $setup = $this->factory($records);
-        $setup->entry('small.talk')->composite(Doubles\ExampleClass::class, 'hello', 'name');
+        $setup->entry('small.talk')->composite(Fixtures\ExampleClass::class, 'hello', 'name');
         $container = $setup->container();
 
         $expect = 'Hello Shudd3r.';
@@ -229,8 +229,8 @@ class ContainerTest extends TestCase
 
         // Decorated record
         $setup = $this->factory($records);
-        $setup->entry('small.talk')->composite(Doubles\ExampleClass::class, 'hello', 'name');
-        $setup->entry('small.talk')->composite(Doubles\DecoratingExampleClass::class, 'small.talk', 'polite');
+        $setup->entry('small.talk')->composite(Fixtures\ExampleClass::class, 'hello', 'name');
+        $setup->entry('small.talk')->composite(Fixtures\DecoratingExampleClass::class, 'small.talk', 'polite');
         $container = $setup->container();
 
         $expect = 'Hello Shudd3r. How are you?';
@@ -239,9 +239,9 @@ class ContainerTest extends TestCase
         // Decorated Again
         $setup = $this->factory($records);
         $setup->entry('ask.football')->value('Have you seen that ridiculous display last night?');
-        $setup->entry('small.talk')->composite(Doubles\ExampleClass::class, 'hello', 'name');
-        $setup->entry('small.talk')->composite(Doubles\DecoratingExampleClass::class, 'small.talk', 'polite');
-        $setup->entry('small.talk')->composite(Doubles\DecoratingExampleClass::class, 'small.talk', 'ask.football');
+        $setup->entry('small.talk')->composite(Fixtures\ExampleClass::class, 'hello', 'name');
+        $setup->entry('small.talk')->composite(Fixtures\DecoratingExampleClass::class, 'small.talk', 'polite');
+        $setup->entry('small.talk')->composite(Fixtures\DecoratingExampleClass::class, 'small.talk', 'ask.football');
         $container = $setup->container();
 
         $expect = 'Hello Shudd3r. How are you? Have you seen that ridiculous display last night?';
@@ -252,7 +252,7 @@ class ContainerTest extends TestCase
     {
         $entry = $this->withBasicSettings()->entry('someClass');
         $this->expectException(Exception\RecordNotFoundException::class);
-        $entry->composite(Doubles\ExampleClass::class, 'undefined.record', 'test');
+        $entry->composite(Fixtures\ExampleClass::class, 'undefined.record', 'test');
     }
 
     public function testCircularCall_ThrowsException()

@@ -22,9 +22,9 @@ interface Record
      * Container instance is passed as parameter as returned value
      * may depend on other Container's entries.
      *
-     * @param ContainerInterface $c
+     * @param ContainerInterface $container
      *
      * @return mixed unwrapped record value
      */
-    public function value(ContainerInterface $c);
+    public function value(ContainerInterface $container);
 }

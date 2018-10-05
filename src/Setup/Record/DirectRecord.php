@@ -27,7 +27,7 @@ class DirectRecord implements Record
         $this->value = $value;
     }
 
-    public function value(ContainerInterface $c)
+    public function value(ContainerInterface $container)
     {
         return $this->value;
     }

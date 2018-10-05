@@ -9,7 +9,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Container\Tests\Doubles;
+namespace Polymorphine\Container\Tests\Fixtures;
 
 use Closure;
 
