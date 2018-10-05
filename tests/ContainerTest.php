@@ -255,6 +255,23 @@ class ContainerTest extends TestCase
         $entry->composite(Doubles\ExampleClass::class, 'undefined.record', 'test');
     }
 
+    public function testCircularCall_ThrowsException()
+    {
+        $factory = $this->factory();
+        $factory->entry('ref')->lazy(function (ContainerInterface $c) {
+            return $c->get('ref.self');
+        });
+        $factory->entry('ref.self')->lazy(function (ContainerInterface $c) {
+            return $c->has('ref.dependency') ? $c->get('ref.dependency') : null;
+        });
+        $factory->entry('ref.dependency')->lazy(function (ContainerInterface $c) {
+            return $c->get('ref.self');
+        });
+        $container = $factory->container();
+        $this->expectException(Exception\CircularReferenceException::class);
+        $container->get('ref');
+    }
+
     protected function factory(array $data = [])
     {
         return new ContainerSetup($data);
