@@ -12,7 +12,6 @@
 namespace Polymorphine\Container\Setup;
 
 use Polymorphine\Container\Exception;
-use Closure;
 
 
 /**
@@ -50,6 +49,8 @@ class RecordSetup
      * @see DirectRecord
      *
      * @param $value
+     *
+     * @throws Exception\InvalidIdException
      */
     public function value($value): void
     {
@@ -57,16 +58,18 @@ class RecordSetup
     }
 
     /**
-     * Pushes LazyRecord with given Closure into Container's records.
-     * Closure receives Container instance as parameter.
+     * Pushes LazyRecord with given callable into Container's records.
+     * Callback receives ContainerInterface instance as parameter.
      *
      * @see LazyRecord
      *
-     * @param Closure $closure
+     * @param callable $callback
+     *
+     * @throws Exception\InvalidIdException
      */
-    public function lazy(Closure $closure): void
+    public function lazy(callable $callback): void
     {
-        $this->record(new Record\LazyRecord($closure));
+        $this->record(new Record\LazyRecord($callback));
     }
 
     /**
@@ -84,6 +87,8 @@ class RecordSetup
      *
      * @param string $className
      * @param string ...$dependencies
+     *
+     * @throws Exception\InvalidIdException
      */
     public function composite(string $className, string ...$dependencies): void
     {

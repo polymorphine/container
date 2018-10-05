@@ -13,12 +13,11 @@ namespace Polymorphine\Container\Setup\Record;
 
 use Polymorphine\Container\Setup\Record;
 use Psr\Container\ContainerInterface;
-use Closure;
 
 
 /**
- * Record that returns value invoked from Closure passed
- * into constructor.
+ * Record that returns value invoked from anonymous function
+ * passed into constructor.
  *
  * Returned value is remembered and returned directly when
  * value() method is called again.
@@ -28,13 +27,19 @@ class LazyRecord implements Record
     private $value;
     private $callback;
 
-    public function __construct(Closure $callback)
+    /**
+     * Callback will be given ContainerInterface that may be used to
+     * produce record's value.
+     *
+     * @param callable $callback
+     */
+    public function __construct(callable $callback)
     {
         $this->callback = $callback;
     }
 
     public function value(ContainerInterface $container)
     {
-        return $this->value ?: $this->value = $this->callback->__invoke($container);
+        return $this->value ?: $this->value = ($this->callback)($container);
     }
 }

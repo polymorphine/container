@@ -11,15 +11,13 @@
 
 namespace Polymorphine\Container\Tests\Fixtures;
 
-use Closure;
-
 
 class ExampleClass implements Example
 {
     private $name;
     private $callback;
 
-    public function __construct(Closure $callback, string $name)
+    public function __construct(callable $callback, string $name)
     {
         $this->name     = $name;
         $this->callback = $callback;
@@ -27,6 +25,6 @@ class ExampleClass implements Example
 
     public function beNice()
     {
-        return $this->callback->__invoke($this->name);
+        return ($this->callback)($this->name);
     }
 }
