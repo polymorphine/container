@@ -42,7 +42,7 @@ class ContainerTest extends TestCase
     public function testClosuresForLazyLoadedValuesCanAccessContainer()
     {
         $setup = $this->withBasicSettings();
-        $setup->entry('bar')->lazy(function (ContainerInterface $c) {
+        $setup->entry('bar')->invoke(function (ContainerInterface $c) {
             return substr($c->get('test'), 0, 6) . $c->get('lazy') . '!';
         });
         $container = $setup->container();
@@ -53,8 +53,8 @@ class ContainerTest extends TestCase
     public function testGivenContainerWithFalsyValues_HasMethodReturnsTrue()
     {
         $container = new Container(new RecordCollection([
-            'null'  => new Record\DirectRecord(null),
-            'false' => new Record\DirectRecord(false)
+            'null'  => new Record\ValueRecord(null),
+            'false' => new Record\ValueRecord(false)
         ]));
 
         $this->assertTrue($container->has('null'));
@@ -89,14 +89,14 @@ class ContainerTest extends TestCase
         ];
 
         $container = new Container(new RecordCollection([
-            'test'            => new Record\DirectRecord('Hello World!'),
-            'category.first'  => new Record\DirectRecord('one'),
-            'category.second' => new Record\DirectRecord('two'),
-            'array'           => new Record\DirectRecord([1, 2, 3]),
-            'assoc'           => new Record\DirectRecord(['first' => 1, 'second' => 2]),
-            'callback'        => new Record\DirectRecord($expected['callback']),
-            'lazy.hello'      => new Record\LazyRecord(function (ContainerInterface $c) { return $c->get('test'); }),
-            'lazy.goodbye'    => new Record\LazyRecord(function () { return 'see ya!'; })
+            'test'            => new Record\ValueRecord('Hello World!'),
+            'category.first'  => new Record\ValueRecord('one'),
+            'category.second' => new Record\ValueRecord('two'),
+            'array'           => new Record\ValueRecord([1, 2, 3]),
+            'assoc'           => new Record\ValueRecord(['first' => 1, 'second' => 2]),
+            'callback'        => new Record\ValueRecord($expected['callback']),
+            'lazy.hello'      => new Record\CallbackRecord(function (ContainerInterface $c) { return $c->get('test'); }),
+            'lazy.goodbye'    => new Record\CallbackRecord(function () { return 'see ya!'; })
         ]));
 
         foreach ($expected as $key => $value) {
@@ -114,7 +114,7 @@ class ContainerTest extends TestCase
     public function testCallbacksCannotModifyRegistry()
     {
         $setup = $this->factory();
-        $setup->entry('lazyModifier')->lazy(function ($c) {
+        $setup->entry('lazyModifier')->invoke(function ($c) {
             $vars = get_object_vars($c);
 
             return isset($vars['records']);
@@ -124,23 +124,23 @@ class ContainerTest extends TestCase
 
     public function testOverwritingExistingKey_ThrowsException()
     {
-        $setup = $this->factory(['test' => new Record\DirectRecord('foo')]);
+        $setup = $this->factory(['test' => new Record\ValueRecord('foo')]);
         $this->expectException(Exception\InvalidIdException::class);
-        $setup->entry('test')->value('bar');
+        $setup->entry('test')->set('bar');
     }
 
     public function testNumericId_ThrowsException()
     {
         $setup = $this->factory();
         $this->expectException(Exception\InvalidIdException::class);
-        $setup->entry('74')->lazy(function () { return 'foo'; });
+        $setup->entry('74')->invoke(function () { return 'foo'; });
     }
 
     public function testEmptyFactoryId_ThrowsException()
     {
         $setup = $this->factory();
         $this->expectException(Exception\InvalidIdException::class);
-        $setup->entry('')->value(function () { return 'foo'; });
+        $setup->entry('')->set(function () { return 'foo'; });
     }
 
     public function testEmptyIdContainerCall_ThrowsException()
@@ -171,18 +171,18 @@ class ContainerTest extends TestCase
     public function inputScenarios()
     {
         return [
-            ['value', 'direct', 'direct value', 'direct value'],
-            ['lazy', 'lazy', function () { return 'lazy value'; }, 'lazy value'],
-            ['record', 'directRecord', new Record\DirectRecord('direct value'), 'direct value'],
-            ['record', 'lazyRecord', new Record\LazyRecord(function () { return 'lazy value'; }), 'lazy value']
+            ['set', 'direct', 'direct value', 'direct value'],
+            ['invoke', 'lazy', function () { return 'lazy value'; }, 'lazy value'],
+            ['useRecord', 'directRecord', new Record\ValueRecord('direct value'), 'direct value'],
+            ['useRecord', 'lazyRecord', new Record\CallbackRecord(function () { return 'lazy value'; }), 'lazy value']
         ];
     }
 
     public function testSetupContainer_ReturnsSameInstanceOfContainer()
     {
-        $setup      = $this->factory(['exists' => new Record\DirectRecord(true)]);
+        $setup      = $this->factory(['exists' => new Record\ValueRecord(true)]);
         $container1 = $setup->container();
-        $setup->entry('not.too.late')->value(true);
+        $setup->entry('not.too.late')->set(true);
         $container2 = $setup->container();
 
         $this->assertSame($container1, $container2);
@@ -190,16 +190,16 @@ class ContainerTest extends TestCase
 
     public function testSetupContainerExistsCheck()
     {
-        $setup = $this->factory(['defined' => new Record\DirectRecord(true)]);
+        $setup = $this->factory(['defined' => new Record\ValueRecord(true)]);
 
         $this->assertTrue($setup->exists('defined'));
         $this->assertFalse($setup->exists('undefined'));
     }
 
-    public function testLazyRecord()
+    public function testCallbackRecord()
     {
         $container = $this->factory([
-            'lazy.goodbye' => new Record\LazyRecord(function () {
+            'lazy.goodbye' => new Record\CallbackRecord(function () {
                 return new Fixtures\ExampleClass(function ($name) {
                     return 'Goodbye ' . $name;
                 }, 'Shudd3r');
@@ -215,13 +215,13 @@ class ContainerTest extends TestCase
     public function testCompositeRecord()
     {
         $records = [
-            'name'   => new Record\DirectRecord('Shudd3r'),
-            'hello'  => new Record\DirectRecord(function ($name) { return 'Hello ' . $name . '.'; }),
-            'polite' => new Record\DirectRecord('How are you?')
+            'name'   => new Record\ValueRecord('Shudd3r'),
+            'hello'  => new Record\ValueRecord(function ($name) { return 'Hello ' . $name . '.'; }),
+            'polite' => new Record\ValueRecord('How are you?')
         ];
 
         $setup = $this->factory($records);
-        $setup->entry('small.talk')->composite(Fixtures\ExampleClass::class, 'hello', 'name');
+        $setup->entry('small.talk')->compose(Fixtures\ExampleClass::class, 'hello', 'name');
         $container = $setup->container();
 
         $expect = 'Hello Shudd3r.';
@@ -229,8 +229,8 @@ class ContainerTest extends TestCase
 
         // Decorated record
         $setup = $this->factory($records);
-        $setup->entry('small.talk')->composite(Fixtures\ExampleClass::class, 'hello', 'name');
-        $setup->entry('small.talk')->composite(Fixtures\DecoratingExampleClass::class, 'small.talk', 'polite');
+        $setup->entry('small.talk')->compose(Fixtures\ExampleClass::class, 'hello', 'name');
+        $setup->entry('small.talk')->compose(Fixtures\DecoratingExampleClass::class, 'small.talk', 'polite');
         $container = $setup->container();
 
         $expect = 'Hello Shudd3r. How are you?';
@@ -238,10 +238,10 @@ class ContainerTest extends TestCase
 
         // Decorated Again
         $setup = $this->factory($records);
-        $setup->entry('ask.football')->value('Have you seen that ridiculous display last night?');
-        $setup->entry('small.talk')->composite(Fixtures\ExampleClass::class, 'hello', 'name');
-        $setup->entry('small.talk')->composite(Fixtures\DecoratingExampleClass::class, 'small.talk', 'polite');
-        $setup->entry('small.talk')->composite(Fixtures\DecoratingExampleClass::class, 'small.talk', 'ask.football');
+        $setup->entry('ask.football')->set('Have you seen that ridiculous display last night?');
+        $setup->entry('small.talk')->compose(Fixtures\ExampleClass::class, 'hello', 'name');
+        $setup->entry('small.talk')->compose(Fixtures\DecoratingExampleClass::class, 'small.talk', 'polite');
+        $setup->entry('small.talk')->compose(Fixtures\DecoratingExampleClass::class, 'small.talk', 'ask.football');
         $container = $setup->container();
 
         $expect = 'Hello Shudd3r. How are you? Have you seen that ridiculous display last night?';
@@ -252,19 +252,19 @@ class ContainerTest extends TestCase
     {
         $entry = $this->withBasicSettings()->entry('someClass');
         $this->expectException(Exception\RecordNotFoundException::class);
-        $entry->composite(Fixtures\ExampleClass::class, 'undefined.record', 'test');
+        $entry->compose(Fixtures\ExampleClass::class, 'undefined.record', 'test');
     }
 
     public function testCircularCall_ThrowsException()
     {
         $factory = $this->factory();
-        $factory->entry('ref')->lazy(function (ContainerInterface $c) {
+        $factory->entry('ref')->invoke(function (ContainerInterface $c) {
             return $c->get('ref.self');
         });
-        $factory->entry('ref.self')->lazy(function (ContainerInterface $c) {
+        $factory->entry('ref.self')->invoke(function (ContainerInterface $c) {
             return $c->has('ref.dependency') ? $c->get('ref.dependency') : null;
         });
-        $factory->entry('ref.dependency')->lazy(function (ContainerInterface $c) {
+        $factory->entry('ref.dependency')->invoke(function (ContainerInterface $c) {
             return $c->get('ref.self');
         });
         $container = $factory->container();
@@ -280,8 +280,8 @@ class ContainerTest extends TestCase
     protected function withBasicSettings()
     {
         $factory = $this->factory([
-            'test' => new Record\DirectRecord('Hello World!'),
-            'lazy' => new Record\LazyRecord(function () { return 'Lazy Foo'; })
+            'test' => new Record\ValueRecord('Hello World!'),
+            'lazy' => new Record\CallbackRecord(function () { return 'Lazy Foo'; })
         ]);
 
         return $factory;

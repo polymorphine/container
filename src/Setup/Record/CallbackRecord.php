@@ -16,13 +16,12 @@ use Psr\Container\ContainerInterface;
 
 
 /**
- * Record that returns value invoked from anonymous function
- * passed into constructor.
+ * Record that returns value invoked from callable property.
  *
  * Returned value is remembered and returned directly when
  * value() method is called again.
  */
-class LazyRecord implements Record
+class CallbackRecord implements Record
 {
     private $value;
     private $callback;

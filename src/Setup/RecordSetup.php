@@ -32,44 +32,42 @@ class RecordSetup
     /**
      * Pushes given Record instance directly into Container's records.
      *
-     * @see Record
-     *
      * @param Record $record
      *
      * @throws Exception\InvalidIdException
      */
-    public function record(Record $record): void
+    public function useRecord(Record $record): void
     {
-        $this->records->set($this->name, $record);
+        $this->records->add($this->name, $record);
     }
 
     /**
      * Pushes DirectRecord with given value into Container's records.
      *
-     * @see DirectRecord
+     * @see ValueRecord
      *
      * @param $value
      *
      * @throws Exception\InvalidIdException
      */
-    public function value($value): void
+    public function set($value): void
     {
-        $this->record(new Record\DirectRecord($value));
+        $this->useRecord(new Record\ValueRecord($value));
     }
 
     /**
-     * Pushes LazyRecord with given callable into Container's records.
+     * Pushes CallbackRecord with given callable into Container's records.
      * Callback receives ContainerInterface instance as parameter.
      *
-     * @see LazyRecord
+     * @see CallbackRecord
      *
      * @param callable $callback
      *
      * @throws Exception\InvalidIdException
      */
-    public function lazy(callable $callback): void
+    public function invoke(callable $callback): void
     {
-        $this->record(new Record\LazyRecord($callback));
+        $this->useRecord(new Record\CallbackRecord($callback));
     }
 
     /**
@@ -90,10 +88,10 @@ class RecordSetup
      *
      * @throws Exception\InvalidIdException
      */
-    public function composite(string $className, string ...$dependencies): void
+    public function compose(string $className, string ...$dependencies): void
     {
         $dependencies = $this->validDependencies($dependencies);
-        $this->record(new Record\CompositeRecord($className, ...$dependencies));
+        $this->useRecord(new Record\CompositeRecord($className, ...$dependencies));
     }
 
     private function validDependencies(array $dependencies): array
@@ -112,7 +110,7 @@ class RecordSetup
     {
         if (!$this->records->has($name)) {
             throw new Exception\RecordNotFoundException(
-                sprintf('FactoryRecord requires defined dependencies - `%s` Record not found', $name)
+                sprintf('CompositeRecord requires defined dependencies - `%s` Record not found', $name)
             );
         }
     }
@@ -124,7 +122,7 @@ class RecordSetup
             $newAlias .= '.DEC';
         }
 
-        $this->records->set($newAlias, $this->records->get($this->name));
+        $this->records->add($newAlias, $this->records->get($this->name));
         $this->records->remove($this->name);
 
         return $newAlias;

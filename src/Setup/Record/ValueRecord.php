@@ -16,9 +16,9 @@ use Psr\Container\ContainerInterface;
 
 
 /**
- * Record that returns stored values as they were passed into constructor.
+ * Record that returns its property value directly.
  */
-class DirectRecord implements Record
+class ValueRecord implements Record
 {
     private $value;
 

@@ -53,7 +53,7 @@ class RecordCollection
      *
      * @throws Exception\InvalidIdException
      */
-    public function set(string $name, Record $record): void
+    public function add(string $name, Record $record): void
     {
         $this->validateIdFormat($name);
         $this->preventOverwrite($name);
