@@ -12,8 +12,6 @@
 namespace Polymorphine\Container;
 
 use Psr\Container\ContainerInterface;
-use Polymorphine\Container\Setup\RecordCollection;
-use Polymorphine\Container\Exception\CircularReferenceException;
 
 
 class TrackingContainer implements ContainerInterface
@@ -30,7 +28,7 @@ class TrackingContainer implements ContainerInterface
     {
         if (isset($this->references[$id])) {
             $message = 'Lazy composition of `%s` record is using reference to itself';
-            throw new CircularReferenceException(sprintf($message, (string) $id));
+            throw new Exception\CircularReferenceException(sprintf($message, (string) $id));
         }
 
         $this->references[$id] = true;

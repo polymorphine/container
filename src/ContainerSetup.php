@@ -20,13 +20,13 @@ class ContainerSetup
     private $container;
 
     /**
-     * @param Setup\Record[] $records
+     * @param Record[] $records
      *
      * @throws Exception\InvalidArgumentException | Exception\InvalidIdException
      */
     public function __construct(array $records = [])
     {
-        $this->records   = new Setup\RecordCollection($records);
+        $this->records   = new RecordCollection($records);
         $this->container = new Container($this->records);
     }
 
@@ -55,11 +55,11 @@ class ContainerSetup
      *
      * @param string $name
      *
-     * @return Setup\RecordSetup
+     * @return RecordSetup
      */
-    public function entry(string $name): Setup\RecordSetup
+    public function entry(string $name): RecordSetup
     {
-        return new Setup\RecordSetup($name, $this->records);
+        return new RecordSetup($name, $this->records);
     }
 
     public function exists(string $name): bool

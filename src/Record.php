@@ -9,7 +9,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Container\Setup;
+namespace Polymorphine\Container;
 
 use Psr\Container\ContainerInterface;
 
@@ -19,8 +19,8 @@ interface Record
     /**
      * Unwraps value requested from container.
      *
-     * Container instance is passed as parameter as returned value
-     * may depend on other Container's entries.
+     * Container instance is passed as parameter because value
+     * may derive from other Container entries.
      *
      * @param ContainerInterface $container
      *

@@ -9,9 +9,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Container\Setup;
-
-use Polymorphine\Container\Exception;
+namespace Polymorphine\Container;
 
 
 /**
@@ -42,7 +40,7 @@ class RecordSetup
     }
 
     /**
-     * Pushes DirectRecord with given value into Container's records.
+     * Pushes ValueRecord with given value into Container's records.
      *
      * @see ValueRecord
      *
@@ -86,7 +84,7 @@ class RecordSetup
      * @param string $className
      * @param string ...$dependencies
      *
-     * @throws Exception\InvalidIdException
+     * @throws Exception\InvalidIdException | Exception\RecordNotFoundException
      */
     public function compose(string $className, string ...$dependencies): void
     {
@@ -98,9 +96,7 @@ class RecordSetup
     {
         foreach ($dependencies as &$name) {
             $this->checkIfDefined($name);
-            if ($name === $this->name) {
-                $name = $this->decoratedDependency();
-            }
+            $this->renameDecorated($name);
         }
 
         return $dependencies;
@@ -115,8 +111,10 @@ class RecordSetup
         }
     }
 
-    private function decoratedDependency(): string
+    private function renameDecorated(string &$name): void
     {
+        if ($name !== $this->name) { return; }
+
         $newAlias = $this->name . '.DEC';
         while ($this->records->has($newAlias)) {
             $newAlias .= '.DEC';
@@ -125,6 +123,6 @@ class RecordSetup
         $this->records->add($newAlias, $this->records->get($this->name));
         $this->records->remove($this->name);
 
-        return $newAlias;
+        $name = $newAlias;
     }
 }

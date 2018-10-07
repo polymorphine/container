@@ -12,7 +12,6 @@
 namespace Polymorphine\Container;
 
 use Psr\Container\ContainerInterface;
-use Polymorphine\Container\Setup\RecordCollection;
 
 
 class Container implements ContainerInterface
