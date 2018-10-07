@@ -17,6 +17,7 @@ use Polymorphine\Container\ContainerSetup;
 use Polymorphine\Container\Record;
 use Polymorphine\Container\RecordCollection;
 use Polymorphine\Container\Exception;
+use Polymorphine\Container\Tests\Fixtures\Example;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Container\ContainerExceptionInterface;
@@ -50,7 +51,7 @@ class ContainerTest extends TestCase
         $this->assertSame('Hello Lazy Foo!', $container->get('bar'));
     }
 
-    public function testGivenContainerWithFalsyValues_HasMethodReturnsTrue()
+    public function testGivenContainerWithEmptyValues_HasMethodReturnsTrue()
     {
         $container = new Container(new RecordCollection([
             'null'  => new Record\ValueRecord(null),
@@ -200,7 +201,7 @@ class ContainerTest extends TestCase
     {
         $container = $this->factory([
             'lazy.goodbye' => new Record\CallbackRecord(function () {
-                return new Fixtures\ExampleClass(function ($name) {
+                return new Example\ExampleClass(function ($name) {
                     return 'Goodbye ' . $name;
                 }, 'Shudd3r');
             })
@@ -221,7 +222,7 @@ class ContainerTest extends TestCase
         ];
 
         $setup = $this->factory($records);
-        $setup->entry('small.talk')->compose(Fixtures\ExampleClass::class, 'hello', 'name');
+        $setup->entry('small.talk')->compose(Example\ExampleClass::class, 'hello', 'name');
         $container = $setup->container();
 
         $expect = 'Hello Shudd3r.';
@@ -229,8 +230,8 @@ class ContainerTest extends TestCase
 
         // Decorated record
         $setup = $this->factory($records);
-        $setup->entry('small.talk')->compose(Fixtures\ExampleClass::class, 'hello', 'name');
-        $setup->entry('small.talk')->compose(Fixtures\DecoratingExampleClass::class, 'small.talk', 'polite');
+        $setup->entry('small.talk')->compose(Example\ExampleClass::class, 'hello', 'name');
+        $setup->entry('small.talk')->compose(Example\DecoratingExampleClass::class, 'small.talk', 'polite');
         $container = $setup->container();
 
         $expect = 'Hello Shudd3r. How are you?';
@@ -239,9 +240,9 @@ class ContainerTest extends TestCase
         // Decorated Again
         $setup = $this->factory($records);
         $setup->entry('ask.football')->set('Have you seen that ridiculous display last night?');
-        $setup->entry('small.talk')->compose(Fixtures\ExampleClass::class, 'hello', 'name');
-        $setup->entry('small.talk')->compose(Fixtures\DecoratingExampleClass::class, 'small.talk', 'polite');
-        $setup->entry('small.talk')->compose(Fixtures\DecoratingExampleClass::class, 'small.talk', 'ask.football');
+        $setup->entry('small.talk')->compose(Example\ExampleClass::class, 'hello', 'name');
+        $setup->entry('small.talk')->compose(Example\DecoratingExampleClass::class, 'small.talk', 'polite');
+        $setup->entry('small.talk')->compose(Example\DecoratingExampleClass::class, 'small.talk', 'ask.football');
         $container = $setup->container();
 
         $expect = 'Hello Shudd3r. How are you? Have you seen that ridiculous display last night?';
@@ -252,7 +253,7 @@ class ContainerTest extends TestCase
     {
         $entry = $this->withBasicSettings()->entry('someClass');
         $this->expectException(Exception\RecordNotFoundException::class);
-        $entry->compose(Fixtures\ExampleClass::class, 'undefined.record', 'test');
+        $entry->compose(Example\ExampleClass::class, 'undefined.record', 'test');
     }
 
     public function testCircularCall_ThrowsException()

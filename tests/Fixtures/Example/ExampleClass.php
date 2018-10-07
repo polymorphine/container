@@ -9,7 +9,9 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Container\Tests\Fixtures;
+namespace Polymorphine\Container\Tests\Fixtures\Example;
+
+use Polymorphine\Container\Tests\Fixtures\Example;
 
 
 class ExampleClass implements Example
