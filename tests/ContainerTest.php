@@ -256,7 +256,18 @@ class ContainerTest extends TestCase
         $entry->compose(Example\ExampleClass::class, 'undefined.record', 'test');
     }
 
-    public function testCircularCall_ThrowsException()
+    public function testDirectCircularCall_ThrowsException()
+    {
+        $factory = $this->factory();
+        $factory->entry('ref.self')->invoke(function (ContainerInterface $c) {
+            return $c->get('ref.self');
+        });
+        $container = $factory->container();
+        $this->expectException(Exception\CircularReferenceException::class);
+        $container->get('ref.self');
+    }
+
+    public function testIndirectCircularCall_ThrowsException()
     {
         $factory = $this->factory();
         $factory->entry('ref')->invoke(function (ContainerInterface $c) {
