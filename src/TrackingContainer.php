@@ -31,8 +31,9 @@ class TrackingContainer implements ContainerInterface
             throw new Exception\CircularReferenceException(sprintf($message, (string) $id));
         }
 
-        $this->references[$id] = true;
-        return $this->records->get($id)->value($this);
+        $track = clone $this;
+        $track->references[$id] = true;
+        return $this->records->get($id)->value($track);
     }
 
     public function has($id)

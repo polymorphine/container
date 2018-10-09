@@ -26,8 +26,7 @@ class ContainerSetup
      */
     public function __construct(array $records = [])
     {
-        $this->records   = new RecordCollection($records);
-        $this->container = new Container($this->records);
+        $this->records = new RecordCollection($records);
     }
 
     /**
@@ -42,11 +41,13 @@ class ContainerSetup
      * Strict immutability cannot be ensured, because side-effects
      * can change subsequent call outcomes for stored identifiers.
      *
+     * @param bool $secure Enable tracking for circular references
+     *
      * @return ContainerInterface
      */
-    public function container(): ContainerInterface
+    public function container(bool $secure = false): ContainerInterface
     {
-        return $this->container;
+        return $this->container ?: $this->container = $this->createContainer($secure);
     }
 
     /**
@@ -65,5 +66,10 @@ class ContainerSetup
     public function exists(string $name): bool
     {
         return $this->records->has($name);
+    }
+
+    protected function createContainer(bool $secure): ContainerInterface
+    {
+        return $secure ? new TrackingContainer($this->records) : new Container($this->records);
     }
 }

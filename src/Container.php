@@ -30,8 +30,7 @@ class Container implements ContainerInterface
 
     public function get($id)
     {
-        $trackingContainer = new TrackingContainer($this->records);
-        return $trackingContainer->get($id);
+        return $this->records->get($id)->value($this);
     }
 
     public function has($id): bool

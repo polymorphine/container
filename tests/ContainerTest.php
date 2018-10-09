@@ -13,6 +13,7 @@ namespace Polymorphine\Container\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Container\Container;
+use Polymorphine\Container\TrackingContainer;
 use Polymorphine\Container\ContainerSetup;
 use Polymorphine\Container\Record;
 use Polymorphine\Container\RecordCollection;
@@ -27,8 +28,9 @@ class ContainerTest extends TestCase
 {
     public function testInstantiation()
     {
-        $this->assertInstanceOf(ContainerInterface::class, Container::fromRecordsArray([]));
-        $this->assertInstanceOf(ContainerInterface::class, $this->factory()->container());
+        $this->assertInstanceOf(Container::class, Container::fromRecordsArray([]));
+        $this->assertInstanceOf(Container::class, $this->factory()->container());
+        $this->assertInstanceOf(TrackingContainer::class, $this->factory()->container(true));
     }
 
     public function testConfiguredRecordsAreAvailableFromContainer()
@@ -262,7 +264,7 @@ class ContainerTest extends TestCase
         $factory->entry('ref.self')->invoke(function (ContainerInterface $c) {
             return $c->get('ref.self');
         });
-        $container = $factory->container();
+        $container = $factory->container(true);
         $this->expectException(Exception\CircularReferenceException::class);
         $container->get('ref.self');
     }
@@ -279,9 +281,34 @@ class ContainerTest extends TestCase
         $factory->entry('ref.dependency')->invoke(function (ContainerInterface $c) {
             return $c->get('ref.self');
         });
-        $container = $factory->container();
+        $container = $factory->container(true);
         $this->expectException(Exception\CircularReferenceException::class);
         $container->get('ref');
+    }
+
+    public function testMultipleCallsAreNotCircular()
+    {
+        $factory = $this->factory();
+        $factory->entry('ref')->invoke(function (ContainerInterface $c) {
+            return $c->get('ref.multiple') . ':' . $c->get('ref.multiple');
+        });
+        $factory->entry('ref.multiple')->set('Test');
+        $this->assertSame('Test:Test', $factory->container(true)->get('ref'));
+    }
+
+    public function testMultipleIndirectCallsAreNotCircular()
+    {
+        $factory = $this->factory();
+        $factory->entry('ref')->invoke(function (ContainerInterface $c) {
+            return $c->get('function')($c);
+        });
+        $factory->entry('function')->invoke(function (ContainerInterface $c) {
+            return function (ContainerInterface $test) use ($c) {
+                return $c->get('ref.multiple') . ':' . $test->get('ref.multiple');
+            };
+        });
+        $factory->entry('ref.multiple')->set('Test');
+        $this->assertSame('Test:Test', $factory->container(true)->get('ref'));
     }
 
     protected function factory(array $data = [])
