@@ -16,8 +16,8 @@ use Psr\Container\ContainerInterface;
 
 class ContainerSetup
 {
-    private $records;
-    private $container;
+    protected $records;
+    protected $container;
 
     /**
      * @param Record[] $records
@@ -45,9 +45,9 @@ class ContainerSetup
      *
      * @return ContainerInterface
      */
-    public function container(bool $secure = false): ContainerInterface
+    public function container(): ContainerInterface
     {
-        return $this->container ?: $this->container = $this->createContainer($secure);
+        return $this->container ?: $this->container = new Container($this->records);
     }
 
     /**
@@ -66,10 +66,5 @@ class ContainerSetup
     public function exists(string $name): bool
     {
         return $this->records->has($name);
-    }
-
-    protected function createContainer(bool $secure): ContainerInterface
-    {
-        return $secure ? new TrackingContainer($this->records) : new Container($this->records);
     }
 }
