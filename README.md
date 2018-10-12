@@ -19,6 +19,9 @@ decide on such feature.
 
 ### Container Setup
 
+This example will show how to set up simple container. It will be continued later, but let's start with
+instantiating [`ContainerSetup`](src/ContainerSetup.php) object:
+
     <?php
     
     use Polymorphine\Container\ContainerSetup;
@@ -28,35 +31,50 @@ decide on such feature.
     
     $setup = new ContainerSetup();
     ...
-    
+
+Now we need to set container values or give some clues how to resolve them.
+
 #### Records decide how it works internally
-Values returned from Container are all wrapped into [`Record`](src/Setup/Record.php) abstraction that
+
+Values returned from Container are all wrapped into [`Record`](src/Record.php) abstraction that
 allows for different strategies of unwrapping them - it may be either returned directly or internally
 created by calling its (lazy) initialization procedure. You may read DocBlock comments in the provided
-default [records](src/Setup/Record) sourcecode to get more information. Here's short explanation of
+default [records](src/Record) sourcecode to get more information. Here's short explanation of
 package's Record implementations:
 
 - `ValueRecord`: Just a value, that will be returned as it was passed (callbacks will be returned without
-                 evaluation as well).
-
-      $setup->entry('direct.object')->set(new ClassInstance());
-      $setup->entry('direct.value')->set('Hello world!');
+  evaluation as well). To push value record mapped to given `$id` into container with setup
+  object use `set` command:
+      
+      $setup->entry(string $id)->set(mixed $value);
 
 - `CallbackRecord`: Lazily invoked value cache. Takes callable that will be called with `ContainerInterface`
-                    as parameter, and value of this call will be stored and returned on subsequent calls.
-
-      $setup->entry('deferred')->invoke(function (ContainerInterface $c) {
-          return new DeferredClassInstance($c->get('direct.value'));
-      });
-
+  as parameter, and value of this call will be stored and returned on subsequent calls. Setup with `invoke` command:
+  
+      $setup->entry(string $id)->invoke(callable $callback);
+  
 - `CompositeRecord`: Lazy instantiated object of given class. Constructor parameters are passed as aliases
-                     to other container entries.
+  to other container entries. Setup - `compose` command:
+  
+      $setup->entry(string $id)->compose(string $class, string ...$dependencyRecords);
 
-      $setup->entry('composed')->compose(ComposedClass::class, 'direct.object', 'deferred');
+So our example might continue this way:
+
+    ...
+    $setup->entry('direct.object')->set(new ClassInstance());
+    $setup->entry('direct.value')->set('Hello world!');
+
+    $setup->entry('deferred')->invoke(function (ContainerInterface $c) {
+        return new DeferredClassInstance($c->get('direct.value'));
+    });
+
+    $setup->entry('composed')->compose(ComposedClass::class, 'direct.object', 'deferred');
+    ...
 
 #### Container instance
-Instantiating container with setup commands used above and getting record stored under `composed` key.
+Instantiating container with setup commands used in example and getting record stored under `composed` key.
 
+    ...
     $container = $setup->container();
     $composedObject = $container->get('composed');
     
@@ -76,7 +94,7 @@ because all clients currently using it will fail. Example:
 >     }
 
 #### Constructor instantiation
-Container can't be instantiated with invalid state, because [`RecordCollection`](src/Setup/RecordCollection.php)
+Container can't be instantiated with invalid state, because [`RecordCollection`](src/RecordCollection.php)
 will throw [`Exception`](src/Exception) from constructor. It is immutable (but not necessary objects within it)
 so all the data have to be passed at once.
 
@@ -89,7 +107,7 @@ array of Record instances.
     $records = [
         'direct.object' => new Record\DirectRecord(new ClassInstance()),
         'direct.value'  => new Record\DirectRecord('Hello world!'),
-        'deferred'      => new Record\LazyRecord(function (ContainerInterface $c) {
+        'deferred'      => new Record\CallbackRecord(function (ContainerInterface $c) {
            return new DeferredClassInstance($c->get('direct.value'));
         }),
         'composed'      => new Record\CompositeRecord(ComposedClass::class, 'direct.object', 'deferred');
@@ -103,7 +121,7 @@ instances before creating `Container`. Same result as above with different execu
     $records = [
         'direct.object' => new Record\DirectRecord(new ClassInstance()),
         'direct.value'  => new Record\DirectRecord('Hello world!'),
-        'deferred'      => new Record\LazyRecord(function (ContainerInterface $c) {
+        'deferred'      => new Record\CallbackRecord(function (ContainerInterface $c) {
             return new DeferredClassInstance($c->get('direct.value'));
         })
     ];
@@ -140,7 +158,7 @@ For example, if you have front controller bootstrap class similar to...
         }
     }
 
-...creating same container as with methods above might go like this:
+...creating container from example will might go like this:
 
     $app = new App([
         'uriString' => new DirectRecord('www.example.com')
