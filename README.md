@@ -180,3 +180,17 @@ For example, if you have front controller bootstrap class similar to...
 Nothing in outer scope can use instance of `Container` created within `App`. It is possible to achieve,
 but it needs to be done by explicitly passing stateful object identifier that can return container through
 one of object's methods. This is not recommended though, so it won't be covered in details.
+
+### Circular reference protection
+
+Instantiation [`TrackingContainer`](src/TrackingContainer.php) directly or using
+[`TrackingContainerSetup`](src/TrackingContainerSetup.php) will track called dependencies and throw
+[`Exception`](src/Exception/CircularReferenceException.php) when record is called within the scope that
+was created with that record.
+
+This feature should be treated as **development tool** and self-constraint so that container was not overused.
+It may help to locate an error in composition structure, but it comes with performance cost and also makes
+a few legitimate cases harder to implement as object invoked from container may call for its instance at
+runtime - for example Routing that finds endpoint & use router inside that endpoint's scope to produce urls.
+To prevent circular reference detection router's endpoint should not use (tracking) container instance passed
+to callback function used to instantiate router.
