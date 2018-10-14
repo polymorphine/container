@@ -1,7 +1,7 @@
 # Polymorphine/Container
-[![Build Status](https://travis-ci.org/shudd3r/polymorphine-container.svg?branch=develop)](https://travis-ci.org/shudd3r/container)
-[![Coverage Status](https://coveralls.io/repos/github/shudd3r/polymorphine-container/badge.svg?branch=develop)](https://coveralls.io/github/shudd3r/container?branch=develop)
-[![PHP from Packagist](https://img.shields.io/packagist/php-v/polymorphine/container/dev-develop.svg)](https://packagist.org/packages/polymorphine/container)
+[![Build Status](https://travis-ci.org/shudd3r/polymorphine-container.svg?branch=master)](https://travis-ci.org/shudd3r/polymorphine-container)
+[![Coverage Status](https://coveralls.io/repos/github/shudd3r/polymorphine-container/badge.svg?branch=master)](https://coveralls.io/github/shudd3r/polymorphine-container?branch=master)
+[![PHP from Packagist](https://img.shields.io/packagist/php-v/polymorphine/container/dev-master.svg)](https://packagist.org/packages/polymorphine/container)
 [![Packagist](https://img.shields.io/packagist/l/polymorphine/container.svg)](https://packagist.org/packages/polymorphine/container)
 ### PSR-11 Container for Dependencies and Configuration
 
