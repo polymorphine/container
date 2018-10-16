@@ -78,6 +78,19 @@ class TrackingContainerTest extends TestCase
         $this->assertSame('Test:Test', $setup->container()->get('ref'));
     }
 
+    public function testIndirectMultipleCallToPassedContainer_ThrowsException()
+    {
+        $setup = $this->builder();
+        $setup->entry('ref')->invoke(function (ContainerInterface $c) {
+            return $c;
+        });
+        $container = $setup->container();
+
+        $trackedContainer = $container->get('ref');
+        $this->expectException(Exception\CircularReferenceException::class);
+        $trackedContainer->get('ref');
+    }
+
     private function builder(array $data = [])
     {
         return new TrackingContainerSetup($data);
