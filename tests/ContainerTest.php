@@ -13,9 +13,7 @@ namespace Polymorphine\Container\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Container\Container;
-use Polymorphine\Container\TrackingContainer;
 use Polymorphine\Container\ContainerSetup;
-use Polymorphine\Container\TrackingContainerSetup;
 use Polymorphine\Container\Record;
 use Polymorphine\Container\RecordCollection;
 use Polymorphine\Container\Exception;
@@ -30,13 +28,12 @@ class ContainerTest extends TestCase
     public function testInstantiation()
     {
         $this->assertInstanceOf(Container::class, Container::fromRecordsArray([]));
-        $this->assertInstanceOf(Container::class, $this->factory()->container());
-        $this->assertInstanceOf(TrackingContainer::class, $this->factory([], true)->container());
+        $this->assertInstanceOf(Container::class, $this->builder()->container());
     }
 
     public function testConfiguredRecordsAreAvailableFromContainer()
     {
-        $container = $this->preconfiguredFactory()->container();
+        $container = $this->preconfiguredBuilder()->container();
 
         $this->assertTrue($container->has('test') && $container->has('lazy'));
         $this->assertSame('Hello World!', $container->get('test'));
@@ -45,7 +42,7 @@ class ContainerTest extends TestCase
 
     public function testClosuresForLazyLoadedValuesCanAccessContainer()
     {
-        $setup = $this->preconfiguredFactory();
+        $setup = $this->preconfiguredBuilder();
         $setup->entry('bar')->invoke(function (ContainerInterface $c) {
             return substr($c->get('test'), 0, 6) . $c->get('lazy') . '!';
         });
@@ -67,14 +64,14 @@ class ContainerTest extends TestCase
 
     public function testInvalidContainerIdType_ThrowsException()
     {
-        $container = $this->factory()->container();
+        $container = $this->builder()->container();
         $this->expectException(ContainerExceptionInterface::class);
         $container->get(23);
     }
 
     public function testAccessingAbsentIdFromContainer_ThrowsException()
     {
-        $container = $this->factory()->container();
+        $container = $this->builder()->container();
         $this->expectException(NotFoundExceptionInterface::class);
         $container->get('not.set');
     }
@@ -112,12 +109,12 @@ class ContainerTest extends TestCase
     public function testConstructWithNotAssociativeArray_ThrowsException()
     {
         $this->expectException(ContainerExceptionInterface::class);
-        $this->factory(['first' => 'ok', 2 => 'not ok']);
+        $this->builder(['first' => 'ok', 2 => 'not ok']);
     }
 
     public function testCallbacksCannotModifyRegistry()
     {
-        $setup = $this->factory();
+        $setup = $this->builder();
         $setup->entry('lazyModifier')->invoke(function ($c) {
             $vars = get_object_vars($c);
 
@@ -128,28 +125,28 @@ class ContainerTest extends TestCase
 
     public function testOverwritingExistingKey_ThrowsException()
     {
-        $setup = $this->factory(['test' => new Record\ValueRecord('foo')]);
+        $setup = $this->builder(['test' => new Record\ValueRecord('foo')]);
         $this->expectException(Exception\InvalidIdException::class);
         $setup->entry('test')->set('bar');
     }
 
     public function testNumericId_ThrowsException()
     {
-        $setup = $this->factory();
+        $setup = $this->builder();
         $this->expectException(Exception\InvalidIdException::class);
         $setup->entry('74')->invoke(function () { return 'foo'; });
     }
 
     public function testEmptyFactoryId_ThrowsException()
     {
-        $setup = $this->factory();
+        $setup = $this->builder();
         $this->expectException(Exception\InvalidIdException::class);
         $setup->entry('')->set(function () { return 'foo'; });
     }
 
     public function testEmptyIdContainerCall_ThrowsException()
     {
-        $container = $this->preconfiguredFactory()->container();
+        $container = $this->preconfiguredBuilder()->container();
         $this->expectException(Exception\InvalidIdException::class);
         $container->get('');
     }
@@ -164,7 +161,7 @@ class ContainerTest extends TestCase
      */
     public function testInputProxyMethods($method, $id, $value, $result)
     {
-        $setup = $this->factory();
+        $setup = $this->builder();
         $setup->entry($id)->{$method}($value);
         $container = $setup->container();
 
@@ -184,7 +181,7 @@ class ContainerTest extends TestCase
 
     public function testSetupContainer_ReturnsSameInstanceOfContainer()
     {
-        $setup      = $this->factory(['exists' => new Record\ValueRecord(true)]);
+        $setup      = $this->builder(['exists' => new Record\ValueRecord(true)]);
         $container1 = $setup->container();
         $setup->entry('not.too.late')->set(true);
         $container2 = $setup->container();
@@ -194,7 +191,7 @@ class ContainerTest extends TestCase
 
     public function testSetupContainerExistsCheck()
     {
-        $setup = $this->factory(['defined' => new Record\ValueRecord(true)]);
+        $setup = $this->builder(['defined' => new Record\ValueRecord(true)]);
 
         $this->assertTrue($setup->exists('defined'));
         $this->assertFalse($setup->exists('undefined'));
@@ -202,7 +199,7 @@ class ContainerTest extends TestCase
 
     public function testCallbackRecord()
     {
-        $container = $this->factory([
+        $container = $this->builder([
             'lazy.goodbye' => new Record\CallbackRecord(function () {
                 return new Example\ExampleClass(function ($name) {
                     return 'Goodbye ' . $name;
@@ -224,7 +221,7 @@ class ContainerTest extends TestCase
             'polite' => new Record\ValueRecord('How are you?')
         ];
 
-        $setup = $this->factory($records);
+        $setup = $this->builder($records);
         $setup->entry('small.talk')->compose(Example\ExampleClass::class, 'hello', 'name');
         $container = $setup->container();
 
@@ -232,7 +229,7 @@ class ContainerTest extends TestCase
         $this->assertSame($expect, $container->get('small.talk')->beNice());
 
         // Decorated record
-        $setup = $this->factory($records);
+        $setup = $this->builder($records);
         $setup->entry('small.talk')->compose(Example\ExampleClass::class, 'hello', 'name');
         $setup->entry('small.talk')->compose(Example\DecoratingExampleClass::class, 'small.talk', 'polite');
         $container = $setup->container();
@@ -241,7 +238,7 @@ class ContainerTest extends TestCase
         $this->assertSame($expect, $container->get('small.talk')->beNice());
 
         // Decorated Again
-        $setup = $this->factory($records);
+        $setup = $this->builder($records);
         $setup->entry('ask.football')->set('Have you seen that ridiculous display last night?');
         $setup->entry('small.talk')->compose(Example\ExampleClass::class, 'hello', 'name');
         $setup->entry('small.talk')->compose(Example\DecoratingExampleClass::class, 'small.talk', 'polite');
@@ -254,76 +251,21 @@ class ContainerTest extends TestCase
 
     public function testCompositeForUndefinedDependencies_ThrowsException()
     {
-        $entry = $this->preconfiguredFactory()->entry('someClass');
+        $entry = $this->preconfiguredBuilder()->entry('someClass');
         $this->expectException(Exception\RecordNotFoundException::class);
         $entry->compose(Example\ExampleClass::class, 'undefined.record', 'test');
     }
 
-    public function testDirectCircularCall_ThrowsException()
+    private function builder(array $data = [])
     {
-        $factory = $this->factory([], true);
-        $factory->entry('ref.self')->invoke(function (ContainerInterface $c) {
-            return $c->get('ref.self');
-        });
-        $container = $factory->container();
-        $this->expectException(Exception\CircularReferenceException::class);
-        $container->get('ref.self');
+        return new ContainerSetup($data);
     }
 
-    public function testIndirectCircularCall_ThrowsException()
+    private function preconfiguredBuilder()
     {
-        $factory = $this->factory([], true);
-        $factory->entry('ref')->invoke(function (ContainerInterface $c) {
-            return $c->get('ref.self');
-        });
-        $factory->entry('ref.self')->invoke(function (ContainerInterface $c) {
-            return $c->has('ref.dependency') ? $c->get('ref.dependency') : null;
-        });
-        $factory->entry('ref.dependency')->invoke(function (ContainerInterface $c) {
-            return $c->get('ref.self');
-        });
-        $container = $factory->container();
-        $this->expectException(Exception\CircularReferenceException::class);
-        $container->get('ref');
-    }
-
-    public function testMultipleCallsAreNotCircular()
-    {
-        $factory = $this->factory([], true);
-        $factory->entry('ref')->invoke(function (ContainerInterface $c) {
-            return $c->get('ref.multiple') . ':' . $c->get('ref.multiple');
-        });
-        $factory->entry('ref.multiple')->set('Test');
-        $this->assertSame('Test:Test', $factory->container()->get('ref'));
-    }
-
-    public function testMultipleIndirectCallsAreNotCircular()
-    {
-        $factory = $this->factory([], true);
-        $factory->entry('ref')->invoke(function (ContainerInterface $c) {
-            return $c->get('function')($c);
-        });
-        $factory->entry('function')->invoke(function (ContainerInterface $c) {
-            return function (ContainerInterface $test) use ($c) {
-                return $c->get('ref.multiple') . ':' . $test->get('ref.multiple');
-            };
-        });
-        $factory->entry('ref.multiple')->set('Test');
-        $this->assertSame('Test:Test', $factory->container()->get('ref'));
-    }
-
-    protected function factory(array $data = [], bool $secure = false)
-    {
-        return $secure ? new TrackingContainerSetup($data) : new ContainerSetup($data);
-    }
-
-    protected function preconfiguredFactory()
-    {
-        $factory = $this->factory([
+        return $this->builder([
             'test' => new Record\ValueRecord('Hello World!'),
             'lazy' => new Record\CallbackRecord(function () { return 'Lazy Foo'; })
         ]);
-
-        return $factory;
     }
 }
