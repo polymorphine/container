@@ -256,6 +256,24 @@ class ContainerTest extends TestCase
         $entry->compose(Example\ExampleClass::class, 'undefined.record', 'test');
     }
 
+    public function testCreateMethodRecord()
+    {
+        $setup = $this->builder(['factory' => new Record\ValueRecord(new Example\Factory())]);
+        $setup->entry('product')->call('create@factory', 'one', 'two', 'three');
+        $container = $setup->container();
+
+        $this->assertSame('one,two,three', $container->get('product'));
+    }
+
+    public function testInvalidCreateMethod_ThrowsException()
+    {
+        $setup = $this->builder(['factory' => new Record\ValueRecord(new Example\Factory())]);
+        $setup->entry('product')->call('@factory', 'one', 'two', 'three');
+        $container = $setup->container();
+        $this->expectException(Exception\InvalidArgumentException::class);
+        $container->get('product');
+    }
+
     private function builder(array $data = [])
     {
         return new ContainerSetup($data);

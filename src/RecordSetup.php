@@ -92,6 +92,11 @@ class RecordSetup
         $this->useRecord(new Record\CompositeRecord($className, ...$dependencies));
     }
 
+    public function call(string $method, ...$arguments): void
+    {
+        $this->useRecord(new Record\CreateMethodRecord($method, $arguments));
+    }
+
     private function validDependencies(array $dependencies): array
     {
         foreach ($dependencies as &$name) {
