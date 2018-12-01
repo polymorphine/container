@@ -58,6 +58,12 @@ package's Record implementations:
   
       $setup->entry(string $id)->compose(string $class, string ...$dependencyRecords);
 
+- `CreateMethodRecord`: Object created by calling one of methods on another container provided instance
+  defined with `method@containerId` string and arguments being parameters for this method configured with
+  `call` command in setup:
+  
+      $setup->entry(string $id)->call(string $containerInstanceMethod, ...$parameterValues);
+
 So our example might continue this way:
 
     ...
@@ -68,7 +74,8 @@ So our example might continue this way:
         return new DeferredClassInstance($c->get('direct.value'));
     });
 
-    $setup->entry('composed')->compose(ComposedClass::class, 'direct.object', 'deferred');
+    $setup->entry('composed.factory')->compose(ComposedClass::class, 'direct.object', 'deferred');
+    $setup->entry('factory.product')->call('create@composed.factory', 'http://api.example.com');
     ...
 
 #### Container instance
@@ -76,11 +83,17 @@ Instantiating container with setup commands used in example and getting record s
 
     ...
     $container = $setup->container();
-    $composedObject = $container->get('composed');
+    $object    = $container->get('factory.product');
     
-`$composedObject` will be equivalent to instantiated directly with `new` operator:
+`$object` will be equivalent to instantiated directly with `new` operator and call `create()` method on it:
 
-    $composedObject = new ComposedClass(new ClassInstance(), new DeferredClassInstance('Hello world!'));   
+    $factory = new ComposedClass(new ClassInstance(), new DeferredClassInstance('Hello world!'));
+    $object  = $factory->create('http://api.example.com');
+    
+As you can see the container does not give any advantage when it comes to creating a structure for single
+object, but for libraries optionally used in various request contexts or reused in the structures where same
+instance should be passed around (like database connection) having it configured in one place saves lots
+of trouble.
 
 > **Decorator feature (ContainerSetup)**: `CompositeRecord` can reassign existing entry if it's also used as
 one of the constructor parameters. Of course it should return the same type as overwritten record returns,
