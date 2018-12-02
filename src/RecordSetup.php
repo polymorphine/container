@@ -92,6 +92,17 @@ class RecordSetup
         $this->useRecord(new Record\CompositeRecord($className, ...$dependencies));
     }
 
+    /**
+     * Pushes CreateMethodRecord with given method of container identified
+     * object and its parameter values.
+     *
+     * @see CreateMethodRecord
+     *
+     * @param string $method       format: `method@containerId`
+     * @param mixed  ...$arguments
+     *
+     * @throws Exception\InvalidIdException | Exception\RecordNotFoundException
+     */
     public function call(string $method, ...$arguments): void
     {
         $this->useRecord(new Record\CreateMethodRecord($method, $arguments));
