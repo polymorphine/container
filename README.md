@@ -171,7 +171,7 @@ For example, if you have front controller bootstrap class similar to...
         }
     }
 
-...creating container from example will might go like this:
+...creating container might go like this:
 
     $app = new App([
         'uriString' => new DirectRecord('www.example.com')
@@ -192,7 +192,7 @@ For example, if you have front controller bootstrap class similar to...
 
 Nothing in outer scope can use instance of `Container` created within `App`. It is possible to achieve,
 but it needs to be done by explicitly passing stateful object identifier that can return container through
-one of object's methods. This is not recommended though, so it won't be covered in details.
+one of its methods. This is not recommended though, so it won't be covered in details.
 
 ### Circular reference protection
 
@@ -204,6 +204,6 @@ was created with that record.
 This feature should be treated as **development tool** and self-constraint so that container was not overused.
 It may help to locate an error in composition structure, but it comes with performance cost and also makes
 a few legitimate cases harder to implement as object invoked from container may call for its instance at
-runtime - for example Routing that finds endpoint & use router inside that endpoint's scope to produce urls.
+runtime - for example router that finds endpoint & use itself inside that endpoint's scope to produce urls.
 To prevent circular reference detection router's endpoint should not use (tracking) container instance passed
 to callback function used to instantiate router.
