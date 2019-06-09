@@ -11,15 +11,19 @@
 
 namespace Polymorphine\Container;
 
+use Polymorphine\Container\Exception\InvalidArgumentException;
 use Polymorphine\Container\RecordCollection\MainRecordCollection;
+use Polymorphine\Container\RecordCollection\CompositeRecordCollection;
+use Polymorphine\Container\RecordCollection\ConfigRecordsTree;
 use Psr\Container\ContainerInterface;
 
 
 class ContainerSetup
 {
     private $records;
-    private $container;
+    private $configs = [];
     private $tracking;
+    private $container;
 
     /**
      * @param Record[] $records
@@ -45,8 +49,6 @@ class ContainerSetup
      * Strict immutability cannot be ensured, because side-effects
      * can change subsequent call outcomes for stored identifiers.
      *
-     * @param bool $secure Enable tracking for circular references
-     *
      * @return ContainerInterface
      */
     public function container(): ContainerInterface
@@ -54,8 +56,8 @@ class ContainerSetup
         if ($this->container) { return $this->container; }
 
         $this->container = $this->tracking
-            ? new TrackingContainer($this->records)
-            : new Container($this->records);
+            ? new TrackingContainer($this->recordsCollection())
+            : new Container($this->recordsCollection());
 
         return $this->container;
     }
@@ -73,8 +75,32 @@ class ContainerSetup
         return new RecordSetup($name, $this->records);
     }
 
+    public function config(string $name, array $config): void
+    {
+        $this->records->preventOverwrite($name);
+
+        if (strpos($name, ConfigRecordsTree::SEPARATOR) !== false) {
+            $message = 'Path separator `%s` used in `%s` config name';
+            throw new InvalidArgumentException(sprintf($message, ConfigRecordsTree::SEPARATOR, $name));
+        }
+
+        if (isset($this->configs[$name])) {
+            $message = 'Config `%s` already loaded';
+            throw new InvalidArgumentException(sprintf($message, $name));
+        }
+
+        $this->configs[$name] = $config;
+    }
+
     public function exists(string $name): bool
     {
         return $this->records->has($name);
+    }
+
+    private function recordsCollection(): RecordCollection
+    {
+        return $this->configs
+            ? new CompositeRecordCollection($this->records, new ConfigRecordsTree($this->configs))
+            : $this->records;
     }
 }

@@ -274,6 +274,75 @@ class ContainerTest extends TestCase
         $container->get('product');
     }
 
+    public function testConfigsCanBeReadWithPath()
+    {
+        $setup = $this->builder();
+
+        $data = ['env1' => ['nested' => ['double' => 'nested value']], 'env2' => 'env2 value'];
+        $setup->config('env', $data);
+
+        $container = $setup->container();
+
+        $this->assertSame($data['env1']['nested']['double'], $container->get('env.env1.nested.double'));
+        $this->assertSame($data['env1']['nested'], $container->get('env.env1.nested'));
+        $this->assertSame($data['env2'], $container->get('env.env2'));
+        $this->assertSame($data['env1'], $container->get('env.env1'));
+        $this->assertSame($data, $container->get('env'));
+
+        $this->assertTrue($container->has('env.env1.nested.double'));
+        $this->assertTrue($container->has('env.env1.nested'));
+        $this->assertTrue($container->has('env.env2'));
+        $this->assertTrue($container->has('env.env1'));
+        $this->assertTrue($container->has('env'));
+    }
+
+    /**
+     * @dataProvider undefinedPaths
+     *
+     * @param string $undefinedPath
+     */
+    public function testGetMissingConfigRecord_ThrowsException(string $undefinedPath)
+    {
+        $setup = $this->builder();
+
+        $data = ['env1' => ['nested' => ['double' => 'nested value']], 'env2' => 'env2 value'];
+        $setup->config('env', $data);
+
+        $container = $setup->container();
+
+        $this->assertFalse($container->has($undefinedPath));
+        $this->expectException(Exception\RecordNotFoundException::class);
+        $container->get($undefinedPath);
+    }
+
+    public function undefinedPaths(): array
+    {
+        return [['env.env1.nested.value'], ['env.env1.something'], ['env.whatever'], ['notEnv']];
+    }
+
+    public function testConfigPrefixCannotOverrideMainRecords()
+    {
+        $setup = $this->builder(['override.path.key' => new Record\ValueRecord('main')]);
+        $setup->config('override', ['other' => ['key' => 'nested value']]);
+
+        $this->assertSame('main', $setup->container()->get('override.path.key'));
+    }
+
+    public function testConfigPrefixWithPathSeparator_ThrowsException()
+    {
+        $this->expectException(Exception\InvalidArgumentException::class);
+        $this->builder()->config('path.syntax', ['key' => 'value']);
+    }
+
+    public function testOverwritingConfig_ThrowsException()
+    {
+        $builder = $this->builder();
+        $builder->config('repeated', ['key' => 'value']);
+
+        $this->expectException(Exception\InvalidArgumentException::class);
+        $builder->config('repeated', ['key' => 'value']);
+    }
+
     private function builder(array $data = [])
     {
         return new ContainerSetup($data);
