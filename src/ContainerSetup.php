@@ -11,6 +11,7 @@
 
 namespace Polymorphine\Container;
 
+use Polymorphine\Container\RecordCollection\MainRecordCollection;
 use Psr\Container\ContainerInterface;
 
 
@@ -26,7 +27,7 @@ class ContainerSetup
      */
     public function __construct(array $records = [])
     {
-        $this->records = new RecordCollection($records);
+        $this->records = new MainRecordCollection($records);
     }
 
     /**

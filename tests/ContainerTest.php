@@ -15,7 +15,7 @@ use PHPUnit\Framework\TestCase;
 use Polymorphine\Container\Container;
 use Polymorphine\Container\ContainerSetup;
 use Polymorphine\Container\Record;
-use Polymorphine\Container\RecordCollection;
+use Polymorphine\Container\RecordCollection\MainRecordCollection;
 use Polymorphine\Container\Exception;
 use Polymorphine\Container\Tests\Fixtures\Example;
 use Psr\Container\ContainerInterface;
@@ -53,7 +53,7 @@ class ContainerTest extends TestCase
 
     public function testGivenContainerWithEmptyValues_HasMethodReturnsTrue()
     {
-        $container = new Container(new RecordCollection([
+        $container = new Container(new MainRecordCollection([
             'null'  => new Record\ValueRecord(null),
             'false' => new Record\ValueRecord(false)
         ]));
@@ -89,7 +89,7 @@ class ContainerTest extends TestCase
             'lazy.goodbye'    => 'see ya!'
         ];
 
-        $container = new Container(new RecordCollection([
+        $container = new Container(new MainRecordCollection([
             'test'            => new Record\ValueRecord('Hello World!'),
             'category.first'  => new Record\ValueRecord('one'),
             'category.second' => new Record\ValueRecord('two'),
