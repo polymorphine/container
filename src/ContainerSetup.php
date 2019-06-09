@@ -17,17 +17,20 @@ use Psr\Container\ContainerInterface;
 
 class ContainerSetup
 {
-    protected $records;
-    protected $container;
+    private $records;
+    private $container;
+    private $tracking;
 
     /**
      * @param Record[] $records
+     * @param bool     $tracking Check for circular references (dev-mode)
      *
      * @throws Exception\InvalidArgumentException | Exception\InvalidIdException
      */
-    public function __construct(array $records = [])
+    public function __construct(array $records = [], bool $tracking = false)
     {
-        $this->records = new MainRecordCollection($records);
+        $this->records  = new MainRecordCollection($records);
+        $this->tracking = $tracking;
     }
 
     /**
@@ -48,7 +51,13 @@ class ContainerSetup
      */
     public function container(): ContainerInterface
     {
-        return $this->container ?: $this->container = new Container($this->records);
+        if ($this->container) { return $this->container; }
+
+        $this->container = $this->tracking
+            ? new TrackingContainer($this->records)
+            : new Container($this->records);
+
+        return $this->container;
     }
 
     /**

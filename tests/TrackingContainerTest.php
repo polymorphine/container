@@ -13,7 +13,7 @@ namespace Polymorphine\Container\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Container\TrackingContainer;
-use Polymorphine\Container\TrackingContainerSetup;
+use Polymorphine\Container\ContainerSetup;
 use Polymorphine\Container\Exception;
 use Psr\Container\ContainerInterface;
 
@@ -93,6 +93,6 @@ class TrackingContainerTest extends TestCase
 
     private function builder(array $data = [])
     {
-        return new TrackingContainerSetup($data);
+        return new ContainerSetup($data, true);
     }
 }
