@@ -27,8 +27,9 @@ class TrackingContainer implements ContainerInterface
     public function get($id)
     {
         if (isset($this->references[$id])) {
-            $message = 'Lazy composition of `%s` record is using reference to itself';
-            throw new Exception\CircularReferenceException(sprintf($message, (string) $id));
+            $message = 'Lazy composition of `%s` record is using reference to itself in path `%s`';
+            $path = implode('->', array_keys($this->references)) . '->' . $id;
+            throw new Exception\CircularReferenceException(sprintf($message, (string) $id, $path));
         }
 
         $track = clone $this;
