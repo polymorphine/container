@@ -196,8 +196,8 @@ one of its methods. This is not recommended though, so it won't be covered in de
 
 ### Circular reference protection
 
-Instantiation [`TrackingContainer`](src/TrackingContainer.php) directly or using
-[`TrackingContainerSetup`](src/TrackingContainerSetup.php) will track called dependencies and throw
+Instantiation [`TrackingContainer`](src/TrackingContainer.php) directly or setting tracking flag in
+[`ContainerSetup`](src/ContainerSetup.php) constructor will track called dependencies and throw
 [`Exception`](src/Exception/CircularReferenceException.php) when record is called within the scope that
 was created with that record.
 
