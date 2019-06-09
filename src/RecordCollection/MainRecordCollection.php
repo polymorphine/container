@@ -91,6 +91,13 @@ class MainRecordCollection implements RecordCollection
         unset($this->records[$name]);
     }
 
+    public function preventOverwrite(string $id): void
+    {
+        if (isset($this->records[$id])) {
+            throw new Exception\InvalidIdException(sprintf('Cannot overwrite defined `%s` Record', $id));
+        }
+    }
+
     private function validateRecords(array $records): void
     {
         foreach ($records as $id => $record) {
@@ -105,13 +112,6 @@ class MainRecordCollection implements RecordCollection
     {
         if (empty($id) || is_numeric($id)) {
             throw new Exception\InvalidIdException('Numeric id tokens for Container Records are not supported');
-        }
-    }
-
-    private function preventOverwrite(string $id): void
-    {
-        if (isset($this->records[$id])) {
-            throw new Exception\InvalidIdException(sprintf('Cannot overwrite defined `%s` Record', $id));
         }
     }
 }
