@@ -22,7 +22,7 @@ class TrackingContainerTest extends TestCase
 {
     public function testInstantiation()
     {
-        $this->assertInstanceOf(TrackingContainer::class, $this->builder()->container());
+        $this->assertInstanceOf(TrackingContainer::class, $this->builder()->container(true));
     }
 
     public function testDirectCircularCall_ThrowsException()
@@ -31,7 +31,7 @@ class TrackingContainerTest extends TestCase
         $setup->entry('ref.self')->invoke(function (ContainerInterface $c) {
             return $c->get('ref.self');
         });
-        $container = $setup->container();
+        $container = $setup->container(true);
         $this->expectException(Exception\CircularReferenceException::class);
         $container->get('ref.self');
     }
@@ -48,7 +48,7 @@ class TrackingContainerTest extends TestCase
         $setup->entry('ref.dependency')->invoke(function (ContainerInterface $c) {
             return $c->get('ref.self');
         });
-        $container = $setup->container();
+        $container = $setup->container(true);
         $this->expectException(Exception\CircularReferenceException::class);
         $container->get('ref');
     }
@@ -75,7 +75,7 @@ class TrackingContainerTest extends TestCase
             };
         });
         $setup->entry('ref.multiple')->set('Test');
-        $this->assertSame('Test:Test', $setup->container()->get('ref'));
+        $this->assertSame('Test:Test', $setup->container(true)->get('ref'));
     }
 
     public function testIndirectMultipleCallToPassedContainer_ThrowsException()
@@ -84,7 +84,7 @@ class TrackingContainerTest extends TestCase
         $setup->entry('ref')->invoke(function (ContainerInterface $c) {
             return $c;
         });
-        $container = $setup->container();
+        $container = $setup->container(true);
 
         $trackedContainer = $container->get('ref');
         $this->expectException(Exception\CircularReferenceException::class);
@@ -93,6 +93,6 @@ class TrackingContainerTest extends TestCase
 
     private function builder(array $data = [])
     {
-        return new ContainerSetup($data, true);
+        return new ContainerSetup($data);
     }
 }

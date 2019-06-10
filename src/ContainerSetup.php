@@ -22,19 +22,16 @@ class ContainerSetup
 {
     private $records;
     private $configs = [];
-    private $tracking;
     private $container;
 
     /**
      * @param Record[] $records
-     * @param bool     $tracking Check for circular references (dev-mode)
      *
      * @throws Exception\InvalidArgumentException | Exception\InvalidIdException
      */
-    public function __construct(array $records = [], bool $tracking = false)
+    public function __construct(array $records = [])
     {
-        $this->records  = new MainRecordCollection($records);
-        $this->tracking = $tracking;
+        $this->records = new MainRecordCollection($records);
     }
 
     /**
@@ -49,17 +46,17 @@ class ContainerSetup
      * Strict immutability cannot be ensured, because side-effects
      * can change subsequent call outcomes for stored identifiers.
      *
+     * @param bool $secure Enables circular references tracking
+     *
      * @return ContainerInterface
      */
-    public function container(): ContainerInterface
+    public function container(bool $secure = false): ContainerInterface
     {
         if ($this->container) { return $this->container; }
 
-        $this->container = $this->tracking
+        return $this->container = $secure
             ? new TrackingContainer($this->recordsCollection())
             : new Container($this->recordsCollection());
-
-        return $this->container;
     }
 
     /**
