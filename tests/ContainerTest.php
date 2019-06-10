@@ -343,6 +343,15 @@ class ContainerTest extends TestCase
         $builder->config('repeated', ['key' => 'value']);
     }
 
+    public function testUsingConfigMainKeyForRecordEntry_ThrowsException()
+    {
+        $builder = $this->builder();
+        $builder->config('repeated', ['key' => 'value']);
+
+        $this->expectException(Exception\InvalidArgumentException::class);
+        $builder->entry('repeated.main.key');
+    }
+
     private function builder(array $data = [])
     {
         return new ContainerSetup($data);

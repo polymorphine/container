@@ -69,6 +69,12 @@ class ContainerSetup
      */
     public function entry(string $name): RecordSetup
     {
+        [$mainKey,] = explode(ConfigRecordsTree::SEPARATOR, $name, 2);
+        if (isset($this->configs[$mainKey])) {
+            $message = 'Cannot store record with `%s` key when `%s` is used as config name';
+            throw new InvalidArgumentException(sprintf($message, $name, $mainKey));
+        }
+
         return new RecordSetup($name, $this->records);
     }
 
