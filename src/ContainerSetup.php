@@ -11,27 +11,24 @@
 
 namespace Polymorphine\Container;
 
-use Polymorphine\Container\Exception\InvalidArgumentException;
-use Polymorphine\Container\RecordCollection\MainRecordCollection;
-use Polymorphine\Container\RecordCollection\CompositeRecordCollection;
-use Polymorphine\Container\RecordCollection\ConfigRecordsTree;
 use Psr\Container\ContainerInterface;
 
 
 class ContainerSetup
 {
     private $records;
-    private $configs = [];
     private $container;
 
     /**
-     * @param Record[] $records
+     * Config can be multidimensional array which values would be
+     * accessed using path notation, therefore array keys cannot
+     * contain path separator (default: '.').
      *
-     * @throws Exception\InvalidArgumentException | Exception\InvalidIdException
+     * @param array    $config  Associative (multidimensional) array of configuration values
      */
-    public function __construct(array $records = [])
+    public function __construct(array $config = [])
     {
-        $this->records = new MainRecordCollection($records);
+        $this->records = new RecordCollection($config, []);
     }
 
     /**
@@ -55,8 +52,8 @@ class ContainerSetup
         if ($this->container) { return $this->container; }
 
         return $this->container = $secure
-            ? new TrackingContainer($this->recordsCollection())
-            : new Container($this->recordsCollection());
+            ? new TrackingContainer($this->records)
+            : new Container($this->records);
     }
 
     /**
@@ -69,41 +66,11 @@ class ContainerSetup
      */
     public function entry(string $name): RecordSetup
     {
-        [$mainKey,] = explode(ConfigRecordsTree::SEPARATOR, $name, 2);
-        if (isset($this->configs[$mainKey])) {
-            $message = 'Cannot store record with `%s` key when `%s` is used as config name';
-            throw new InvalidArgumentException(sprintf($message, $name, $mainKey));
-        }
-
         return new RecordSetup($name, $this->records);
-    }
-
-    public function config(string $name, array $config): void
-    {
-        $this->records->preventOverwrite($name);
-
-        if (strpos($name, ConfigRecordsTree::SEPARATOR) !== false) {
-            $message = 'Path separator `%s` used in `%s` config name';
-            throw new InvalidArgumentException(sprintf($message, ConfigRecordsTree::SEPARATOR, $name));
-        }
-
-        if (isset($this->configs[$name])) {
-            $message = 'Config `%s` already loaded';
-            throw new InvalidArgumentException(sprintf($message, $name));
-        }
-
-        $this->configs[$name] = $config;
     }
 
     public function exists(string $name): bool
     {
         return $this->records->has($name);
-    }
-
-    private function recordsCollection(): RecordCollection
-    {
-        return $this->configs
-            ? new CompositeRecordCollection($this->records, new ConfigRecordsTree($this->configs))
-            : $this->records;
     }
 }

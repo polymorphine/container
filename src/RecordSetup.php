@@ -11,8 +11,6 @@
 
 namespace Polymorphine\Container;
 
-use Polymorphine\Container\RecordCollection\MainRecordCollection;
-
 
 /**
  * Write-only proxy with helper methods to instantiate and
@@ -23,7 +21,7 @@ class RecordSetup
     private $name;
     private $records;
 
-    public function __construct(string $name, MainRecordCollection $records)
+    public function __construct(string $name, RecordCollection $records)
     {
         $this->name    = $name;
         $this->records = $records;

@@ -11,7 +11,6 @@
 
 namespace Polymorphine\Container;
 
-use Polymorphine\Container\RecordCollection\MainRecordCollection;
 use Psr\Container\ContainerInterface;
 
 
@@ -26,7 +25,7 @@ class Container implements ContainerInterface
 
     public static function fromRecordsArray(array $records): self
     {
-        return new self(new MainRecordCollection($records));
+        return new self(new RecordCollection($records));
     }
 
     public function get($id)

@@ -15,7 +15,7 @@ use PHPUnit\Framework\TestCase;
 use Polymorphine\Container\Container;
 use Polymorphine\Container\ContainerSetup;
 use Polymorphine\Container\Record;
-use Polymorphine\Container\RecordCollection\MainRecordCollection;
+use Polymorphine\Container\RecordCollection;
 use Polymorphine\Container\Exception;
 use Polymorphine\Container\Tests\Fixtures\Example;
 use Psr\Container\ContainerInterface;
@@ -53,7 +53,7 @@ class ContainerTest extends TestCase
 
     public function testGivenContainerWithEmptyValues_HasMethodReturnsTrue()
     {
-        $container = new Container(new MainRecordCollection([
+        $container = new Container(new RecordCollection([
             'null'  => new Record\ValueRecord(null),
             'false' => new Record\ValueRecord(false)
         ]));
@@ -89,7 +89,7 @@ class ContainerTest extends TestCase
             'lazy.goodbye'    => 'see ya!'
         ];
 
-        $container = new Container(new MainRecordCollection([
+        $container = new Container(new RecordCollection([], [
             'test'            => new Record\ValueRecord('Hello World!'),
             'category.first'  => new Record\ValueRecord('one'),
             'category.second' => new Record\ValueRecord('two'),
@@ -109,7 +109,7 @@ class ContainerTest extends TestCase
     public function testConstructWithNotAssociativeArray_ThrowsException()
     {
         $this->expectException(ContainerExceptionInterface::class);
-        $this->builder(['first' => 'ok', 2 => 'not ok']);
+        new RecordCollection([], ['first' => 'ok', 2 => 'not ok']);
     }
 
     public function testCallbacksCannotModifyRegistry()
@@ -125,7 +125,8 @@ class ContainerTest extends TestCase
 
     public function testOverwritingExistingKey_ThrowsException()
     {
-        $setup = $this->builder(['test' => new Record\ValueRecord('foo')]);
+        $setup = $this->builder();
+        $setup->entry('test')->set('foo');
         $this->expectException(Exception\InvalidIdException::class);
         $setup->entry('test')->set('bar');
     }
@@ -191,7 +192,8 @@ class ContainerTest extends TestCase
 
     public function testSetupContainerExistsCheck()
     {
-        $setup = $this->builder(['defined' => new Record\ValueRecord(true)]);
+        $setup = $this->builder();
+        $setup->entry('defined')->set(true);
 
         $this->assertTrue($setup->exists('defined'));
         $this->assertFalse($setup->exists('undefined'));
@@ -199,15 +201,14 @@ class ContainerTest extends TestCase
 
     public function testCallbackRecord()
     {
-        $container = $this->builder([
-            'lazy.goodbye' => new Record\CallbackRecord(function () {
-                return new Example\ExampleClass(function ($name) {
-                    return 'Goodbye ' . $name;
-                }, 'Shudd3r');
-            })
-        ])->container();
-
-        $object = $container->get('lazy.goodbye');
+        $setup = $this->builder();
+        $setup->entry('lazy.goodbye')->invoke(function () {
+            return new Example\ExampleClass(function ($name) {
+                return 'Goodbye ' . $name;
+            }, 'Shudd3r');
+        });
+        $container = $setup->container();
+        $object    = $container->get('lazy.goodbye');
 
         $this->assertSame('Goodbye Shudd3r', $object->beNice());
         $this->assertSame($object, $container->get('lazy.goodbye'));
@@ -215,33 +216,33 @@ class ContainerTest extends TestCase
 
     public function testCompositeRecord()
     {
-        $records = [
-            'name'   => new Record\ValueRecord('Shudd3r'),
-            'hello'  => new Record\ValueRecord(function ($name) { return 'Hello ' . $name . '.'; }),
-            'polite' => new Record\ValueRecord('How are you?')
-        ];
+        $config = ['env' => [
+            'name' => 'Shudd3r',
+            'hello' => function ($name) { return 'Hello ' . $name . '.'; },
+            'polite' => 'How are you?'
+        ]];
 
-        $setup = $this->builder($records);
-        $setup->entry('small.talk')->compose(Example\ExampleClass::class, 'hello', 'name');
+        $setup = $this->builder($config);
+        $setup->entry('small.talk')->compose(Example\ExampleClass::class, 'env.hello', 'env.name');
         $container = $setup->container();
 
         $expect = 'Hello Shudd3r.';
         $this->assertSame($expect, $container->get('small.talk')->beNice());
 
         // Decorated record
-        $setup = $this->builder($records);
-        $setup->entry('small.talk')->compose(Example\ExampleClass::class, 'hello', 'name');
-        $setup->entry('small.talk')->compose(Example\DecoratingExampleClass::class, 'small.talk', 'polite');
+        $setup = $this->builder($config);
+        $setup->entry('small.talk')->compose(Example\ExampleClass::class, 'env.hello', 'env.name');
+        $setup->entry('small.talk')->compose(Example\DecoratingExampleClass::class, 'small.talk', 'env.polite');
         $container = $setup->container();
 
         $expect = 'Hello Shudd3r. How are you?';
         $this->assertSame($expect, $container->get('small.talk')->beNice());
 
         // Decorated Again
-        $setup = $this->builder($records);
+        $setup = $this->builder($config);
         $setup->entry('ask.football')->set('Have you seen that ridiculous display last night?');
-        $setup->entry('small.talk')->compose(Example\ExampleClass::class, 'hello', 'name');
-        $setup->entry('small.talk')->compose(Example\DecoratingExampleClass::class, 'small.talk', 'polite');
+        $setup->entry('small.talk')->compose(Example\ExampleClass::class, 'env.hello', 'env.name');
+        $setup->entry('small.talk')->compose(Example\DecoratingExampleClass::class, 'small.talk', 'env.polite');
         $setup->entry('small.talk')->compose(Example\DecoratingExampleClass::class, 'small.talk', 'ask.football');
         $container = $setup->container();
 
@@ -258,7 +259,8 @@ class ContainerTest extends TestCase
 
     public function testCreateMethodRecord()
     {
-        $setup = $this->builder(['factory' => new Record\ValueRecord(new Example\Factory())]);
+        $setup = $this->builder();
+        $setup->entry('factory')->set(new Example\Factory());
         $setup->entry('product')->call('create@factory', 'one', 'two', 'three');
         $container = $setup->container();
 
@@ -276,23 +278,19 @@ class ContainerTest extends TestCase
 
     public function testConfigsCanBeReadWithPath()
     {
-        $setup = $this->builder();
+        $data      = ['key1' => ['nested' => ['double' => 'nested value']], 'key2' => 'value2'];
+        $container = $this->builder(['env' => $data])->container();
 
-        $data = ['env1' => ['nested' => ['double' => 'nested value']], 'env2' => 'env2 value'];
-        $setup->config('env', $data);
-
-        $container = $setup->container();
-
-        $this->assertSame($data['env1']['nested']['double'], $container->get('env.env1.nested.double'));
-        $this->assertSame($data['env1']['nested'], $container->get('env.env1.nested'));
-        $this->assertSame($data['env2'], $container->get('env.env2'));
-        $this->assertSame($data['env1'], $container->get('env.env1'));
+        $this->assertSame($data['key1']['nested']['double'], $container->get('env.key1.nested.double'));
+        $this->assertSame($data['key1']['nested'], $container->get('env.key1.nested'));
+        $this->assertSame($data['key2'], $container->get('env.key2'));
+        $this->assertSame($data['key1'], $container->get('env.key1'));
         $this->assertSame($data, $container->get('env'));
 
-        $this->assertTrue($container->has('env.env1.nested.double'));
-        $this->assertTrue($container->has('env.env1.nested'));
-        $this->assertTrue($container->has('env.env2'));
-        $this->assertTrue($container->has('env.env1'));
+        $this->assertTrue($container->has('env.key1.nested.double'));
+        $this->assertTrue($container->has('env.key1.nested'));
+        $this->assertTrue($container->has('env.key2'));
+        $this->assertTrue($container->has('env.key1'));
         $this->assertTrue($container->has('env'));
     }
 
@@ -303,12 +301,8 @@ class ContainerTest extends TestCase
      */
     public function testGetMissingConfigRecord_ThrowsException(string $undefinedPath)
     {
-        $setup = $this->builder();
-
-        $data = ['env1' => ['nested' => ['double' => 'nested value']], 'env2' => 'env2 value'];
-        $setup->config('env', $data);
-
-        $container = $setup->container();
+        $data      = ['key1' => ['nested' => ['double' => 'nested value']], 'key2' => 'value2'];
+        $container = $this->builder($data)->container();
 
         $this->assertFalse($container->has($undefinedPath));
         $this->expectException(Exception\RecordNotFoundException::class);
@@ -317,39 +311,15 @@ class ContainerTest extends TestCase
 
     public function undefinedPaths(): array
     {
-        return [['env.env1.nested.value'], ['env.env1.something'], ['env.whatever'], ['notEnv']];
+        return [['env.key1.nested.value'], ['env.key1.something'], ['env.whatever'], ['notEnv']];
     }
 
-    public function testConfigPrefixCannotOverrideMainRecords()
+    public function testUsingConfigRootKeyForRecordEntry_ThrowsException()
     {
-        $setup = $this->builder(['override.path.key' => new Record\ValueRecord('main')]);
-        $setup->config('override', ['other' => ['key' => 'nested value']]);
+        $builder = $this->builder(['repeated' => ['key' => 'value']]);
 
-        $this->assertSame('main', $setup->container()->get('override.path.key'));
-    }
-
-    public function testConfigPrefixWithPathSeparator_ThrowsException()
-    {
-        $this->expectException(Exception\InvalidArgumentException::class);
-        $this->builder()->config('path.syntax', ['key' => 'value']);
-    }
-
-    public function testOverwritingConfig_ThrowsException()
-    {
-        $builder = $this->builder();
-        $builder->config('repeated', ['key' => 'value']);
-
-        $this->expectException(Exception\InvalidArgumentException::class);
-        $builder->config('repeated', ['key' => 'value']);
-    }
-
-    public function testUsingConfigMainKeyForRecordEntry_ThrowsException()
-    {
-        $builder = $this->builder();
-        $builder->config('repeated', ['key' => 'value']);
-
-        $this->expectException(Exception\InvalidArgumentException::class);
-        $builder->entry('repeated.main.key');
+        $this->expectException(Exception\InvalidIdException::class);
+        $builder->entry('repeated.main.key')->set(true);
     }
 
     private function builder(array $data = [])
@@ -359,9 +329,10 @@ class ContainerTest extends TestCase
 
     private function preconfiguredBuilder()
     {
-        return $this->builder([
-            'test' => new Record\ValueRecord('Hello World!'),
-            'lazy' => new Record\CallbackRecord(function () { return 'Lazy Foo'; })
-        ]);
+        $builder = $this->builder(['config' => 'value']);
+        $builder->entry('test')->set('Hello World!');
+        $builder->entry('lazy')->invoke(function () { return 'Lazy Foo'; });
+
+        return $builder;
     }
 }
