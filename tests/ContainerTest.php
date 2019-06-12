@@ -67,11 +67,10 @@ class ContainerTest extends TestCase
         $this->assertTrue($container->has('false'));
     }
 
-    public function testInvalidContainerIdType_ThrowsException()
+    public function testInvalidContainerIdTypeIsCastedToString()
     {
-        $container = $this->builder()->container();
-        $this->expectException(ContainerExceptionInterface::class);
-        $container->get(23);
+        $container = $this->builder([], ['23' => new Record\ValueRecord('Michael Jordan!')])->container();
+        $this->assertSame('Michael Jordan!', $container->get(23));
     }
 
     public function testAccessingAbsentIdFromContainer_ThrowsException()
