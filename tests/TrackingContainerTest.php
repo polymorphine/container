@@ -46,7 +46,7 @@ class TrackingContainerTest extends TestCase
             return $c->get('ref.self');
         });
         $setup->entry('ref.self')->invoke(function (ContainerInterface $c) {
-            return $c->has('ref.dependency') ? $c->get('ref.dependency') : null;
+            return $c->get('ref.dependency');
         });
         $setup->entry('ref.dependency')->invoke(function (ContainerInterface $c) {
             return $c->get('ref.self');
@@ -58,12 +58,12 @@ class TrackingContainerTest extends TestCase
 
     public function testMultipleCallsAreNotCircular()
     {
-        $setup = $this->builder();
+        $setup = $this->builder(['config' => 'value']);
         $setup->entry('ref')->invoke(function (ContainerInterface $c) {
-            return $c->get('ref.multiple') . ':' . $c->get('ref.multiple');
+            return $c->get('ref.multiple') . ':' . $c->get('ref.multiple') . ':' . $c->get('.config');
         });
         $setup->entry('ref.multiple')->set('Test');
-        $this->assertSame('Test:Test', $setup->container()->get('ref'));
+        $this->assertSame('Test:Test:value', $setup->container(true)->get('ref'));
     }
 
     public function testMultipleIndirectCallsAreNotCircular()

@@ -44,9 +44,7 @@ class RecordCollection
      */
     public function has(string $name): bool
     {
-        return $name && $name[0] === self::SEPARATOR
-            ? $this->configHas($name)
-            : isset($this->records[$name]);
+        return isset($this->records[$name]);
     }
 
     /**
@@ -60,12 +58,38 @@ class RecordCollection
      */
     public function get(string $name): Record
     {
-        if (isset($this->records[$name])) { return $this->records[$name]; }
-        if ($name && $name[0] === self::SEPARATOR) {
-            return $this->configGet($name);
+        if (!isset($this->records[$name])) {
+            throw new Exception\RecordNotFoundException(sprintf('Record `%s` not defined', $name));
+        }
+        return $this->records[$name];
+    }
+
+    public function configHas(string $path): bool
+    {
+        $data = &$this->config;
+        $keys = explode(self::SEPARATOR, substr($path, 1));
+        foreach ($keys as $id) {
+            if (!is_array($data) || !array_key_exists($id, $data)) {
+                return false;
+            }
+            $data = &$data[$id];
         }
 
-        throw new Exception\RecordNotFoundException(sprintf('Record `%s` not defined', $name));
+        return true;
+    }
+
+    public function configGet(string $path)
+    {
+        $data = &$this->config;
+        $keys = explode(self::SEPARATOR, substr($path, 1));
+        foreach ($keys as $id) {
+            if (!is_array($data) || !array_key_exists($id, $data)) {
+                throw new Exception\RecordNotFoundException(sprintf('Record `%s` not defined', $path));
+            }
+            $data = &$data[$id];
+        }
+
+        return $data;
     }
 
     /**
@@ -80,7 +104,7 @@ class RecordCollection
      */
     public function add(string $name, Record $record): void
     {
-        if ($name && $name[0] === self::SEPARATOR) {
+        if ($this->isConfigId($name)) {
             $message = 'Id starting with separator `%s` is reserved for immutable configuration';
             throw new Exception\InvalidIdException(sprintf($message, self::SEPARATOR));
         }
@@ -104,6 +128,11 @@ class RecordCollection
         unset($this->records[$name]);
     }
 
+    public function isConfigId(string $name)
+    {
+        return $name && $name[0] === self::SEPARATOR;
+    }
+
     private function validRecordsArray(array $records): array
     {
         foreach ($records as $id => $record) {
@@ -111,33 +140,5 @@ class RecordCollection
             throw new Exception\InvalidArgumentException('Expected flat associative array of Record instances');
         }
         return $records;
-    }
-
-    private function configHas(string $path): bool
-    {
-        $data = &$this->config;
-        $keys = explode(self::SEPARATOR, substr($path, 1));
-        foreach ($keys as $id) {
-            if (!is_array($data) || !array_key_exists($id, $data)) {
-                return false;
-            }
-            $data = &$data[$id];
-        }
-
-        return true;
-    }
-
-    private function configGet(string $path): Record
-    {
-        $data = &$this->config;
-        $keys = explode(self::SEPARATOR, substr($path, 1));
-        foreach ($keys as $id) {
-            if (!is_array($data) || !array_key_exists($id, $data)) {
-                throw new Exception\RecordNotFoundException(sprintf('Record `%s` not defined', $path));
-            }
-            $data = &$data[$id];
-        }
-
-        return new Record\ValueRecord($data);
     }
 }

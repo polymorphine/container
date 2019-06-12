@@ -120,7 +120,11 @@ class RecordSetup
 
     private function checkIfDefined(string $name): void
     {
-        if (!$this->records->has($name)) {
+        $defined = $this->records->isConfigId($name)
+            ? $this->records->configHas($name)
+            : $this->records->has($name);
+
+        if (!$defined) {
             throw new Exception\RecordNotFoundException(
                 sprintf('CompositeRecord requires defined dependencies - `%s` Record not found', $name)
             );
@@ -129,7 +133,7 @@ class RecordSetup
 
     private function renameDecorated(string &$name): void
     {
-        if ($name !== $this->name) { return; }
+        if ($name !== $this->name || $this->records->isConfigId($name)) { return; }
 
         $newAlias = $this->name . '.DEC';
         while ($this->records->has($newAlias)) {

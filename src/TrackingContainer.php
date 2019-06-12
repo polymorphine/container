@@ -11,21 +11,17 @@
 
 namespace Polymorphine\Container;
 
-use Psr\Container\ContainerInterface;
 
-
-class TrackingContainer implements ContainerInterface
+class TrackingContainer extends Container
 {
-    private $records;
     private $references = [];
-
-    public function __construct(RecordCollection $records)
-    {
-        $this->records = $records;
-    }
 
     public function get($id)
     {
+        if ($this->records->isConfigId($id)) {
+            return $this->records->configGet($id);
+        }
+
         if (isset($this->references[$id])) {
             $message = 'Lazy composition of `%s` record is using reference to itself in path `%s`';
             $path = implode('->', array_keys($this->references)) . '->' . $id;
@@ -35,10 +31,5 @@ class TrackingContainer implements ContainerInterface
         $track = clone $this;
         $track->references[$id] = true;
         return $this->records->get($id)->value($track);
-    }
-
-    public function has($id)
-    {
-        return $this->records->has($id);
     }
 }

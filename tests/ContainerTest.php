@@ -238,6 +238,16 @@ class ContainerTest extends TestCase
         $entry->compose(Example\ExampleClass::class, 'undefined.record', 'test');
     }
 
+    public function testDecoratedConfigValue_ThrowsException()
+    {
+        $setup = $this->builder([
+            'env' => new Example\ExampleClass(function () {}, 'something'),
+            'string' => 'test'
+        ]);
+        $this->expectException(Exception\InvalidIdException::class);
+        $setup->entry('.env')->compose(Example\DecoratingExampleClass::class, '.env', '.string');
+    }
+
     public function testCreateMethodRecord()
     {
         $setup = $this->builder();
