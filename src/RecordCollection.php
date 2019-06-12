@@ -11,8 +11,6 @@
 
 namespace Polymorphine\Container;
 
-use Polymorphine\Container\Exception;
-
 
 class RecordCollection
 {
@@ -57,7 +55,6 @@ class RecordCollection
      */
     public function get(string $name): Record
     {
-        $this->validateIdFormat($name);
         return $this->records[$name] ?? $this->fromConfig($name);
     }
 
@@ -73,7 +70,6 @@ class RecordCollection
      */
     public function add(string $name, Record $record): void
     {
-        $this->validateIdFormat($name);
         $this->preventOverwrite($name);
         $this->records[$name] = $record;
     }
@@ -106,17 +102,9 @@ class RecordCollection
     private function validateRecords(array $records): void
     {
         foreach ($records as $id => $record) {
-            $this->validateIdFormat($id);
             if (!$record instanceof Record) {
                 throw new Exception\InvalidArgumentException('Expected associative array of Record instances');
             }
-        }
-    }
-
-    private function validateIdFormat(string $id): void
-    {
-        if (empty($id) || is_numeric($id)) {
-            throw new Exception\InvalidIdException('Numeric id tokens for Container Records are not supported');
         }
     }
 

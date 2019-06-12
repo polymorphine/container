@@ -86,7 +86,9 @@ class ContainerTest extends TestCase
             'assoc'           => ['first' => 1, 'second' => 2],
             'callback'        => function () { return 'first'; },
             'lazy.hello'      => 'Hello World!',
-            'lazy.goodbye'    => 'see ya!'
+            'lazy.goodbye'    => 'see ya!',
+            '2643'            => 'numeric id!',
+            ''                => 'empty id?!'
         ];
 
         $container = new Container(new RecordCollection([], [
@@ -97,7 +99,9 @@ class ContainerTest extends TestCase
             'assoc'           => new Record\ValueRecord(['first' => 1, 'second' => 2]),
             'callback'        => new Record\ValueRecord($expected['callback']),
             'lazy.hello'      => new Record\CallbackRecord(function (ContainerInterface $c) { return $c->get('test'); }),
-            'lazy.goodbye'    => new Record\CallbackRecord(function () { return 'see ya!'; })
+            'lazy.goodbye'    => new Record\CallbackRecord(function () { return 'see ya!'; }),
+            '2643'            => new Record\ValueRecord('numeric id!'),
+            ''                => new Record\ValueRecord('empty id?!')
         ]));
 
         foreach ($expected as $key => $value) {
@@ -129,27 +133,6 @@ class ContainerTest extends TestCase
         $setup->entry('test')->set('foo');
         $this->expectException(Exception\InvalidIdException::class);
         $setup->entry('test')->set('bar');
-    }
-
-    public function testNumericId_ThrowsException()
-    {
-        $setup = $this->builder();
-        $this->expectException(Exception\InvalidIdException::class);
-        $setup->entry('74')->invoke(function () { return 'foo'; });
-    }
-
-    public function testEmptyFactoryId_ThrowsException()
-    {
-        $setup = $this->builder();
-        $this->expectException(Exception\InvalidIdException::class);
-        $setup->entry('')->set(function () { return 'foo'; });
-    }
-
-    public function testEmptyIdContainerCall_ThrowsException()
-    {
-        $container = $this->preconfiguredBuilder()->container();
-        $this->expectException(Exception\InvalidIdException::class);
-        $container->get('');
     }
 
     /**
