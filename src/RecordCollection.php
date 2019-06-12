@@ -20,15 +20,18 @@ class RecordCollection
     private $records;
 
     /**
-     * @param array    $config
-     * @param Record[] $records
+     * Config can be multidimensional array which values would be
+     * accessed using path notation, therefore array keys cannot
+     * contain '.' which is path separator.
      *
-     * @throws Exception\InvalidArgumentException | Exception\InvalidIdException
+     * @param array    $config  Associative (multidimensional) array of configuration values
+     * @param Record[] $records Associative (flat) array of Record entries
+     *
+     * @throws Exception\InvalidArgumentException
      */
     public function __construct(array $config = [], array $records = [])
     {
-        $this->validateRecords($records);
-        $this->records = $records;
+        $this->records = $this->validRecordsArray($records);
         $this->config  = $config;
     }
 
@@ -42,7 +45,7 @@ class RecordCollection
     public function has(string $name): bool
     {
         return $name && $name[0] === self::SEPARATOR
-            ? $this->inConfig($name)
+            ? $this->configHas($name)
             : isset($this->records[$name]);
     }
 
@@ -59,7 +62,7 @@ class RecordCollection
     {
         if (isset($this->records[$name])) { return $this->records[$name]; }
         if ($name && $name[0] === self::SEPARATOR) {
-            return $this->fromConfig($name);
+            return $this->configGet($name);
         }
 
         throw new Exception\RecordNotFoundException(sprintf('Record `%s` not defined', $name));
@@ -77,7 +80,15 @@ class RecordCollection
      */
     public function add(string $name, Record $record): void
     {
-        $this->preventOverwrite($name);
+        if ($name && $name[0] === self::SEPARATOR) {
+            $message = 'Id starting with separator `%s` is reserved for immutable configuration';
+            throw new Exception\InvalidIdException(sprintf($message, self::SEPARATOR));
+        }
+
+        if (isset($this->records[$name])) {
+            throw new Exception\InvalidIdException(sprintf('Cannot overwrite defined `%s` Record', $name));
+        }
+
         $this->records[$name] = $record;
     }
 
@@ -93,28 +104,16 @@ class RecordCollection
         unset($this->records[$name]);
     }
 
-    private function preventOverwrite(string $id): void
-    {
-        if ($id && $id[0] === self::SEPARATOR) {
-            $message = 'Id starting with separator `%s` is reserved for immutable configuration';
-            throw new Exception\InvalidIdException(sprintf($message, self::SEPARATOR));
-        }
-
-        if (isset($this->records[$id])) {
-            throw new Exception\InvalidIdException(sprintf('Cannot overwrite defined `%s` Record', $id));
-        }
-    }
-
-    private function validateRecords(array $records): void
+    private function validRecordsArray(array $records): array
     {
         foreach ($records as $id => $record) {
-            if (!$record instanceof Record) {
-                throw new Exception\InvalidArgumentException('Expected associative array of Record instances');
-            }
+            if ($record instanceof Record) { continue; }
+            throw new Exception\InvalidArgumentException('Expected flat associative array of Record instances');
         }
+        return $records;
     }
 
-    private function inConfig(string $path): bool
+    private function configHas(string $path): bool
     {
         $data = &$this->config;
         $keys = explode(self::SEPARATOR, substr($path, 1));
@@ -128,7 +127,7 @@ class RecordCollection
         return true;
     }
 
-    private function fromConfig(string $path): Record
+    private function configGet(string $path): Record
     {
         $data = &$this->config;
         $keys = explode(self::SEPARATOR, substr($path, 1));
