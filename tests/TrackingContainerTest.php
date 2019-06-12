@@ -12,6 +12,7 @@
 namespace Polymorphine\Container\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Polymorphine\Container\RecordCollection;
 use Polymorphine\Container\TrackingContainer;
 use Polymorphine\Container\ContainerSetup;
 use Polymorphine\Container\Exception;
@@ -91,8 +92,8 @@ class TrackingContainerTest extends TestCase
         $trackedContainer->get('ref');
     }
 
-    private function builder(array $data = [])
+    private function builder(array $config = [], array $records = [])
     {
-        return new ContainerSetup($data);
+        return new ContainerSetup(new RecordCollection($config, $records));
     }
 }

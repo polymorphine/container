@@ -20,15 +20,11 @@ class ContainerSetup
     private $container;
 
     /**
-     * Config can be multidimensional array which values would be
-     * accessed using path notation, therefore array keys cannot
-     * contain path separator (default: '.').
-     *
-     * @param array    $config  Associative (multidimensional) array of configuration values
+     * @param RecordCollection $records (optional)
      */
-    public function __construct(array $config = [])
+    public function __construct(RecordCollection $records = null)
     {
-        $this->records = new RecordCollection($config, []);
+        $this->records = $records ?? new RecordCollection();
     }
 
     /**
@@ -67,10 +63,5 @@ class ContainerSetup
     public function entry(string $name): RecordSetup
     {
         return new RecordSetup($name, $this->records);
-    }
-
-    public function exists(string $name): bool
-    {
-        return $this->records->has($name);
     }
 }

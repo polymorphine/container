@@ -115,9 +115,9 @@ class ContainerTest extends TestCase
         }
     }
 
-    public function testConstructWithNotAssociativeArray_ThrowsException()
+    public function testConstructWithNonRecordsArray_ThrowsException()
     {
-        $this->expectException(ContainerExceptionInterface::class);
+        $this->expectException(Exception\InvalidArgumentException::class);
         new RecordCollection([], ['first' => 'ok', 2 => 'not ok']);
     }
 
@@ -176,15 +176,6 @@ class ContainerTest extends TestCase
         $container2 = $setup->container();
 
         $this->assertSame($container1, $container2);
-    }
-
-    public function testSetupContainerExistsCheck()
-    {
-        $setup = $this->builder();
-        $setup->entry('defined')->set(true);
-
-        $this->assertTrue($setup->exists('defined'));
-        $this->assertFalse($setup->exists('undefined'));
     }
 
     public function testCallbackRecord()
@@ -310,9 +301,9 @@ class ContainerTest extends TestCase
         $builder->entry('.starting.with.separator')->set(true);
     }
 
-    private function builder(array $data = [])
+    private function builder(array $config = [], array $records = [])
     {
-        return new ContainerSetup($data);
+        return new ContainerSetup(new RecordCollection($config, $records));
     }
 
     private function preconfiguredBuilder()
