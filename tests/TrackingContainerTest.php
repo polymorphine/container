@@ -17,6 +17,7 @@ use Polymorphine\Container\TrackingContainer;
 use Polymorphine\Container\ContainerSetup;
 use Polymorphine\Container\Exception;
 use Psr\Container\ContainerInterface;
+use Psr\Container\ContainerExceptionInterface;
 
 
 class TrackingContainerTest extends TestCase
@@ -24,6 +25,7 @@ class TrackingContainerTest extends TestCase
     public function testInstantiation()
     {
         $this->assertInstanceOf(TrackingContainer::class, $this->builder()->container(true));
+        $this->assertInstanceOf(ContainerExceptionInterface::class, new Exception\CircularReferenceException());
     }
 
     public function testDirectCircularCall_ThrowsException()

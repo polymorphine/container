@@ -29,6 +29,9 @@ class ContainerTest extends TestCase
     {
         $this->assertInstanceOf(Container::class, Container::fromRecordsArray([]));
         $this->assertInstanceOf(Container::class, $this->builder()->container());
+        $this->assertInstanceOf(ContainerExceptionInterface::class, new Exception\InvalidArgumentException());
+        $this->assertInstanceOf(ContainerExceptionInterface::class, new Exception\InvalidIdException());
+        $this->assertInstanceOf(NotFoundExceptionInterface::class, new Exception\RecordNotFoundException());
     }
 
     public function testConfiguredRecordsAreAvailableFromContainer()
@@ -76,7 +79,7 @@ class ContainerTest extends TestCase
     public function testAccessingAbsentIdFromContainer_ThrowsException()
     {
         $container = $this->builder()->container();
-        $this->expectException(NotFoundExceptionInterface::class);
+        $this->expectException(Exception\RecordNotFoundException::class);
         $container->get('not.set');
     }
 
