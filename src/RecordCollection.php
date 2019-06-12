@@ -41,7 +41,9 @@ class RecordCollection
      */
     public function has(string $name): bool
     {
-        return isset($this->records[$name]) || $this->inConfig($name);
+        return $name && $name[0] === self::SEPARATOR
+            ? $this->inConfig($name)
+            : isset($this->records[$name]);
     }
 
     /**
@@ -55,7 +57,12 @@ class RecordCollection
      */
     public function get(string $name): Record
     {
-        return $this->records[$name] ?? $this->fromConfig($name);
+        if (isset($this->records[$name])) { return $this->records[$name]; }
+        if ($name && $name[0] === self::SEPARATOR) {
+            return $this->fromConfig($name);
+        }
+
+        throw new Exception\RecordNotFoundException(sprintf('Record `%s` not defined', $name));
     }
 
     /**
@@ -88,14 +95,13 @@ class RecordCollection
 
     private function preventOverwrite(string $id): void
     {
-        if (isset($this->records[$id]) || isset($this->config[$id])) {
-            throw new Exception\InvalidIdException(sprintf('Cannot overwrite defined `%s` Record', $id));
+        if ($id && $id[0] === self::SEPARATOR) {
+            $message = 'Id starting with separator `%s` is reserved for immutable configuration';
+            throw new Exception\InvalidIdException(sprintf($message, self::SEPARATOR));
         }
 
-        [$mainKey,] = explode(self::SEPARATOR, $id, 2);
-        if (isset($this->config[$mainKey])) {
-            $message = 'Cannot store record with `%s` id when `%s` is used as config root key';
-            throw new Exception\InvalidIdException(sprintf($message, $id, $mainKey));
+        if (isset($this->records[$id])) {
+            throw new Exception\InvalidIdException(sprintf('Cannot overwrite defined `%s` Record', $id));
         }
     }
 
@@ -111,7 +117,8 @@ class RecordCollection
     private function inConfig(string $path): bool
     {
         $data = &$this->config;
-        foreach (explode(self::SEPARATOR, $path) as $id) {
+        $keys = explode(self::SEPARATOR, substr($path, 1));
+        foreach ($keys as $id) {
             if (!is_array($data) || !array_key_exists($id, $data)) {
                 return false;
             }
@@ -124,7 +131,8 @@ class RecordCollection
     private function fromConfig(string $path): Record
     {
         $data = &$this->config;
-        foreach (explode(self::SEPARATOR, $path) as $id) {
+        $keys = explode(self::SEPARATOR, substr($path, 1));
+        foreach ($keys as $id) {
             if (!is_array($data) || !array_key_exists($id, $data)) {
                 throw new Exception\RecordNotFoundException(sprintf('Record `%s` not defined', $path));
             }

@@ -53,10 +53,15 @@ class ContainerTest extends TestCase
 
     public function testGivenContainerWithEmptyValues_HasMethodReturnsTrue()
     {
-        $container = new Container(new RecordCollection([
+        $config = [
+            'null'  => null,
+            'false' => false
+        ];
+        $records = [
             'null'  => new Record\ValueRecord(null),
             'false' => new Record\ValueRecord(false)
-        ]));
+        ];
+        $container = new Container(new RecordCollection($config, $records));
 
         $this->assertTrue($container->has('null'));
         $this->assertTrue($container->has('false'));
@@ -206,7 +211,7 @@ class ContainerTest extends TestCase
         ]];
 
         $setup = $this->builder($config);
-        $setup->entry('small.talk')->compose(Example\ExampleClass::class, 'env.hello', 'env.name');
+        $setup->entry('small.talk')->compose(Example\ExampleClass::class, '.env.hello', '.env.name');
         $container = $setup->container();
 
         $expect = 'Hello Shudd3r.';
@@ -214,8 +219,8 @@ class ContainerTest extends TestCase
 
         // Decorated record
         $setup = $this->builder($config);
-        $setup->entry('small.talk')->compose(Example\ExampleClass::class, 'env.hello', 'env.name');
-        $setup->entry('small.talk')->compose(Example\DecoratingExampleClass::class, 'small.talk', 'env.polite');
+        $setup->entry('small.talk')->compose(Example\ExampleClass::class, '.env.hello', '.env.name');
+        $setup->entry('small.talk')->compose(Example\DecoratingExampleClass::class, 'small.talk', '.env.polite');
         $container = $setup->container();
 
         $expect = 'Hello Shudd3r. How are you?';
@@ -224,8 +229,8 @@ class ContainerTest extends TestCase
         // Decorated Again
         $setup = $this->builder($config);
         $setup->entry('ask.football')->set('Have you seen that ridiculous display last night?');
-        $setup->entry('small.talk')->compose(Example\ExampleClass::class, 'env.hello', 'env.name');
-        $setup->entry('small.talk')->compose(Example\DecoratingExampleClass::class, 'small.talk', 'env.polite');
+        $setup->entry('small.talk')->compose(Example\ExampleClass::class, '.env.hello', '.env.name');
+        $setup->entry('small.talk')->compose(Example\DecoratingExampleClass::class, 'small.talk', '.env.polite');
         $setup->entry('small.talk')->compose(Example\DecoratingExampleClass::class, 'small.talk', 'ask.football');
         $container = $setup->container();
 
@@ -264,17 +269,17 @@ class ContainerTest extends TestCase
         $data      = ['key1' => ['nested' => ['double' => 'nested value']], 'key2' => 'value2'];
         $container = $this->builder(['env' => $data])->container();
 
-        $this->assertSame($data['key1']['nested']['double'], $container->get('env.key1.nested.double'));
-        $this->assertSame($data['key1']['nested'], $container->get('env.key1.nested'));
-        $this->assertSame($data['key2'], $container->get('env.key2'));
-        $this->assertSame($data['key1'], $container->get('env.key1'));
-        $this->assertSame($data, $container->get('env'));
+        $this->assertSame($data['key1']['nested']['double'], $container->get('.env.key1.nested.double'));
+        $this->assertSame($data['key1']['nested'], $container->get('.env.key1.nested'));
+        $this->assertSame($data['key2'], $container->get('.env.key2'));
+        $this->assertSame($data['key1'], $container->get('.env.key1'));
+        $this->assertSame($data, $container->get('.env'));
 
-        $this->assertTrue($container->has('env.key1.nested.double'));
-        $this->assertTrue($container->has('env.key1.nested'));
-        $this->assertTrue($container->has('env.key2'));
-        $this->assertTrue($container->has('env.key1'));
-        $this->assertTrue($container->has('env'));
+        $this->assertTrue($container->has('.env.key1.nested.double'));
+        $this->assertTrue($container->has('.env.key1.nested'));
+        $this->assertTrue($container->has('.env.key2'));
+        $this->assertTrue($container->has('.env.key1'));
+        $this->assertTrue($container->has('.env'));
     }
 
     /**
@@ -294,15 +299,15 @@ class ContainerTest extends TestCase
 
     public function undefinedPaths(): array
     {
-        return [['env.key1.nested.value'], ['env.key1.something'], ['env.whatever'], ['notEnv']];
+        return [['.env.key1.nested.value'], ['.env.key1.something'], ['.env.whatever'], ['.notEnv']];
     }
 
-    public function testUsingConfigRootKeyForRecordEntry_ThrowsException()
+    public function testUsingConfigKeyIndicatorForRecordEntry_ThrowsException()
     {
-        $builder = $this->builder(['repeated' => ['key' => 'value']]);
+        $builder = $this->builder();
 
         $this->expectException(Exception\InvalidIdException::class);
-        $builder->entry('repeated.main.key')->set(true);
+        $builder->entry('.starting.with.separator')->set(true);
     }
 
     private function builder(array $data = [])
