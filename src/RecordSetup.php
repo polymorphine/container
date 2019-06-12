@@ -88,7 +88,10 @@ class RecordSetup
      */
     public function compose(string $className, string ...$dependencies): void
     {
-        $dependencies = $this->validDependencies($dependencies);
+        if (!$this->records->isConfigId($this->name)) {
+            $dependencies = $this->validDependencies($dependencies);
+        }
+
         $this->useRecord(new Record\CompositeRecord($className, ...$dependencies));
     }
 
@@ -133,7 +136,7 @@ class RecordSetup
 
     private function renameDecorated(string &$name): void
     {
-        if ($name !== $this->name || $this->records->isConfigId($name)) { return; }
+        if ($name !== $this->name) { return; }
 
         $newAlias = $this->name . '.DEC';
         while ($this->records->has($newAlias)) {
