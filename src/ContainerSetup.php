@@ -39,15 +39,16 @@ class ContainerSetup
      * Strict immutability cannot be ensured, because side-effects
      * can change subsequent call outcomes for stored identifiers.
      *
-     * @param bool $secure Enables circular references tracking
+     * @param bool $tracking Enables call stack tracking and detects
+     *                       circular references
      *
      * @return ContainerInterface
      */
-    public function container(bool $secure = false): ContainerInterface
+    public function container(bool $tracking = false): ContainerInterface
     {
         if ($this->container) { return $this->container; }
 
-        return $this->container = $secure
+        return $this->container = $tracking
             ? new TrackingContainer($this->records)
             : new Container($this->records);
     }
