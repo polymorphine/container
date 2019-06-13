@@ -12,7 +12,10 @@
 namespace Polymorphine\Container\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Polymorphine\Container\Container;
 use Polymorphine\Container\RecordCollection;
+use Polymorphine\Container\Tests\Fixtures\Example\DecoratingExampleClass;
+use Polymorphine\Container\Tests\Fixtures\Example\ExampleClass;
 use Polymorphine\Container\TrackingContainer;
 use Polymorphine\Container\ContainerSetup;
 use Polymorphine\Container\Exception;
@@ -36,6 +39,7 @@ class TrackingContainerTest extends TestCase
         });
         $container = $setup->container(true);
         $this->expectException(Exception\CircularReferenceException::class);
+        $this->expectExceptionMessage('ref.self->ref.self');
         $container->get('ref.self');
     }
 
@@ -53,6 +57,7 @@ class TrackingContainerTest extends TestCase
         });
         $container = $setup->container(true);
         $this->expectException(Exception\CircularReferenceException::class);
+        $this->expectExceptionMessage('ref->ref.self->ref.dependency->ref.self');
         $container->get('ref');
     }
 
@@ -91,7 +96,22 @@ class TrackingContainerTest extends TestCase
 
         $trackedContainer = $container->get('ref');
         $this->expectException(Exception\CircularReferenceException::class);
+        $this->expectExceptionMessage('ref->ref');
         $trackedContainer->get('ref');
+    }
+
+    public function testCallStackIsAddedToContainerExceptionMessage()
+    {
+        $setup = $this->builder(['config' => 'value']);
+        $setup->entry('A')->set(function () {});
+        $setup->entry('B')->invoke(function (Container $c) {
+            return new ExampleClass($c->get('A'), $c->get('undefined'));
+        });
+        $setup->entry('C')->compose(DecoratingExampleClass::class, 'B', '.config');
+
+        $container = $setup->container(true);
+        $this->expectExceptionMessage('C->B->undefined');
+        $container->get('C');
     }
 
     private function builder(array $config = [], array $records = [])

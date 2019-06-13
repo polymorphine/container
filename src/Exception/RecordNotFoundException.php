@@ -17,4 +17,14 @@ use InvalidArgumentException;
 
 class RecordNotFoundException extends InvalidArgumentException implements NotFoundExceptionInterface
 {
+    private $hasCallStack = false;
+
+    public function withCallStack(string $callStack): self
+    {
+        if (!$this->hasCallStack) {
+            $this->message .= ' [call stack: ' . $callStack . ' ]';
+            $this->hasCallStack = true;
+        }
+        return $this;
+    }
 }
