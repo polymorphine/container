@@ -88,8 +88,9 @@ class RecordSetup
      */
     public function compose(string $className, string ...$dependencies): void
     {
-        if (!$this->records->isConfigId($this->name)) {
-            $dependencies = $this->validDependencies($dependencies);
+        $idx = array_search($this->name, $dependencies, true);
+        if ($idx !== false && !$this->records->isConfigId($this->name)) {
+            $dependencies[$idx] = $this->decoratedRecordAlias();
         }
 
         $this->useRecord(new Record\CompositeRecord($className, ...$dependencies));
@@ -111,32 +112,12 @@ class RecordSetup
         $this->useRecord(new Record\CreateMethodRecord($method, $arguments));
     }
 
-    private function validDependencies(array $dependencies): array
+    private function decoratedRecordAlias(): string
     {
-        foreach ($dependencies as &$name) {
-            $this->checkIfDefined($name);
-            $this->renameDecorated($name);
+        if (!$this->records->has($this->name)) {
+            $message = 'Undefined `%s` record for decorating composition';
+            throw new Exception\RecordNotFoundException(sprintf($message, $this->name));
         }
-
-        return $dependencies;
-    }
-
-    private function checkIfDefined(string $name): void
-    {
-        $defined = $this->records->isConfigId($name)
-            ? $this->records->configHas($name)
-            : $this->records->has($name);
-
-        if (!$defined) {
-            throw new Exception\RecordNotFoundException(
-                sprintf('CompositeRecord requires defined dependencies - `%s` Record not found', $name)
-            );
-        }
-    }
-
-    private function renameDecorated(string &$name): void
-    {
-        if ($name !== $this->name) { return; }
 
         $newAlias = $this->name . '.DEC';
         while ($this->records->has($newAlias)) {
@@ -146,6 +127,6 @@ class RecordSetup
         $this->records->add($newAlias, $this->records->get($this->name));
         $this->records->remove($this->name);
 
-        $name = $newAlias;
+        return $newAlias;
     }
 }

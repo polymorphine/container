@@ -231,17 +231,19 @@ class ContainerTest extends TestCase
         $this->assertSame($expect, $container->get('small.talk')->beNice());
     }
 
-    public function testCompositeForUndefinedDependencies_ThrowsException()
+    public function testCompositeForUndefinedDecoratedDependency_ThrowsException()
     {
-        $entry = $this->preconfiguredBuilder()->entry('someClass');
+        $builder = $this->builder();
+        $builder->entry('someClass')->compose(Example\ExampleClass::class, 'not.exists', 'doesnt.matter');
+        $entry = $builder->entry('decorating.undefined.id');
         $this->expectException(Exception\RecordNotFoundException::class);
-        $entry->compose(Example\ExampleClass::class, 'undefined.record', 'test');
+        $entry->compose(Example\ExampleClass::class, 'undefined.record', 'decorating.undefined.id');
     }
 
     public function testDecoratedConfigValue_ThrowsException()
     {
         $setup = $this->builder([
-            'env' => new Example\ExampleClass(function () {}, 'something'),
+            'env'    => new Example\ExampleClass(function () {}, 'something'),
             'string' => 'test'
         ]);
         $this->expectException(Exception\InvalidIdException::class);
