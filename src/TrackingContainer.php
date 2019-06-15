@@ -34,7 +34,7 @@ class TrackingContainer extends Container
 
         $track = clone $this;
         $track->references[$id] = true;
-        return $this->records->get($id)->value($track);
+        return $this->records->get($id, $track);
     }
 
     private function callStackPath(string $id): string

@@ -11,7 +11,7 @@
 
 namespace Polymorphine\Container;
 
-use Polymorphine\Container\Record\ValueRecord;
+use Psr\Container\ContainerInterface;
 
 
 class RecordCollection
@@ -47,27 +47,25 @@ class RecordCollection
     public function has(string $name): bool
     {
         return $this->isConfigId($name)
-            ? $this->configHas($name)
+            ? $this->isConfigDefined($name)
             : isset($this->records[$name]);
     }
 
     /**
      * Returns Record stored at given $name identifier.
      *
-     * @param string $name
+     * @param string             $name
+     * @param ContainerInterface $container
      *
      * @throws Exception\RecordNotFoundException
      *
-     * @return Record
+     * @return mixed
      */
-    public function get(string $name): Record
+    public function get(string $name, ContainerInterface $container)
     {
-        if ($this->isConfigId($name)) { return $this->configGet($name); }
-
-        if (!isset($this->records[$name])) {
-            throw new Exception\RecordNotFoundException(sprintf('Record `%s` not defined', $name));
-        }
-        return $this->records[$name];
+        return $this->isConfigId($name)
+            ? $this->configValue($name)
+            : $this->getRecord($name)->value($container);
     }
 
     /**
@@ -117,12 +115,20 @@ class RecordCollection
         return $newAlias;
     }
 
-    private function isConfigId(string $name)
+    private function getRecord(string $name): Record
+    {
+        if (!isset($this->records[$name])) {
+            throw new Exception\RecordNotFoundException(sprintf('Record `%s` not defined', $name));
+        }
+        return $this->records[$name];
+    }
+
+    private function isConfigId(string $name): bool
     {
         return $name && $name[0] === self::SEPARATOR;
     }
 
-    private function configHas(string $path): bool
+    private function isConfigDefined(string $path): bool
     {
         $data = &$this->config;
         $keys = explode(self::SEPARATOR, substr($path, 1));
@@ -136,7 +142,7 @@ class RecordCollection
         return true;
     }
 
-    private function configGet(string $path)
+    private function configValue(string $path)
     {
         $data = &$this->config;
         $keys = explode(self::SEPARATOR, substr($path, 1));
@@ -147,7 +153,7 @@ class RecordCollection
             $data = &$data[$id];
         }
 
-        return new ValueRecord($data);
+        return $data;
     }
 
     private function validRecordsArray(array $records): array

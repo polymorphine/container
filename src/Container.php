@@ -30,7 +30,7 @@ class Container implements ContainerInterface
 
     public function get($id)
     {
-        return $this->records->get($id)->value($this);
+        return $this->records->get($id, $this);
     }
 
     public function has($id): bool
