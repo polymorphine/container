@@ -93,15 +93,28 @@ class RecordCollection
     }
 
     /**
-     * Removes Record stored at given $name identifier.
+     * Moves Record to different identifier.
      *
      * @param string $name
      *
-     * @return mixed
+     * @return string New identifier of moved Record
      */
-    public function remove(string $name): void
+    public function moveRecord(string $name): string
     {
+        if (!isset($this->records[$name])) {
+            $message = 'Undefined `%s` record cannot be moved';
+            throw new Exception\RecordNotFoundException(sprintf($message, $name));
+        }
+
+        $newAlias = $name . '.WRAP';
+        while (isset($this->records[$newAlias])) {
+            $newAlias .= '.WRAP';
+        }
+
+        $this->records[$newAlias] = $this->records[$name];
         unset($this->records[$name]);
+
+        return $newAlias;
     }
 
     private function isConfigId(string $name)

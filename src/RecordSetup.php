@@ -114,19 +114,11 @@ class RecordSetup
 
     private function decoratedRecordAlias(): string
     {
-        if (!$this->records->has($this->name)) {
+        try {
+            return $this->records->moveRecord($this->name);
+        } catch (Exception\RecordNotFoundException $e) {
             $message = 'Undefined `%s` record for decorating composition';
             throw new Exception\RecordNotFoundException(sprintf($message, $this->name));
         }
-
-        $newAlias = $this->name . '.DEC';
-        while ($this->records->has($newAlias)) {
-            $newAlias .= '.DEC';
-        }
-
-        $this->records->add($newAlias, $this->records->get($this->name));
-        $this->records->remove($this->name);
-
-        return $newAlias;
     }
 }
