@@ -18,23 +18,18 @@ class TrackingContainer extends Container
 
     public function get($id)
     {
-        try {
-            return $this->getTracked($id);
-        } catch (Exception\RecordNotFoundException $e) {
-            throw $e->withCallStack($this->callStackPath($id));
-        }
-    }
-
-    private function getTracked(string $id)
-    {
         if (isset($this->references[$id])) {
             $message = 'Lazy composition of `%s` record is using reference to itself [call stack: %s ]';
             throw new Exception\CircularReferenceException(sprintf($message, (string) $id, $this->callStackPath($id)));
         }
 
-        $track = clone $this;
-        $track->references[$id] = true;
-        return $this->records->get($id, $track);
+        try {
+            $track = clone $this;
+            $track->references[$id] = true;
+            return $this->records->get($id, $track);
+        } catch (Exception\RecordNotFoundException $e) {
+            throw $e->withCallStack($this->callStackPath($id));
+        }
     }
 
     private function callStackPath(string $id): string
