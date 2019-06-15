@@ -19,9 +19,7 @@ class TrackingContainer extends Container
     public function get($id)
     {
         try {
-            return $this->records->isConfigId($id)
-                ? $this->records->configGet($id)
-                : $this->getTracked($id);
+            return $this->getTracked($id);
         } catch (Exception\RecordNotFoundException $e) {
             throw $e->withCallStack($this->callStackPath($id));
         }

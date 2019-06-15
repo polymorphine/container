@@ -89,7 +89,7 @@ class RecordSetup
     public function compose(string $className, string ...$dependencies): void
     {
         $idx = array_search($this->name, $dependencies, true);
-        if ($idx !== false && !$this->records->isConfigId($this->name)) {
+        if ($idx !== false) {
             $dependencies[$idx] = $this->decoratedRecordAlias();
         }
 

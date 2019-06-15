@@ -11,6 +11,8 @@
 
 namespace Polymorphine\Container;
 
+use Polymorphine\Container\Record\ValueRecord;
+
 
 class RecordCollection
 {
@@ -44,7 +46,9 @@ class RecordCollection
      */
     public function has(string $name): bool
     {
-        return isset($this->records[$name]);
+        return $this->isConfigId($name)
+            ? $this->configHas($name)
+            : isset($this->records[$name]);
     }
 
     /**
@@ -58,38 +62,12 @@ class RecordCollection
      */
     public function get(string $name): Record
     {
+        if ($this->isConfigId($name)) { return $this->configGet($name); }
+
         if (!isset($this->records[$name])) {
             throw new Exception\RecordNotFoundException(sprintf('Record `%s` not defined', $name));
         }
         return $this->records[$name];
-    }
-
-    public function configHas(string $path): bool
-    {
-        $data = &$this->config;
-        $keys = explode(self::SEPARATOR, substr($path, 1));
-        foreach ($keys as $id) {
-            if (!is_array($data) || !array_key_exists($id, $data)) {
-                return false;
-            }
-            $data = &$data[$id];
-        }
-
-        return true;
-    }
-
-    public function configGet(string $path)
-    {
-        $data = &$this->config;
-        $keys = explode(self::SEPARATOR, substr($path, 1));
-        foreach ($keys as $id) {
-            if (!is_array($data) || !array_key_exists($id, $data)) {
-                throw new Exception\RecordNotFoundException(sprintf('Record `%s` not defined', $path));
-            }
-            $data = &$data[$id];
-        }
-
-        return $data;
     }
 
     /**
@@ -126,9 +104,37 @@ class RecordCollection
         unset($this->records[$name]);
     }
 
-    public function isConfigId(string $name)
+    private function isConfigId(string $name)
     {
         return $name && $name[0] === self::SEPARATOR;
+    }
+
+    private function configHas(string $path): bool
+    {
+        $data = &$this->config;
+        $keys = explode(self::SEPARATOR, substr($path, 1));
+        foreach ($keys as $id) {
+            if (!is_array($data) || !array_key_exists($id, $data)) {
+                return false;
+            }
+            $data = &$data[$id];
+        }
+
+        return true;
+    }
+
+    private function configGet(string $path)
+    {
+        $data = &$this->config;
+        $keys = explode(self::SEPARATOR, substr($path, 1));
+        foreach ($keys as $id) {
+            if (!is_array($data) || !array_key_exists($id, $data)) {
+                throw new Exception\RecordNotFoundException(sprintf('Record `%s` not defined', $path));
+            }
+            $data = &$data[$id];
+        }
+
+        return new ValueRecord($data);
     }
 
     private function validRecordsArray(array $records): array

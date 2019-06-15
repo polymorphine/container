@@ -30,15 +30,11 @@ class Container implements ContainerInterface
 
     public function get($id)
     {
-        return $this->records->isConfigId($id)
-            ? $this->records->configGet($id)
-            : $this->records->get($id)->value($this);
+        return $this->records->get($id)->value($this);
     }
 
     public function has($id): bool
     {
-        return $this->records->isConfigId($id)
-            ? $this->records->configHas($id)
-            : $this->records->has($id);
+        return $this->records->has($id);
     }
 }
