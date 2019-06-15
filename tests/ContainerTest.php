@@ -12,6 +12,7 @@
 namespace Polymorphine\Container\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Polymorphine\Container\CompositeRecordCollection;
 use Polymorphine\Container\ConfigContainer;
 use Polymorphine\Container\Container;
 use Polymorphine\Container\ContainerSetup;
@@ -28,7 +29,6 @@ class ContainerTest extends TestCase
 {
     public function testInstantiation()
     {
-        $this->assertInstanceOf(Container::class, Container::createFromArray([]));
         $this->assertInstanceOf(Container::class, $this->builder()->container());
         $this->assertInstanceOf(ContainerExceptionInterface::class, new Exception\InvalidArgumentException());
         $this->assertInstanceOf(ContainerExceptionInterface::class, new Exception\InvalidIdException());
@@ -65,7 +65,7 @@ class ContainerTest extends TestCase
             'null'  => new Record\ValueRecord(null),
             'false' => new Record\ValueRecord(false)
         ];
-        $container = new Container(new RecordCollection($records, new ConfigContainer($config)));
+        $container = $this->builder($config, $records)->container();
 
         $this->assertTrue($container->has('null'));
         $this->assertTrue($container->has('false'));
@@ -308,7 +308,7 @@ class ContainerTest extends TestCase
 
     private function builder(array $config = [], array $records = [])
     {
-        return new ContainerSetup(new RecordCollection($records, new ConfigContainer($config)));
+        return new ContainerSetup(new CompositeRecordCollection(new ConfigContainer($config), $records));
     }
 
     private function preconfiguredBuilder()

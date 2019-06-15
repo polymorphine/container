@@ -17,18 +17,15 @@ use Psr\Container\ContainerInterface;
 class RecordCollection
 {
     private $records;
-    private $config;
 
     /**
-     * @param Record[]                $records Associative (flat) array of Record entries
-     * @param null|ContainerInterface $config
+     * @param Record[] $records Associative (flat) array of Record entries
      *
      * @throws Exception\InvalidArgumentException
      */
-    public function __construct(array $records = [], ?ContainerInterface $config = null)
+    public function __construct(array $records = [])
     {
         $this->records = $this->validRecordsArray($records);
-        $this->config  = $config;
     }
 
     /**
@@ -40,9 +37,7 @@ class RecordCollection
      */
     public function has(string $id): bool
     {
-        return $this->isConfigId($id)
-            ? $this->config->has(substr($id, 1))
-            : isset($this->records[$id]);
+        return isset($this->records[$id]);
     }
 
     /**
@@ -57,9 +52,7 @@ class RecordCollection
      */
     public function get(string $id, ContainerInterface $container)
     {
-        return $this->isConfigId($id)
-            ? $this->config->get(substr($id, 1))
-            : $this->getRecord($id)->value($container);
+        return $this->getRecord($id)->value($container);
     }
 
     /**
@@ -72,11 +65,6 @@ class RecordCollection
      */
     public function add(string $id, Record $record): void
     {
-        if ($this->isConfigId($id)) {
-            $message = 'Id starting with separator `%s` is reserved for immutable configuration';
-            throw new Exception\InvalidIdException(sprintf($message, ConfigContainer::SEPARATOR));
-        }
-
         if (isset($this->records[$id])) {
             throw new Exception\InvalidIdException(sprintf('Cannot overwrite defined `%s` Record', $id));
         }
@@ -115,11 +103,6 @@ class RecordCollection
             throw new Exception\RecordNotFoundException(sprintf('Record `%s` not defined', $id));
         }
         return $this->records[$id];
-    }
-
-    private function isConfigId(string $id): bool
-    {
-        return $this->config && $id && $id[0] === ConfigContainer::SEPARATOR;
     }
 
     private function validRecordsArray(array $records): array
