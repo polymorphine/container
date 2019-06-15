@@ -12,6 +12,7 @@
 namespace Polymorphine\Container\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Polymorphine\Container\ConfigContainer;
 use Polymorphine\Container\Container;
 use Polymorphine\Container\RecordCollection;
 use Polymorphine\Container\Tests\Fixtures\Example\DecoratingExampleClass;
@@ -116,6 +117,6 @@ class TrackingContainerTest extends TestCase
 
     private function builder(array $config = [], array $records = [])
     {
-        return new ContainerSetup(new RecordCollection($config, $records));
+        return new ContainerSetup(new RecordCollection($records, new ConfigContainer($config)));
     }
 }

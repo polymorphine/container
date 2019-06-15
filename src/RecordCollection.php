@@ -16,144 +16,110 @@ use Psr\Container\ContainerInterface;
 
 class RecordCollection
 {
-    const SEPARATOR = '.';
-
-    private $config;
     private $records;
+    private $config;
 
     /**
-     * Config can be multidimensional array which values would be
-     * accessed using path notation, therefore config array keys
-     * cannot contain path separator.
-     *
-     * @param array    $config  Associative (multidimensional) array of configuration values
-     * @param Record[] $records Associative (flat) array of Record entries
+     * @param Record[]                $records Associative (flat) array of Record entries
+     * @param null|ContainerInterface $config
      *
      * @throws Exception\InvalidArgumentException
      */
-    public function __construct(array $config = [], array $records = [])
+    public function __construct(array $records = [], ?ContainerInterface $config = null)
     {
         $this->records = $this->validRecordsArray($records);
         $this->config  = $config;
     }
 
     /**
-     * Checks if Record is stored at given name identifier.
+     * Checks if Record is stored at given identifier.
      *
-     * @param string $name
+     * @param string $id
      *
      * @return bool
      */
-    public function has(string $name): bool
+    public function has(string $id): bool
     {
-        return $this->isConfigId($name)
-            ? $this->isConfigDefined($name)
-            : isset($this->records[$name]);
+        return $this->isConfigId($id)
+            ? $this->config->has(substr($id, 1))
+            : isset($this->records[$id]);
     }
 
     /**
-     * Returns Record stored at given $name identifier.
+     * Returns Record stored at given identifier.
      *
-     * @param string             $name
+     * @param string             $id
      * @param ContainerInterface $container
      *
-     * @throws Exception\RecordNotFoundException
+     *@throws Exception\RecordNotFoundException
      *
      * @return mixed
      */
-    public function get(string $name, ContainerInterface $container)
+    public function get(string $id, ContainerInterface $container)
     {
-        return $this->isConfigId($name)
-            ? $this->configValue($name)
-            : $this->getRecord($name)->value($container);
+        return $this->isConfigId($id)
+            ? $this->config->get(substr($id, 1))
+            : $this->getRecord($id)->value($container);
     }
 
     /**
      * Stores Record at given $name identifier.
      *
-     * @param $name
+     * @param $id
      * @param Record $record
      *
      * @throws Exception\InvalidIdException
      */
-    public function add(string $name, Record $record): void
+    public function add(string $id, Record $record): void
     {
-        if ($this->isConfigId($name)) {
+        if ($this->isConfigId($id)) {
             $message = 'Id starting with separator `%s` is reserved for immutable configuration';
-            throw new Exception\InvalidIdException(sprintf($message, self::SEPARATOR));
+            throw new Exception\InvalidIdException(sprintf($message, ConfigContainer::SEPARATOR));
         }
 
-        if (isset($this->records[$name])) {
-            throw new Exception\InvalidIdException(sprintf('Cannot overwrite defined `%s` Record', $name));
+        if (isset($this->records[$id])) {
+            throw new Exception\InvalidIdException(sprintf('Cannot overwrite defined `%s` Record', $id));
         }
 
-        $this->records[$name] = $record;
+        $this->records[$id] = $record;
     }
 
     /**
      * Moves Record to different identifier.
      *
-     * @param string $name
+     * @param string $id
      *
      * @return string New identifier of moved Record
      */
-    public function moveRecord(string $name): string
+    public function moveRecord(string $id): string
     {
-        if (!isset($this->records[$name])) {
+        if (!isset($this->records[$id])) {
             $message = 'Undefined `%s` record cannot be moved';
-            throw new Exception\RecordNotFoundException(sprintf($message, $name));
+            throw new Exception\RecordNotFoundException(sprintf($message, $id));
         }
 
-        $newAlias = $name . '.WRAP';
-        while (isset($this->records[$newAlias])) {
-            $newAlias .= '.WRAP';
+        $newId = $id . '.WRAP';
+        while (isset($this->records[$newId])) {
+            $newId .= '.WRAP';
         }
 
-        $this->records[$newAlias] = $this->records[$name];
-        unset($this->records[$name]);
+        $this->records[$newId] = $this->records[$id];
+        unset($this->records[$id]);
 
-        return $newAlias;
+        return $newId;
     }
 
-    private function getRecord(string $name): Record
+    private function getRecord(string $id): Record
     {
-        if (!isset($this->records[$name])) {
-            throw new Exception\RecordNotFoundException(sprintf('Record `%s` not defined', $name));
+        if (!isset($this->records[$id])) {
+            throw new Exception\RecordNotFoundException(sprintf('Record `%s` not defined', $id));
         }
-        return $this->records[$name];
+        return $this->records[$id];
     }
 
-    private function isConfigId(string $name): bool
+    private function isConfigId(string $id): bool
     {
-        return $name && $name[0] === self::SEPARATOR;
-    }
-
-    private function isConfigDefined(string $path): bool
-    {
-        $data = &$this->config;
-        $keys = explode(self::SEPARATOR, substr($path, 1));
-        foreach ($keys as $id) {
-            if (!is_array($data) || !array_key_exists($id, $data)) {
-                return false;
-            }
-            $data = &$data[$id];
-        }
-
-        return true;
-    }
-
-    private function configValue(string $path)
-    {
-        $data = &$this->config;
-        $keys = explode(self::SEPARATOR, substr($path, 1));
-        foreach ($keys as $id) {
-            if (!is_array($data) || !array_key_exists($id, $data)) {
-                throw new Exception\RecordNotFoundException(sprintf('Record `%s` not defined', $path));
-            }
-            $data = &$data[$id];
-        }
-
-        return $data;
+        return $this->config && $id && $id[0] === ConfigContainer::SEPARATOR;
     }
 
     private function validRecordsArray(array $records): array

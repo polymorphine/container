@@ -23,9 +23,9 @@ class Container implements ContainerInterface
         $this->records = $records;
     }
 
-    public static function fromRecordsArray(array $records): self
+    public static function createFromArray(array $records, array $config = []): self
     {
-        return new self(new RecordCollection($records));
+        return new self(new RecordCollection($records, $config ? new ConfigContainer($config) : null));
     }
 
     public function get($id)

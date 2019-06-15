@@ -12,6 +12,7 @@
 namespace Polymorphine\Container\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Polymorphine\Container\ConfigContainer;
 use Polymorphine\Container\Container;
 use Polymorphine\Container\ContainerSetup;
 use Polymorphine\Container\Record;
@@ -27,7 +28,7 @@ class ContainerTest extends TestCase
 {
     public function testInstantiation()
     {
-        $this->assertInstanceOf(Container::class, Container::fromRecordsArray([]));
+        $this->assertInstanceOf(Container::class, Container::createFromArray([]));
         $this->assertInstanceOf(Container::class, $this->builder()->container());
         $this->assertInstanceOf(ContainerExceptionInterface::class, new Exception\InvalidArgumentException());
         $this->assertInstanceOf(ContainerExceptionInterface::class, new Exception\InvalidIdException());
@@ -64,7 +65,7 @@ class ContainerTest extends TestCase
             'null'  => new Record\ValueRecord(null),
             'false' => new Record\ValueRecord(false)
         ];
-        $container = new Container(new RecordCollection($config, $records));
+        $container = new Container(new RecordCollection($records, new ConfigContainer($config)));
 
         $this->assertTrue($container->has('null'));
         $this->assertTrue($container->has('false'));
@@ -98,7 +99,7 @@ class ContainerTest extends TestCase
             ''                => 'empty id?!'
         ];
 
-        $container = new Container(new RecordCollection([], [
+        $container = new Container(new RecordCollection([
             'test'            => new Record\ValueRecord('Hello World!'),
             'category.first'  => new Record\ValueRecord('one'),
             'category.second' => new Record\ValueRecord('two'),
@@ -120,7 +121,7 @@ class ContainerTest extends TestCase
     public function testConstructWithNonRecordsArray_ThrowsException()
     {
         $this->expectException(Exception\InvalidArgumentException::class);
-        new RecordCollection([], ['first' => 'ok', 2 => 'not ok']);
+        new RecordCollection(['first' => 'ok', 2 => 'not ok']);
     }
 
     public function testCallbacksCannotModifyRegistry()
@@ -307,7 +308,7 @@ class ContainerTest extends TestCase
 
     private function builder(array $config = [], array $records = [])
     {
-        return new ContainerSetup(new RecordCollection($config, $records));
+        return new ContainerSetup(new RecordCollection($records, new ConfigContainer($config)));
     }
 
     private function preconfiguredBuilder()
