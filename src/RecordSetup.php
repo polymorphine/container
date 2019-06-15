@@ -81,8 +81,8 @@ class RecordSetup
      *
      * @see CompositeRecord
      *
-     * @param string $className
-     * @param string ...$dependencies
+     * @param string   $className
+     * @param string[] $dependencies
      *
      * @throws Exception\InvalidIdException | Exception\RecordNotFoundException
      */

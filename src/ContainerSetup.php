@@ -55,7 +55,7 @@ class ContainerSetup
 
     /**
      * Returns RecordSetup object able to configure Container's
-     * Record slot under given name id.
+     * Record slot for given name id.
      *
      * @param string $name
      *

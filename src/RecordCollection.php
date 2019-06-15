@@ -21,8 +21,8 @@ class RecordCollection
 
     /**
      * Config can be multidimensional array which values would be
-     * accessed using path notation, therefore array keys cannot
-     * contain '.' which is path separator.
+     * accessed using path notation, therefore config array keys
+     * cannot contain path separator.
      *
      * @param array    $config  Associative (multidimensional) array of configuration values
      * @param Record[] $records Associative (flat) array of Record entries
@@ -36,7 +36,7 @@ class RecordCollection
     }
 
     /**
-     * Checks if Record is stored under given name.
+     * Checks if Record is stored at given name identifier.
      *
      * @param string $name
      *
@@ -48,7 +48,7 @@ class RecordCollection
     }
 
     /**
-     * Returns Record stored under given $name identifier.
+     * Returns Record stored at given $name identifier.
      *
      * @param string $name
      *
@@ -93,9 +93,7 @@ class RecordCollection
     }
 
     /**
-     * Stores Record under given $name identifier.
-     * Behavior of Container returning given Record's value
-     * depends on passed Record's implementation.
+     * Stores Record at given $name identifier.
      *
      * @param $name
      * @param Record $record
@@ -117,7 +115,7 @@ class RecordCollection
     }
 
     /**
-     * Removes Record with given $name identifier.
+     * Removes Record stored at given $name identifier.
      *
      * @param string $name
      *
