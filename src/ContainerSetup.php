@@ -20,24 +20,32 @@ class ContainerSetup
     private $container;
 
     /**
-     * @param RecordCollection $records (optional)
+     * Records stored under keys starting with configuration
+     * $prefix will not be accessible, because container will
+     * assume configuration entry.
+     *
+     * @param array    $config  Associative (multidimensional) array of configuration values
+     * @param Record[] $records Flat associative array of Record instances
+     * @param string   $prefix  Container entry id prefix used to identify config container values
+     *
+     * @throws Exception\InvalidArgumentException
      */
-    public function __construct(RecordCollection $records = null)
+    public function __construct(array $config = [], array $records = [], string $prefix = '.')
     {
-        $this->records = $records ?? new RecordCollection();
+        $this->records = $config
+            ? new CompositeRecordCollection(new ConfigContainer($config), $records, $prefix)
+            : new RecordCollection($records);
     }
 
     /**
      * Returns Container instance with provided records.
      *
-     * Adding new entries to container is possible only through
-     * this setup instance, but early access to container might be
-     * necessary. Cannot lock instance right after exposing it - for
-     * example routing is both stored within container and built
-     * with references to its records.
+     * Adding new entries to container is still possible, but only
+     * using this instance's entry() method.
      *
-     * Strict immutability cannot be ensured, because side-effects
-     * can change subsequent call outcomes for stored identifiers.
+     * Strict immutability can be ensured only when this instance is
+     * encapsulated and not passed to uncontrolled parts of application
+     * (including container itself).
      *
      * @param bool $tracking Enables call stack tracking and detects
      *                       circular references

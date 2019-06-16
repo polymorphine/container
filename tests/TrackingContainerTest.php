@@ -12,14 +12,9 @@
 namespace Polymorphine\Container\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\Container\ConfigContainer;
-use Polymorphine\Container\Container;
-use Polymorphine\Container\CompositeRecordCollection;
-use Polymorphine\Container\Tests\Fixtures\Example\DecoratingExampleClass;
-use Polymorphine\Container\Tests\Fixtures\Example\ExampleClass;
-use Polymorphine\Container\TrackingContainer;
 use Polymorphine\Container\ContainerSetup;
 use Polymorphine\Container\Exception;
+use Polymorphine\Container\Tests\Fixtures\Example;
 use Psr\Container\ContainerInterface;
 use Psr\Container\ContainerExceptionInterface;
 
@@ -28,7 +23,7 @@ class TrackingContainerTest extends TestCase
 {
     public function testInstantiation()
     {
-        $this->assertInstanceOf(TrackingContainer::class, $this->builder()->container(true));
+        $this->assertInstanceOf(ContainerInterface::class, $this->builder()->container(true));
         $this->assertInstanceOf(ContainerExceptionInterface::class, new Exception\CircularReferenceException());
     }
 
@@ -105,10 +100,10 @@ class TrackingContainerTest extends TestCase
     {
         $setup = $this->builder(['config' => 'value']);
         $setup->entry('A')->set(function () {});
-        $setup->entry('B')->invoke(function (Container $c) {
-            return new ExampleClass($c->get('A'), $c->get('undefined'));
+        $setup->entry('B')->invoke(function (ContainerInterface $c) {
+            return new Example\ExampleClass($c->get('A'), $c->get('undefined'));
         });
-        $setup->entry('C')->compose(DecoratingExampleClass::class, 'B', '.config');
+        $setup->entry('C')->compose(Example\DecoratingExampleClass::class, 'B', '.config');
 
         $container = $setup->container(true);
         $this->expectExceptionMessage('C->B->undefined');
@@ -117,6 +112,6 @@ class TrackingContainerTest extends TestCase
 
     private function builder(array $config = [], array $records = [])
     {
-        return new ContainerSetup(new CompositeRecordCollection(new ConfigContainer($config), $records));
+        return new ContainerSetup($config, $records);
     }
 }

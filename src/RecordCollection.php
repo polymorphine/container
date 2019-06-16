@@ -46,7 +46,7 @@ class RecordCollection
      * @param string             $id
      * @param ContainerInterface $container
      *
-     *@throws Exception\RecordNotFoundException
+     * @throws Exception\RecordNotFoundException
      *
      * @return mixed
      */

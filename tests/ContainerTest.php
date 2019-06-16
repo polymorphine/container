@@ -12,13 +12,9 @@
 namespace Polymorphine\Container\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\Container\CompositeRecordCollection;
-use Polymorphine\Container\ConfigContainer;
-use Polymorphine\Container\Container;
 use Polymorphine\Container\ContainerSetup;
-use Polymorphine\Container\Record;
-use Polymorphine\Container\RecordCollection;
 use Polymorphine\Container\Exception;
+use Polymorphine\Container\Record;
 use Polymorphine\Container\Tests\Fixtures\Example;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -29,7 +25,7 @@ class ContainerTest extends TestCase
 {
     public function testInstantiation()
     {
-        $this->assertInstanceOf(Container::class, $this->builder()->container());
+        $this->assertInstanceOf(ContainerInterface::class, $this->builder()->container());
         $this->assertInstanceOf(ContainerExceptionInterface::class, new Exception\InvalidArgumentException());
         $this->assertInstanceOf(ContainerExceptionInterface::class, new Exception\InvalidIdException());
         $this->assertInstanceOf(NotFoundExceptionInterface::class, new Exception\RecordNotFoundException());
@@ -99,7 +95,7 @@ class ContainerTest extends TestCase
             ''                => 'empty id?!'
         ];
 
-        $container = new Container(new RecordCollection([
+        $records = [
             'test'            => new Record\ValueRecord('Hello World!'),
             'category.first'  => new Record\ValueRecord('one'),
             'category.second' => new Record\ValueRecord('two'),
@@ -110,7 +106,9 @@ class ContainerTest extends TestCase
             'lazy.goodbye'    => new Record\CallbackRecord(function () { return 'see ya!'; }),
             '2643'            => new Record\ValueRecord('numeric id!'),
             ''                => new Record\ValueRecord('empty id?!')
-        ]));
+        ];
+
+        $container = $this->builder([], $records)->container();
 
         foreach ($expected as $key => $value) {
             $this->assertTrue($container->has($key), 'Failed for key: ' . $key);
@@ -121,7 +119,7 @@ class ContainerTest extends TestCase
     public function testConstructWithNonRecordsArray_ThrowsException()
     {
         $this->expectException(Exception\InvalidArgumentException::class);
-        new RecordCollection(['first' => 'ok', 2 => 'not ok']);
+        $this->builder([], ['first' => new Record\ValueRecord('ok'), 'second' => 'not ok']);
     }
 
     public function testCallbacksCannotModifyRegistry()
@@ -300,15 +298,22 @@ class ContainerTest extends TestCase
 
     public function testUsingConfigKeyIndicatorForRecordEntry_ThrowsException()
     {
-        $builder = $this->builder();
+        $builder = $this->builder(['config' => 'value']);
 
         $this->expectException(Exception\InvalidIdException::class);
         $builder->entry('.starting.with.separator')->set(true);
     }
 
+    public function testUsingConfigKeyIndicatorDoesntMatterIfConfigNotPresent()
+    {
+        $builder = $this->builder();
+        $builder->entry('.starting.with.separator')->set(true);
+        $this->assertTrue($builder->container()->get('.starting.with.separator'));
+    }
+
     private function builder(array $config = [], array $records = [])
     {
-        return new ContainerSetup(new CompositeRecordCollection(new ConfigContainer($config), $records));
+        return new ContainerSetup($config, $records);
     }
 
     private function preconfiguredBuilder()
