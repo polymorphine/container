@@ -9,9 +9,9 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Container\Record;
+namespace Polymorphine\Container\Setup\Record;
 
-use Polymorphine\Container\Record;
+use Polymorphine\Container\Setup\Record;
 use Psr\Container\ContainerInterface;
 
 

@@ -12,7 +12,7 @@
 namespace Polymorphine\Container\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Polymorphine\Container\ContainerSetup;
+use Polymorphine\Container\Setup\ContainerSetup;
 use Polymorphine\Container\Exception;
 use Polymorphine\Container\Tests\Fixtures\Example;
 use Psr\Container\ContainerInterface;

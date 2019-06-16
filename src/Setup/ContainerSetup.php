@@ -9,8 +9,12 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Container;
+namespace Polymorphine\Container\Setup;
 
+use Polymorphine\Container\Container;
+use Polymorphine\Container\TrackingContainer;
+use Polymorphine\Container\ConfigContainer;
+use Polymorphine\Container\Exception;
 use Psr\Container\ContainerInterface;
 
 
