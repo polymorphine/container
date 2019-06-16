@@ -11,8 +11,8 @@
 
 namespace Polymorphine\Container\Setup;
 
-use Polymorphine\Container\Container;
-use Polymorphine\Container\TrackingContainer;
+use Polymorphine\Container\RecordContainer;
+use Polymorphine\Container\TrackingRecordContainer;
 use Polymorphine\Container\ConfigContainer;
 use Polymorphine\Container\Exception;
 use Psr\Container\ContainerInterface;
@@ -61,8 +61,8 @@ class ContainerSetup
         if ($this->container) { return $this->container; }
 
         return $this->container = $tracking
-            ? new TrackingContainer($this->records)
-            : new Container($this->records);
+            ? new TrackingRecordContainer($this->records)
+            : new RecordContainer($this->records);
     }
 
     /**

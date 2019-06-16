@@ -15,7 +15,7 @@ use Polymorphine\Container\Setup\RecordCollection;
 use Psr\Container\ContainerInterface;
 
 
-class Container implements ContainerInterface
+class RecordContainer implements ContainerInterface
 {
     protected $records;
 

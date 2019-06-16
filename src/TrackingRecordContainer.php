@@ -12,7 +12,7 @@
 namespace Polymorphine\Container;
 
 
-class TrackingContainer extends Container
+class TrackingRecordContainer extends RecordContainer
 {
     private $references = [];
 
