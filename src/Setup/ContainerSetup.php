@@ -28,16 +28,16 @@ class ContainerSetup
      * $prefix will not be accessible, because container will
      * assume configuration entry.
      *
-     * @param array    $config  Associative (multidimensional) array of configuration values
      * @param Record[] $records Flat associative array of Record instances
+     * @param array    $config  Associative (multidimensional) array of configuration values
      * @param string   $prefix  Container entry id prefix used to identify config container values
      *
      * @throws Exception\InvalidArgumentException
      */
-    public function __construct(array $config = [], array $records = [], string $prefix = '.')
+    public function __construct(array $records = [], array $config = [], string $prefix = '.')
     {
         $this->records = $config
-            ? new CompositeRecordCollection(new ConfigContainer($config), $records, $prefix)
+            ? new CompositeRecordCollection($records, new ConfigContainer($config), $prefix)
             : new RecordCollection($records);
     }
 

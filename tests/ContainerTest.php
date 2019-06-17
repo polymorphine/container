@@ -53,15 +53,15 @@ class ContainerTest extends TestCase
 
     public function testGivenContainerWithEmptyValues_HasMethodReturnsTrue()
     {
-        $config = [
-            'null'  => null,
-            'false' => false
-        ];
         $records = [
             'null'  => new Record\ValueRecord(null),
             'false' => new Record\ValueRecord(false)
         ];
-        $container = $this->builder($config, $records)->container();
+        $config = [
+            'null'  => null,
+            'false' => false
+        ];
+        $container = $this->builder($records, $config)->container();
 
         $this->assertTrue($container->has('null'));
         $this->assertTrue($container->has('false'));
@@ -69,7 +69,7 @@ class ContainerTest extends TestCase
 
     public function testInvalidContainerIdTypeIsCastedToString()
     {
-        $container = $this->builder([], ['23' => new Record\ValueRecord('Michael Jordan!')])->container();
+        $container = $this->builder(['23' => new Record\ValueRecord('Michael Jordan!')])->container();
         $this->assertSame('Michael Jordan!', $container->get(23));
     }
 
@@ -108,7 +108,7 @@ class ContainerTest extends TestCase
             ''                => new Record\ValueRecord('empty id?!')
         ];
 
-        $container = $this->builder([], $records)->container();
+        $container = $this->builder($records)->container();
 
         foreach ($expected as $key => $value) {
             $this->assertTrue($container->has($key), 'Failed for key: ' . $key);
@@ -119,7 +119,7 @@ class ContainerTest extends TestCase
     public function testConstructWithNonRecordsArray_ThrowsException()
     {
         $this->expectException(Exception\InvalidArgumentException::class);
-        $this->builder([], ['first' => new Record\ValueRecord('ok'), 'second' => 'not ok']);
+        $this->builder(['first' => new Record\ValueRecord('ok'), 'second' => 'not ok']);
     }
 
     public function testCallbacksCannotModifyRegistry()
@@ -171,7 +171,7 @@ class ContainerTest extends TestCase
 
     public function testSetupContainer_ReturnsSameInstanceOfContainer()
     {
-        $setup      = $this->builder(['exists' => new Record\ValueRecord(true)]);
+        $setup      = $this->builder([], ['exists' => new Record\ValueRecord(true)]);
         $container1 = $setup->container();
         $setup->entry('not.too.late')->set(true);
         $container2 = $setup->container();
@@ -202,7 +202,7 @@ class ContainerTest extends TestCase
             'polite' => 'How are you?'
         ]];
 
-        $setup = $this->builder($config);
+        $setup = $this->builder([], $config);
         $setup->entry('small.talk')->compose(Example\ExampleClass::class, '.env.hello', '.env.name');
         $container = $setup->container();
 
@@ -210,7 +210,7 @@ class ContainerTest extends TestCase
         $this->assertSame($expect, $container->get('small.talk')->beNice());
 
         // Decorated record
-        $setup = $this->builder($config);
+        $setup = $this->builder([], $config);
         $setup->entry('small.talk')->compose(Example\ExampleClass::class, '.env.hello', '.env.name');
         $setup->entry('small.talk')->compose(Example\DecoratingExampleClass::class, 'small.talk', '.env.polite');
         $container = $setup->container();
@@ -219,7 +219,7 @@ class ContainerTest extends TestCase
         $this->assertSame($expect, $container->get('small.talk')->beNice());
 
         // Decorated Again
-        $setup = $this->builder($config);
+        $setup = $this->builder([], $config);
         $setup->entry('ask.football')->set('Have you seen that ridiculous display last night?');
         $setup->entry('small.talk')->compose(Example\ExampleClass::class, '.env.hello', '.env.name');
         $setup->entry('small.talk')->compose(Example\DecoratingExampleClass::class, 'small.talk', '.env.polite');
@@ -251,7 +251,7 @@ class ContainerTest extends TestCase
 
     public function testInvalidCreateMethod_ThrowsException()
     {
-        $setup = $this->builder(['factory' => new Record\ValueRecord(new Example\Factory())]);
+        $setup = $this->builder([], ['factory' => new Record\ValueRecord(new Example\Factory())]);
         $setup->entry('product')->call('@factory', 'one', 'two', 'three');
         $container = $setup->container();
         $this->expectException(Exception\InvalidArgumentException::class);
@@ -261,7 +261,7 @@ class ContainerTest extends TestCase
     public function testConfigsCanBeReadWithPath()
     {
         $data      = ['key1' => ['nested' => ['double' => 'nested value']], 'key2' => 'value2'];
-        $container = $this->builder(['env' => $data])->container();
+        $container = $this->builder([], ['env' => $data])->container();
 
         $this->assertSame($data['key1']['nested']['double'], $container->get('.env.key1.nested.double'));
         $this->assertSame($data['key1']['nested'], $container->get('.env.key1.nested'));
@@ -284,7 +284,7 @@ class ContainerTest extends TestCase
     public function testGetMissingConfigRecord_ThrowsException(string $undefinedPath)
     {
         $data      = ['key1' => ['nested' => ['double' => 'nested value']], 'key2' => 'value2'];
-        $container = $this->builder($data)->container();
+        $container = $this->builder([], $data)->container();
 
         $this->assertFalse($container->has($undefinedPath));
         $this->expectException(Exception\RecordNotFoundException::class);
@@ -298,7 +298,7 @@ class ContainerTest extends TestCase
 
     public function testUsingConfigKeyIndicatorForRecordEntry_ThrowsException()
     {
-        $builder = $this->builder(['config' => 'value']);
+        $builder = $this->builder([], ['config' => 'value']);
 
         $this->expectException(Exception\InvalidIdException::class);
         $builder->entry('.starting.with.separator')->set(true);
@@ -311,14 +311,14 @@ class ContainerTest extends TestCase
         $this->assertTrue($builder->container()->get('.starting.with.separator'));
     }
 
-    private function builder(array $config = [], array $records = [])
+    private function builder(array $records = [], array $config = [])
     {
-        return new ContainerSetup($config, $records);
+        return new ContainerSetup($records, $config);
     }
 
     private function preconfiguredBuilder()
     {
-        $builder = $this->builder(['config' => 'value']);
+        $builder = $this->builder([], ['config' => 'value']);
         $builder->entry('test')->set('Hello World!');
         $builder->entry('lazy')->invoke(function () { return 'Lazy Foo'; });
 

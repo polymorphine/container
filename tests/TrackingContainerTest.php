@@ -59,7 +59,7 @@ class TrackingContainerTest extends TestCase
 
     public function testMultipleCallsAreNotCircular()
     {
-        $setup = $this->builder(['config' => 'value']);
+        $setup = $this->builder([], ['config' => 'value']);
         $setup->entry('ref')->invoke(function (ContainerInterface $c) {
             return $c->get('ref.multiple') . ':' . $c->get('ref.multiple') . ':' . $c->get('.config');
         });
@@ -98,7 +98,7 @@ class TrackingContainerTest extends TestCase
 
     public function testCallStackIsAddedToContainerExceptionMessage()
     {
-        $setup = $this->builder(['config' => 'value']);
+        $setup = $this->builder([], ['config' => 'value']);
         $setup->entry('A')->set(function () {});
         $setup->entry('B')->invoke(function (ContainerInterface $c) {
             return new Example\ExampleClass($c->get('A'), $c->get('undefined'));
@@ -110,8 +110,8 @@ class TrackingContainerTest extends TestCase
         $container->get('C');
     }
 
-    private function builder(array $config = [], array $records = [])
+    private function builder(array $records = [], array $config = [])
     {
-        return new ContainerSetup($config, $records);
+        return new ContainerSetup($records, $config);
     }
 }

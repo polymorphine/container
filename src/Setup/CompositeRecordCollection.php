@@ -24,13 +24,13 @@ class CompositeRecordCollection extends RecordCollection
      * RecordCollection with secondary Container accessed with
      * $prefix matching $id.
      *
-     * @param ContainerInterface $config
      * @param Record[]           $records
+     * @param ContainerInterface $config
      * @param string             $prefix
      *
      * @throws Exception\InvalidArgumentException
      */
-    public function __construct(ContainerInterface $config, array $records = [], string $prefix = '.')
+    public function __construct(array $records, ContainerInterface $config, string $prefix = '.')
     {
         $this->config = $config;
         $this->prefix = $prefix;
