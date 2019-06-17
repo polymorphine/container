@@ -15,15 +15,15 @@ use Polymorphine\Container\Exception;
 use Psr\Container\ContainerInterface;
 
 
+/**
+ * RecordCollection with secondary Container accessed using prefixed ids
+ */
 class CombinedRecordCollection extends RecordCollection
 {
     private $config;
     private $prefix;
 
     /**
-     * RecordCollection with secondary Container accessed with
-     * $prefix matching $id.
-     *
      * @param Record[]           $records
      * @param ContainerInterface $config
      * @param string             $prefix

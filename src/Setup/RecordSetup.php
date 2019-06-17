@@ -30,7 +30,8 @@ class RecordSetup
     }
 
     /**
-     * Pushes given Record instance directly into Container's records.
+     * Pushes given Record instance directly into Container's records
+     * using this instance's name property.
      *
      * @param Record $record
      *
@@ -111,7 +112,7 @@ class RecordSetup
      */
     public function call(string $method, ...$arguments): void
     {
-        $this->useRecord(new Record\CreateMethodRecord($method, $arguments));
+        $this->useRecord(new Record\CreateMethodRecord($method, ...$arguments));
     }
 
     private function decoratedRecordAlias(): string

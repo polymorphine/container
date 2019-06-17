@@ -12,6 +12,14 @@
 namespace Polymorphine\Container;
 
 
+/**
+ * Container that keeps track of called record sequences to display verbose
+ * Exception messages and prevent circular references causing callback loop
+ * stack overflow.
+ *
+ * This mechanism adds substantial execution overhead and should not
+ * be used in production.
+ */
 class TrackingRecordContainer extends RecordContainer
 {
     private $references = [];

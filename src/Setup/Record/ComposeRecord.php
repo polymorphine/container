@@ -19,7 +19,7 @@ use Psr\Container\ContainerInterface;
  * Record that creates and returns object of given class name
  * created with Container entries as its constructor parameters.
  *
- * Returned object is remembered and returned directly when
+ * Returned object is cached and returned directly when
  * value() method is called again.
  */
 class ComposeRecord implements Record

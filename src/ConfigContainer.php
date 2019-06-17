@@ -14,6 +14,10 @@ namespace Polymorphine\Container;
 use Psr\Container\ContainerInterface;
 
 
+/**
+ * Container with multidimensional array values accessed using path notation identifiers.
+ * Example: $config['key']['sub-key']['id'] = $instance->get('key.sub-key.id');
+ */
 class ConfigContainer implements ContainerInterface
 {
     public const SEPARATOR = '.';
@@ -21,11 +25,10 @@ class ConfigContainer implements ContainerInterface
     private $config;
 
     /**
-     * Config can be multidimensional array which values would be
-     * accessed using path notation, therefore its keys cannot
-     * contain path separator.
+     * $config keys MUST NOT contain path separator, because values
+     * stored under these keys will not be accessible.
      *
-     * @param array $config
+     * @param array $config Associative (multidimensional) array of config values
      */
     public function __construct(array $config)
     {

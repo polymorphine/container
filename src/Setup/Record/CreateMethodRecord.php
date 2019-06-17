@@ -16,13 +16,23 @@ use Polymorphine\Container\Exception\InvalidArgumentException;
 use Psr\Container\ContainerInterface;
 
 
+/**
+ * Record that creates its value by calling a method on (factory) object.
+ *
+ * Returned value is cached and returned directly when
+ * value() method is called again.
+ */
 class CreateMethodRecord implements Record
 {
     private $method;
     private $arguments = [];
     private $product;
 
-    public function __construct(string $method, $arguments)
+    /**
+     * @param string $method       format: `method@containerId`
+     * @param mixed  ...$arguments
+     */
+    public function __construct(string $method, ...$arguments)
     {
         $this->method    = $method;
         $this->arguments = $arguments;

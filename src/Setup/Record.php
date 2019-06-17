@@ -14,6 +14,9 @@ namespace Polymorphine\Container\Setup;
 use Psr\Container\ContainerInterface;
 
 
+/**
+ * Abstract strategy for retrieving values from RecordContainer
+ */
 interface Record
 {
     /**

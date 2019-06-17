@@ -18,7 +18,7 @@ use Psr\Container\ContainerInterface;
 /**
  * Record that returns value invoked from callable property.
  *
- * Returned value is remembered and returned directly when
+ * Returned value is cached and returned directly when
  * value() method is called again.
  */
 class CallbackRecord implements Record
@@ -27,10 +27,7 @@ class CallbackRecord implements Record
     private $callback;
 
     /**
-     * Callback will be given ContainerInterface that may be used to
-     * produce record's value.
-     *
-     * @param callable $callback
+     * @param callable $callback function (ContainerInterface): mixed
      */
     public function __construct(callable $callback)
     {
