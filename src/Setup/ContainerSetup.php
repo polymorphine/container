@@ -37,7 +37,7 @@ class ContainerSetup
     public function __construct(array $records = [], array $config = [], string $prefix = '.')
     {
         $this->records = $config
-            ? new CompositeRecordCollection($records, new ConfigContainer($config), $prefix)
+            ? new CombinedRecordCollection($records, new ConfigContainer($config), $prefix)
             : new RecordCollection($records);
     }
 

@@ -15,7 +15,7 @@ use Polymorphine\Container\Exception;
 use Psr\Container\ContainerInterface;
 
 
-class CompositeRecordCollection extends RecordCollection
+class CombinedRecordCollection extends RecordCollection
 {
     private $config;
     private $prefix;
