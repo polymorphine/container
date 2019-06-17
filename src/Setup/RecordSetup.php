@@ -71,7 +71,7 @@ class RecordSetup
     }
 
     /**
-     * Pushes CompositeRecord with given className and its constructor
+     * Pushes ComposeRecord with given className and its constructor
      * parameters given as Container id names. Each dependency has
      * to be defined within collection (otherwise circular references
      * cannot be avoided).
@@ -81,7 +81,7 @@ class RecordSetup
      * Now every class depending on decorated object will take product of this
      * record as its dependency. Objects can be decorated multiple times.
      *
-     * @see CompositeRecord
+     * @see ComposeRecord
      *
      * @param string   $className
      * @param string[] $dependencies
@@ -95,7 +95,7 @@ class RecordSetup
             $dependencies[$idx] = $this->decoratedRecordAlias();
         }
 
-        $this->useRecord(new Record\CompositeRecord($className, ...$dependencies));
+        $this->useRecord(new Record\ComposeRecord($className, ...$dependencies));
     }
 
     /**

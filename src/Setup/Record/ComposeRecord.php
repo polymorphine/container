@@ -22,7 +22,7 @@ use Psr\Container\ContainerInterface;
  * Returned object is remembered and returned directly when
  * value() method is called again.
  */
-class CompositeRecord implements Record
+class ComposeRecord implements Record
 {
     private $className;
     private $dependencies;
