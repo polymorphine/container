@@ -12,9 +12,11 @@
 namespace Polymorphine\Container\Tests;
 
 use PHPUnit\Framework\TestCase;
+use Polymorphine\Container\ConfigContainer;
 use Polymorphine\Container\Setup\ContainerSetup;
 use Polymorphine\Container\Setup\Record;
 use Polymorphine\Container\Exception;
+use Polymorphine\Container\Setup\RecordCollection;
 use Polymorphine\Container\Tests\Fixtures\Example;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -119,7 +121,7 @@ class ContainerTest extends TestCase
     public function testConstructWithNonRecordsArray_ThrowsException()
     {
         $this->expectException(Exception\InvalidArgumentException::class);
-        $this->builder(['first' => new Record\ValueRecord('ok'), 'second' => 'not ok']);
+        new RecordCollection(['first' => new Record\ValueRecord('ok'), 'second' => 'not ok']);
     }
 
     public function testCallbacksCannotModifyRegistry()
@@ -313,7 +315,9 @@ class ContainerTest extends TestCase
 
     private function builder(array $records = [], array $config = [])
     {
-        return new ContainerSetup($records, $config);
+        $setup = $config ? new ContainerSetup(new ConfigContainer($config)) : new ContainerSetup();
+        $setup->records($records);
+        return $setup;
     }
 
     private function preconfiguredBuilder()

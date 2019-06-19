@@ -13,7 +13,6 @@ namespace Polymorphine\Container\Setup;
 
 use Polymorphine\Container\RecordContainer;
 use Polymorphine\Container\TrackingRecordContainer;
-use Polymorphine\Container\ConfigContainer;
 use Polymorphine\Container\Exception;
 use Psr\Container\ContainerInterface;
 
@@ -24,21 +23,18 @@ class ContainerSetup
     private $container;
 
     /**
-     * Records stored under keys starting with configuration
-     * $prefix will not be accessible, because container will
-     * assume configuration entry.
+     * Optional secondary container accessed with identifier $prefix.
      *
-     * @param Record[] $records Flat associative array of Record instances
-     * @param array    $config  Associative (multidimensional) array of configuration values
-     * @param string   $prefix  Container entry id prefix used to identify config container values
+     * @param ContainerInterface $container
+     * @param string             $prefix
      *
      * @throws Exception\InvalidArgumentException
      */
-    public function __construct(array $records = [], array $config = [], string $prefix = '.')
+    public function __construct(ContainerInterface $container = null, string $prefix = '.')
     {
-        $this->records = $config
-            ? new CombinedRecordCollection($records, new ConfigContainer($config), $prefix)
-            : new RecordCollection($records);
+        $this->records = $container
+            ? new CombinedRecordCollection([], $container, $prefix)
+            : new RecordCollection();
     }
 
     /**
@@ -76,5 +72,17 @@ class ContainerSetup
     public function entry(string $name): RecordSetup
     {
         return new RecordSetup($name, $this->records);
+    }
+
+    /**
+     * Stores Records instantiated directly in container.
+     *
+     * @param Record[] $records Flat associative array of Record instances
+     */
+    public function records(array $records): void
+    {
+        foreach ($records as $id => $record) {
+            $this->records->add($id, $record);
+        }
     }
 }
