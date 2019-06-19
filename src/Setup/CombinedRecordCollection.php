@@ -16,12 +16,13 @@ use Psr\Container\ContainerInterface;
 
 
 /**
- * RecordCollection with secondary Container accessed using prefixed ids
+ * RecordCollection with secondary Container accessed using prefixed ids.
  */
 class CombinedRecordCollection extends RecordCollection
 {
     private $config;
     private $prefix;
+    private $prefixLength;
 
     /**
      * @param Record[]           $records
@@ -34,6 +35,8 @@ class CombinedRecordCollection extends RecordCollection
     {
         $this->config = $config;
         $this->prefix = $prefix;
+
+        $this->prefixLength = strlen($prefix);
         parent::__construct($records);
     }
 
@@ -68,11 +71,11 @@ class CombinedRecordCollection extends RecordCollection
 
     private function isConfigId(string $id): bool
     {
-        return strpos($id, $this->prefix) === 0;
+        return strncmp($this->prefix, $id, $this->prefixLength) === 0;
     }
 
     private function removePrefix(string $id): string
     {
-        return substr($id, strlen($this->prefix));
+        return substr($id, $this->prefixLength);
     }
 }
