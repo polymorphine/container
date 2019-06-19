@@ -118,12 +118,6 @@ class ContainerTest extends TestCase
         }
     }
 
-    public function testConstructWithNonRecordsArray_ThrowsException()
-    {
-        $this->expectException(Exception\InvalidArgumentException::class);
-        new RecordCollection(['first' => new Record\ValueRecord('ok'), 'second' => 'not ok']);
-    }
-
     public function testCallbacksCannotModifyRegistry()
     {
         $setup = $this->builder();

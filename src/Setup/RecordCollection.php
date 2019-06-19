@@ -21,12 +21,10 @@ class RecordCollection
 
     /**
      * @param Record[] $records Associative (flat) array of Record entries
-     *
-     * @throws Exception\InvalidArgumentException
      */
     public function __construct(array $records = [])
     {
-        $this->records = $this->validRecordsArray($records);
+        $this->records = $records;
     }
 
     /**
@@ -104,14 +102,5 @@ class RecordCollection
             throw new Exception\RecordNotFoundException(sprintf('Record `%s` not defined', $id));
         }
         return $this->records[$id];
-    }
-
-    private function validRecordsArray(array $records): array
-    {
-        foreach ($records as $id => $record) {
-            if ($record instanceof Record) { continue; }
-            throw new Exception\InvalidArgumentException('Expected flat associative array of Record instances');
-        }
-        return $records;
     }
 }
