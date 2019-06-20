@@ -12,6 +12,7 @@
 namespace Polymorphine\Container\Setup;
 
 use Polymorphine\Container\Exception;
+use Polymorphine\Container\Setup\Record\CreateMethodRecord;
 
 
 /**
@@ -101,18 +102,19 @@ class RecordSetup
 
     /**
      * Pushes CreateMethodRecord with given method of container identified
-     * object and its parameter values.
+     * factory and its parameter values as container identifiers.
      *
      * @see CreateMethodRecord
      *
-     * @param string $method       format: `method@containerId`
-     * @param mixed  ...$arguments
+     * @param string $factoryId
+     * @param string $method
+     * @param string ...$arguments Container identifiers of stored arguments
      *
      * @throws Exception\InvalidIdException | Exception\RecordNotFoundException
      */
-    public function call(string $method, ...$arguments): void
+    public function create(string $factoryId, string $method, string ...$arguments): void
     {
-        $this->useRecord(new Record\CreateMethodRecord($method, ...$arguments));
+        $this->useRecord(new Record\CreateMethodRecord($factoryId, $method, ...$arguments));
     }
 
     private function decoratedRecordAlias(): string

@@ -12,7 +12,6 @@
 namespace Polymorphine\Container\Setup\Record;
 
 use Polymorphine\Container\Setup\Record;
-use Polymorphine\Container\Exception\InvalidArgumentException;
 use Psr\Container\ContainerInterface;
 
 
@@ -24,16 +23,21 @@ use Psr\Container\ContainerInterface;
  */
 class CreateMethodRecord implements Record
 {
+    use ExtractArgumentsTrait;
+
+    private $factoryId;
     private $method;
     private $arguments = [];
     private $product;
 
     /**
-     * @param string $method       format: `method@containerId`
-     * @param mixed  ...$arguments
+     * @param string $method
+     * @param string $factoryId
+     * @param string ...$arguments
      */
-    public function __construct(string $method, ...$arguments)
+    public function __construct(string $factoryId, string $method, string ...$arguments)
     {
+        $this->factoryId = $factoryId;
         $this->method    = $method;
         $this->arguments = $arguments;
     }
@@ -45,14 +49,7 @@ class CreateMethodRecord implements Record
 
     private function create(ContainerInterface $container)
     {
-        [$method, $factoryName] = explode('@', $this->method) + [null, null];
-
-        if (!$method || !$factoryName) {
-            throw new InvalidArgumentException();
-        }
-
-        $factory = $container->get($factoryName);
-
-        return $factory->{$method}(...$this->arguments);
+        $factory = $container->get($this->factoryId);
+        return $factory->{$this->method}(...$this->arguments($this->arguments, $container));
     }
 }

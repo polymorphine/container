@@ -244,21 +244,12 @@ class ContainerTest extends TestCase
 
     public function testCreateMethodRecord()
     {
-        $setup = $this->builder();
+        $setup = $this->builder(['one' => 'first', 'two' => 'second', 'three' => 'third']);
         $setup->entry('factory')->set(new Example\Factory());
-        $setup->entry('product')->call('create@factory', 'one', 'two', 'three');
+        $setup->entry('product')->create('factory', 'create', '.one', '.two', '.three');
         $container = $setup->container();
 
-        $this->assertSame('one,two,three', $container->get('product'));
-    }
-
-    public function testInvalidCreateMethod_ThrowsException()
-    {
-        $setup = $this->builder(['factory' => new Record\ValueRecord(new Example\Factory())]);
-        $setup->entry('product')->call('@factory', 'one', 'two', 'three');
-        $container = $setup->container();
-        $this->expectException(Exception\InvalidArgumentException::class);
-        $container->get('product');
+        $this->assertSame('first,second,third', $container->get('product'));
     }
 
     public function testConfigsCanBeReadWithPath()

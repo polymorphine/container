@@ -24,6 +24,8 @@ use Psr\Container\ContainerInterface;
  */
 class ComposeRecord implements Record
 {
+    use ExtractArgumentsTrait;
+
     private $className;
     private $dependencies;
     private $object;
@@ -40,16 +42,11 @@ class ComposeRecord implements Record
 
     public function value(ContainerInterface $container)
     {
-        return $this->object ?: $this->object = new $this->className(...$this->extractDependencies($container));
+        return $this->object ?: $this->object = $this->create($container);
     }
 
-    private function extractDependencies(ContainerInterface $container): array
+    private function create(ContainerInterface $container)
     {
-        $dependencies = [];
-        foreach ($this->dependencies as $dependency) {
-            $dependencies[] = $container->get($dependency);
-        }
-
-        return $dependencies;
+        return new $this->className(...$this->arguments($this->dependencies, $container));
     }
 }
