@@ -3,7 +3,7 @@
 [![Coverage status](https://coveralls.io/repos/github/shudd3r/polymorphine-container/badge.svg?branch=master)](https://coveralls.io/github/shudd3r/polymorphine-container?branch=master)
 [![PHP version](https://img.shields.io/packagist/php-v/polymorphine/container.svg)](https://packagist.org/packages/polymorphine/container)
 [![LICENSE](https://img.shields.io/github/license/shudd3r/polymorphine-container.svg?color=blue)](LICENSE)
-### PSR-11 Container for Dependencies and Configuration
+### PSR-11 Container for libraries & configuration
 
 #### Concept features:
 - immutability & PSR-11 compatibility

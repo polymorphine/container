@@ -1,6 +1,6 @@
 {
     "name": "polymorphine/container",
-    "description": "PSR-11 Container for Dependencies & Configuration",
+    "description": "PSR-11 Container for libraries & configuration",
     "type": "library",
     "minimum-stability": "stable",
     "require": {
