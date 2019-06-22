@@ -40,11 +40,17 @@ class ContainerTest extends TestCase
             'test' => new Record\ValueRecord('Hello World!'),
             'lazy' => new Record\CallbackRecord(function () { return 'Lazy Foo'; })
         ]);
+
+        $setup->records([
+            'callback' => new Record\ValueRecord(function () {}),
+            'foo' => new Record\ComposeRecord(Example\ExampleClass::class, 'callback', 'test')
+        ]);
         $container = $setup->container();
 
         $this->assertTrue($container->has('test') && $container->has('lazy'));
         $this->assertSame('Hello World!', $container->get('test'));
         $this->assertSame('Lazy Foo', $container->get('lazy'));
+        $this->assertInstanceOf(Example\ExampleClass::class, $container->get('foo'));
     }
 
     public function testClosuresForLazyLoadedValuesCanAccessContainer()
@@ -143,6 +149,13 @@ class ContainerTest extends TestCase
         $setup->entry('test')->set('foo');
         $this->expectException(Exception\InvalidIdException::class);
         $setup->entry('test')->set('bar');
+    }
+
+    public function testAddingRecordsArrayWithExistingRecord_ThrowsException()
+    {
+        $setup = $this->builder([], ['exists' => new Record\ValueRecord('something')]);
+        $this->expectException(Exception\InvalidIdException::class);
+        $setup->records(['notExists' => new Record\ValueRecord('foo'), 'exists' => new Record\ValueRecord('bar')]);
     }
 
     /**
@@ -390,8 +403,12 @@ class ContainerTest extends TestCase
 
     private function builder(array $config = [], array $records = [])
     {
-        $setup = $config ? new ContainerSetup(new ConfigContainer($config)) : new ContainerSetup();
-        $setup->records($records);
-        return $setup;
+        if ($config && !$records) {
+            return ContainerSetup::withConfig($config);
+        }
+
+        return $config
+            ? ContainerSetup::prebuilt($records, new ConfigContainer($config))
+            : ContainerSetup::prebuilt($records);
     }
 }

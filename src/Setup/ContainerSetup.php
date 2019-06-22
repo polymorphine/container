@@ -12,9 +12,10 @@
 namespace Polymorphine\Container\Setup;
 
 use Polymorphine\Container\RecordContainer;
+use Polymorphine\Container\ConfigContainer;
 use Polymorphine\Container\TrackingRecordContainer;
+use Psr\Container\ContainerInterface as Container;
 use Polymorphine\Container\Exception;
-use Psr\Container\ContainerInterface;
 
 
 class ContainerSetup
@@ -23,18 +24,44 @@ class ContainerSetup
     private $container;
 
     /**
-     * Optional secondary container accessed with identifier $prefix.
-     *
-     * @param ContainerInterface $container
-     * @param string             $prefix
-     *
-     * @throws Exception\InvalidArgumentException
+     * @param RecordCollection $records
      */
-    public function __construct(ContainerInterface $container = null, string $prefix = '.')
+    public function __construct(RecordCollection $records = null)
     {
-        $this->records = $container
-            ? new CombinedRecordCollection([], $container, $prefix)
-            : new RecordCollection();
+        $this->records = $records ?? new RecordCollection();
+    }
+
+    /**
+     * Provided Record entries will not be validated, make sure to avoid id conflicts
+     * with secondary container prefix and type or nesting Record values.
+     *
+     * @param Record[]  $records   $records Associative (flat) array of Record entries
+     * @param Container $container Secondary container instance
+     * @param string    $prefix    Id prefix to access secondary container values
+     *
+     * @return ContainerSetup
+     */
+    public static function prebuilt(
+        array $records,
+        Container $container = null,
+        string $prefix = '.'
+    ): self {
+        $records = $container
+            ? new CombinedRecordCollection($records, $container, $prefix)
+            : new RecordCollection($records);
+
+        return new self($records);
+    }
+
+    /**
+     * @param array  $config Associative (multidimensional) array of configuration values
+     * @param string $prefix
+     *
+     * @return ContainerSetup
+     */
+    public static function withConfig(array $config, string $prefix = '.'): self
+    {
+        return new self(new CombinedRecordCollection([], new ConfigContainer($config), $prefix));
     }
 
     /**
@@ -50,9 +77,9 @@ class ContainerSetup
      * @param bool $tracking Enables call stack tracking and detects
      *                       circular references
      *
-     * @return ContainerInterface
+     * @return Container
      */
-    public function container(bool $tracking = false): ContainerInterface
+    public function container(bool $tracking = false): Container
     {
         if ($this->container) { return $this->container; }
 
@@ -78,6 +105,8 @@ class ContainerSetup
      * Stores Records instantiated directly in container.
      *
      * @param Record[] $records Flat associative array of Record instances
+     *
+     * @throws Exception\InvalidIdException
      */
     public function records(array $records): void
     {
