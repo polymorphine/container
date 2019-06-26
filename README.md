@@ -23,50 +23,50 @@
 This example will show how to set up simple container. It starts with instantiating
 [`ContainerSetup`](src/Setup/ContainerSetup.php) object, and using its methods to set
 container's entries:
+```php
+<?php
+use Polymorphine\Container\Setup\ContainerSetup;
 
-    <?php
-    use Polymorphine\Container\Setup\ContainerSetup;
+require_once __DIR__ . '/vendor/autoload.php';
 
-    require_once __DIR__ . '/vendor/autoload.php';
-    
-    $setup = new ContainerSetup();
-
+$setup = new ContainerSetup();
+````
 Using `ContainerSetup::entry()` method:
+```php
+$setup->entry('value')->set('Hello world!');
+$setup->entry('domain')->set('http://api.example.com');
+$setup->entry('direct.object')->set(new ClassInstance());
 
-    $setup->entry('value')->set('Hello world!');
-    $setup->entry('domain')->set('http://api.example.com');
-    $setup->entry('direct.object')->set(new ClassInstance());
+$setup->entry('deferred')->invoke(function (ContainerInterface $c) {
+    return new DeferredClassInstance($c->get('value'));
+});
 
-    $setup->entry('deferred')->invoke(function (ContainerInterface $c) {
-        return new DeferredClassInstance($c->get('value'));
-    });
-
-    $setup->entry('composed.factory')->compose(ComposedClass::class, 'direct.object', 'deferred');
-    $setup->entry('factory.product')->create('composed.factory', 'create', 'domain');
-
+$setup->entry('composed.factory')->compose(ComposedClass::class, 'direct.object', 'deferred');
+$setup->entry('factory.product')->create('composed.factory', 'create', 'domain');
+```
 Or passing array of [`Record`](src/Setup/Record.php) instances:
+```php
+// assumed Record namespace is also imported at the top
+use Polymorphine\Container\Setup\Record;
+// ...
 
-    // assumed Record namespace is also imported at the top
-    use Polymorphine\Container\Setup\Record;
-    ...
-    
-    $setup->records([
-        'value' => new Record\VelueRecord('Hello world!'),
-        'domain' => new Recoed\ValueRecord('http://api.example.com');
-        'direct.object' => new Record\VelueRecord(new ClassInstance()),
-        'deferred' => new Record\CallbackRecord(function (ContainerInterface $c) {
-             return new DeferredClassInstance($c->get('env.value'));
-        },
-        'composed.factory' => new Record\ComposeRecord(ComposedClass::class, 'direct.object', 'deferred'),
-        'factory.product' => new Record\CreateMethodRecord('composed.factory', 'create', 'domain')                  
-    ]);
-
+$setup->records([
+    'value' => new Record\VelueRecord('Hello world!'),
+    'domain' => new Recoed\ValueRecord('http://api.example.com');
+    'direct.object' => new Record\VelueRecord(new ClassInstance()),
+    'deferred' => new Record\CallbackRecord(function (ContainerInterface $c) {
+         return new DeferredClassInstance($c->get('env.value'));
+    },
+    'composed.factory' => new Record\ComposeRecord(ComposedClass::class, 'direct.object', 'deferred'),
+    'factory.product' => new Record\CreateMethodRecord('composed.factory', 'create', 'domain')
+]);
+```
 And instantiate container:
-
-    $container = $setup->container();
-    $container->has('composed.factory'); // true
-    $container->get('factory.product'); // return type of ComposedClass::create() method
-
+```php
+$container = $setup->container();
+$container->has('composed.factory'); // true
+$container->get('factory.product'); // return type of ComposedClass::create() method
+```
 Container may be instantiated before adding any entries, and using `ContainerSetup` this
 way Container instance will be mutable only through its setter methods and once stored values
 will not be overwritten (except [*decorator feature*](#mutable-record---decorator-feature) described below).
@@ -83,26 +83,26 @@ package's Record implementations:
 - `ValueRecord`: Just a value, that will be returned as it was passed (callbacks will be returned
   without evaluation as well). To push value record mapped to given `$id` into container with
   setup object use `set` method:
-      
-      $setup->entry(string $id)->set(mixed $value);
-
+  ```php
+  $setup->entry(string $id)->set(mixed $value);
+  ```
 - `CallbackRecord`: Lazily invoked value cache. Takes callable that will be called with
   `ContainerInterface` as parameter, and value of this call will be stored and returned on
   subsequent calls. Setup with `invoke` method:
-  
-      $setup->entry(string $id)->invoke(callable $callback);
-  
+  ```php
+  $setup->entry(string $id)->invoke(callable $callback);
+  ```
 - `ComposeRecord`: Lazy instantiated object of given class. Constructor parameters are passed
   as aliases to other container entries. Setup - `compose` method:
-  
-      $setup->entry(string $id)->compose(string $class, string ...$dependencyRecords);
-
+  ```php
+  $setup->entry(string $id)->compose(string $class, string ...$dependencyRecords);
+  ```
 - `CreateMethodRecord`: Object created by calling method (given as string) on container provided
   instance of factory with container identifiers as arguments for this method. To configure this
   record with setup use `create` method:
-  
-      $setup->entry(string $id)->create(string $factoryId, string $factoryMethod, string ...$parameterIdentifiers);
-
+  ```php
+  $setup->entry(string $id)->create(string $factoryId, string $factoryMethod, string ...$parameterIdentifiers);
+  ```
 Stateful nature of custom `Record` implementation might return different values on subsequent
 calls or have various side effects, but it is advised against using container this way.
 
@@ -110,15 +110,15 @@ calls or have various side effects, but it is advised against using container th
 `ComposeRecord` can reassign existing entry if it's also used as
 one of its constructor parameters. Let's assume for example that in dev environment we want
 to log messages passed/returned by a library stored at container's 'my.library' id:
+```php
+ $setup->entry('my.library')->invoke(function (ContainerInterface $c) {
+     return new MyLibrary($c->get('myLib.dependency'), ...);
+ });
 
-     $setup->entry('my.library')->invoke(function (ContainerInterface $c) {
-         return new MyLibrary($c->get('myLib.dependency'), ...);
-     });
-
-     if ($env === 'develop') {
-         $setup->entry('my.library')->commpose(LoggedMyLibrary::class, 'my.library', 'logger.object');
-     }
-
+ if ($env === 'develop') {
+     $setup->entry('my.library')->commpose(LoggedMyLibrary::class, 'my.library', 'logger.object');
+ }
+```
 Of course it should return the same type as overwritten record would, because all clients
 currently using it would fail on type-checking, but due to lazy instantiation container
 can't ensure valid use and possible errors will emerge at runtime.
@@ -143,9 +143,9 @@ or `RecordContainer` constructor instead its base class (`RecordCollection`) all
 Container with different behaviour than default one (using records) when its contents is
 retrieved with defined id prefix. You may use (static) named constructor to pass both associated
 array of `Record` instances and secondary container with its identifier prefix (default: `.`):
-
-    $setup = ContainerSetup::prebuilt($records, ContainerInterface $container, string $prefix);
-    
+```php
+$setup = ContainerSetup::prebuilt($records, ContainerInterface $container, string $prefix);
+```
 Assuming `env.` prefix, entries received with `$setup->container()->get('env.someId')` will be
 delivered from passed `$container` instance with `someId` key.
 
@@ -154,70 +154,70 @@ delivered from passed `$container` instance with `someId` key.
 way to store and retrieve values from multidimensional associative arrays using path notation.
 This container is instantiated directly with constructor, and values can be accessed by
 separated keys on consecutive nesting levels. Example:
-
-    $container = new ConfigContainer([
-        'pdo' => [
-            'dsn' => 'mysql:dbname=testdb;host=localhost',
-            'user' => 'root',
-            'pass' => 'secret',
-            'options' => [
-                PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-            ]
+```php
+$container = new ConfigContainer([
+    'pdo' => [
+        'dsn' => 'mysql:dbname=testdb;host=localhost',
+        'user' => 'root',
+        'pass' => 'secret',
+        'options' => [
+            PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
         ]
-    ]);
-    
-    $container->get('pdo'); // ['dsn => 'mysql:dbname=testdb;host=localhost', 'user' => 'root', ...]
-    $container->get('pdo.user'); // root
-    $container->get('pdo.options'); // [ PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8', ... ]
- 
+    ]
+]);
+
+$container->get('pdo'); // ['dsn => 'mysql:dbname=testdb;host=localhost', 'user' => 'root', ...]
+$container->get('pdo.user'); // root
+$container->get('pdo.options'); // [ PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8', ... ]
+ ```
 #### Combine RecordContainer with ConfigContainer
 As it was described in introduction to this section `ContainerSetup` can be instantiated with
 secondary container. Here's an example of container combined from previous examples:
-    
-    $config = [
-        'value' => 'Hello world!',
-        'domain' => 'http://api.example.com',
-        'pdo' => [
-            'dsn' => 'mysql:dbname=testdb;host=localhost',
-            'user' => 'root',
-            'pass' => 'secret',
-            'options' => [
-                PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-            ]
+```php
+$config = [
+    'value' => 'Hello world!',
+    'domain' => 'http://api.example.com',
+    'pdo' => [
+        'dsn' => 'mysql:dbname=testdb;host=localhost',
+        'user' => 'root',
+        'pass' => 'secret',
+        'options' => [
+            PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
         ]
-    ];
-    
-    $records = [
-        'direct.object' => new Record/VelueRecord(new ClassInstance()),
-        'deferred' => new Record/CallbackRecord(function (ContainerInterface $c) {
-            return new DeferredClassInstance($c->get('env.value'));
-        },
-        'composed.factory' => new Record/ComposeRecord(ComposedClass::class, 'direct.object', 'deferred'),
-        'factory.product' => new Record/CreateMethodRecord('create@composed.factory', 'env.domain')                  
-    ];
+    ]
+];
 
+$records = [
+    'direct.object' => new Record/VelueRecord(new ClassInstance()),
+    'deferred' => new Record/CallbackRecord(function (ContainerInterface $c) {
+        return new DeferredClassInstance($c->get('env.value'));
+    },
+    'composed.factory' => new Record/ComposeRecord(ComposedClass::class, 'direct.object', 'deferred'),
+    'factory.product' => new Record/CreateMethodRecord('create@composed.factory', 'env.domain')           
+];
+```
 Note additional path prefixes for `value` and `domain` within `deferred` and `factory.product`
 definitions compared to records used in first example. These values are now fetched from
 `ConfigContainer`, and it's prefix will be defined as `env.`:
-
-    $setup = ContainerSetup::withConfig($config, 'env.');
-    $setup->records($records);
-    
+```php
+$setup = ContainerSetup::withConfig($config, 'env.');
+$setup->records($records);
+```
 Alternatively, but without type and id collisions checking:
-
-    $setup = ContainerSetup::prebuilt($records, new ConfigContainer($config), '.env');
-
+```php
+$setup = ContainerSetup::prebuilt($records, new ConfigContainer($config), '.env');
+```
 Now values can be retrieved from both Config and Record containers:
-     
-    $container = $setup->container();
-    $container->get('env.value'); // Hello world!
-    $container->get('env.pdo.user'); // root
-    $container->get('factory.product') // ComposedClass::create() method return type
-
+```php
+$container = $setup->container();
+$container->get('env.value'); // Hello world!
+$container->get('env.pdo.user'); // root
+$container->get('factory.product') // ComposedClass::create() method return type
+```
 
 ### Read and Write separation
 
@@ -230,37 +230,37 @@ and `RecordSetup` write only object.
 To make use of this separation `ContainerSetup` should be encapsulated within object, that
 allows its clients to configure container and grants its dependencies access only to container
 instance. For example, if you have front controller bootstrap class similar to...
+```php
+class App implements RequestHandlerInterface
+{
+    private $containerSetup;
 
-    class App implements RequestHandlerInterface
+    public function __construct(array $config = [])
     {
-        private $containerSetup;
-        
-        public function __construct(array $config = [])
-        {
-            $this->containerSetup = ContainerSetup::withConfig($config, 'env.');
-        }
-        
-        public function set(string $name): RecordSetup
-        {
-            return $this->containerSetup->entry($name);
-        }
-        
-        public function handle(ServerRequestInterface $request): ResponseInterface {
-            $container = $this->containerSetup->container();
-            //...
-        }
-        
-        ...
+        $this->containerSetup = ContainerSetup::withConfig($config, 'env.');
     }
 
+    public function set(string $name): RecordSetup
+    {
+        return $this->containerSetup->entry($name);
+    }
+
+    public function handle(ServerRequestInterface $request): ResponseInterface {
+        $container = $this->containerSetup->container();
+        // ...
+    }
+
+    // ...
+}
+```
 Now You can push values into container from the scope of `App` class object, but cannot
 access them, which provides by-design separation of concerns:
-
-    $app = new App(parse_ini_file('pdo.ini'));
-    $app->set('database')->invoke(function (ContainerInterface $c) {
-        return new PDO(...$c->get('env.pdo')); 
-    });
-
+```php
+$app = new App(parse_ini_file('pdo.ini'));
+$app->set('database')->invoke(function (ContainerInterface $c) {
+    return new PDO(...$c->get('env.pdo'));
+});
+```
 Nothing in outer scope will be able to use instance of `Container` created within `App`.
 It is possible to achieve, but it would need passing stateful object identifier that can
 return container through one of its methods. This is not recommended though, so it won't
@@ -285,12 +285,13 @@ built using container endpoints that use same router to produce urls (producing 
 stack: `router->endpoint->view-model->router`). To prevent circular reference (detection)
 router should be called directly in front controller layer (not retrieved from container)
 or should be built using container instance from parent (setup) scope instead callback parameter.
-
-    // anonymous function will be called with container parameter,
-    // but we're using inherited $setup instead:
-    $setup->entry('router')->invoke(function () use ($setup) {
-        return new Router($setup->container(true));
-    });
+```php
+// anonymous function will be called with container parameter,
+// but we're using inherited $setup instead:
+$setup->entry('router')->invoke(function () use ($setup) {
+    return new Router($setup->container(true));
+});
+```
 
 ### Recommended use
 
@@ -298,10 +299,10 @@ or should be built using container instance from parent (setup) scope instead ca
 Instantiating container with setup commands used in [first example](README.md#container-setup) and
 getting `factory.product` object will be equivalent to factory instantiated directly with
 `new` operator and calling `create()` method with `http://api.example.com` parameter:
-
-    $factory = new ComposedClass(new ClassInstance(), new DeferredClassInstance('Hello world!'));
-    $object  = $factory->create('http://api.example.com');
-    
+```php
+$factory = new ComposedClass(new ClassInstance(), new DeferredClassInstance('Hello world!'));
+$object  = $factory->create('http://api.example.com');
+```
 As you can see the container does not give any visible advantage when it comes to creating object
 directly. Assuming this object is used only in single use-case scenario there won't be any, but
 for libraries used in various request contexts or reused in the structures where the same instance
