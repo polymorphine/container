@@ -1,4 +1,5 @@
 # Polymorphine/Container
+[![Latest Stable Version](https://poser.pugx.org/polymorphine/container/version)](https://packagist.org/packages/polymorphine/container)
 [![Build status](https://travis-ci.org/shudd3r/polymorphine-container.svg?branch=master)](https://travis-ci.org/shudd3r/polymorphine-container)
 [![Coverage status](https://coveralls.io/repos/github/shudd3r/polymorphine-container/badge.svg?branch=master)](https://coveralls.io/github/shudd3r/polymorphine-container?branch=master)
 [![PHP version](https://img.shields.io/packagist/php-v/polymorphine/container.svg)](https://packagist.org/packages/polymorphine/container)
