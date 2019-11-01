@@ -1,9 +1,9 @@
 # Polymorphine/Container
 [![Latest Stable Version](https://poser.pugx.org/polymorphine/container/version)](https://packagist.org/packages/polymorphine/container)
-[![Build status](https://travis-ci.org/shudd3r/polymorphine-container.svg?branch=master)](https://travis-ci.org/shudd3r/polymorphine-container)
-[![Coverage status](https://coveralls.io/repos/github/shudd3r/polymorphine-container/badge.svg?branch=master)](https://coveralls.io/github/shudd3r/polymorphine-container?branch=master)
+[![Build status](https://travis-ci.org/polymorphine/container.svg?branch=master)](https://travis-ci.org/polymorphine/container)
+[![Coverage status](https://coveralls.io/repos/github/polymorphine/container/badge.svg?branch=master)](https://coveralls.io/github/polymorphine/container?branch=master)
 [![PHP version](https://img.shields.io/packagist/php-v/polymorphine/container.svg)](https://packagist.org/packages/polymorphine/container)
-[![LICENSE](https://img.shields.io/github/license/shudd3r/polymorphine-container.svg?color=blue)](LICENSE)
+[![LICENSE](https://img.shields.io/github/license/polymorphine/container.svg?color=blue)](LICENSE)
 ### PSR-11 Container for libraries & configuration
 
 #### Concept features:
