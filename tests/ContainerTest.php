@@ -13,7 +13,7 @@ namespace Polymorphine\Container\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Container\ConfigContainer;
-use Polymorphine\Container\Records\ContainerSetup;
+use Polymorphine\Container\Setup;
 use Polymorphine\Container\Records\Record;
 use Polymorphine\Container\Exception;
 use Polymorphine\Container\Tests\Fixtures\Example;
@@ -404,11 +404,11 @@ class ContainerTest extends TestCase
     private function builder(array $config = [], array $records = [])
     {
         if ($config && !$records) {
-            return ContainerSetup::withConfig($config);
+            return Setup::withConfig($config);
         }
 
         return $config
-            ? ContainerSetup::prebuilt($records, new ConfigContainer($config))
-            : ContainerSetup::prebuilt($records);
+            ? Setup::prebuilt($records, new ConfigContainer($config))
+            : Setup::prebuilt($records);
     }
 }

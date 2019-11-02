@@ -22,15 +22,15 @@
 
 ### Container setup
 This example will show how to set up simple container. It starts with instantiating
-[`ContainerSetup`](src/Records/ContainerSetup.php) object, and using its methods to set
+[`ContainerSetup`](src/Setup.php) object, and using its methods to set
 container's entries:
 ```php
 <?php
-use Polymorphine\Container\Records\ContainerSetup;
+use Polymorphine\Container\Setup;
 
 require_once 'vendor/autoload.php';
 
-$setup = new ContainerSetup();
+$setup = new Setup();
 ````
 Using `ContainerSetup::entry()` method:
 ```php
@@ -71,7 +71,7 @@ $container->get('factory.product'); // return type of ComposedClass::create() me
 Container may be instantiated before adding any entries, and using `ContainerSetup` this
 way Container instance will be mutable only through its setter methods and once stored values
 will not be overwritten (except [*decorator feature*](#mutable-record---decorator-feature) described below).
-It is recommended that access to [`ContainerSetup`](src/Records/ContainerSetup.php) was encapsulated
+It is recommended that access to [`ContainerSetup`](src/Setup.php) was encapsulated
 within controlled scope - see: [Read and Write separation](#read-and-write-separation)
 
 #### Records decide how it works internally
@@ -133,7 +133,7 @@ some integration tests in place). This collection is the same instance that Cont
 except setup has write access to it, and container is read only. Records comes with two static
 constructors that will instantiate collection for you: `RecordSetup::prebuilt()` and
 `RecordSetup::withConfig()`. Both allow setting up secondary container (explained in next
-section) access. Look at [`ContainerSetup`](src/Records/ContainerSetup.php) static constructors
+section) access. Look at [`ContainerSetup`](src/Setup.php) static constructors
 for details on composition of `RecordCollection` object.
 
 

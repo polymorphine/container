@@ -9,38 +9,35 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Container\Records;
+namespace Polymorphine\Container;
 
-use Polymorphine\Container\Records;
-use Polymorphine\Container\RecordContainer;
-use Polymorphine\Container\ConfigContainer;
-use Polymorphine\Container\TrackingRecordContainer;
+use Polymorphine\Container\Records\RecordCollection;
+use Polymorphine\Container\Records\CombinedRecordCollection;
 use Psr\Container\ContainerInterface as Container;
-use Polymorphine\Container\Exception;
 
 
-class ContainerSetup
+class Setup
 {
     private $records;
     private $container;
 
     /**
-     * @param RecordCollection $records
+     * @param Records $records
      */
     public function __construct(Records $records = null)
     {
-        $this->records = $records ?? new RecordCollection();
+        $this->records = $records ?? new Records\RecordCollection();
     }
 
     /**
      * Provided Record entries will not be validated, make sure to avoid id conflicts
      * with secondary container prefix and type or nesting Record values.
      *
-     * @param Record[]  $records   $records Associative (flat) array of Record entries
-     * @param Container $container Secondary container instance
-     * @param string    $prefix    Id prefix to access secondary container values
+     * @param Records\Record[] $records   $records Associative (flat) array of Record entries
+     * @param Container        $container Secondary container instance
+     * @param string           $prefix    Id prefix to access secondary container values
      *
-     * @return ContainerSetup
+     * @return Setup
      */
     public static function prebuilt(
         array $records,
@@ -58,11 +55,12 @@ class ContainerSetup
      * @param array  $config Associative (multidimensional) array of configuration values
      * @param string $prefix
      *
-     * @return ContainerSetup
+     * @return Setup
      */
     public static function withConfig(array $config, string $prefix = '.'): self
     {
-        return new self(new CombinedRecordCollection(new RecordCollection([]), new ConfigContainer($config), $prefix));
+        $records = new CombinedRecordCollection(new RecordCollection([]), new ConfigContainer($config), $prefix);
+        return new self($records);
     }
 
     /**
@@ -95,17 +93,17 @@ class ContainerSetup
      *
      * @param string $name
      *
-     * @return RecordSetup
+     * @return Records\RecordSetup
      */
-    public function entry(string $name): RecordSetup
+    public function entry(string $name): Records\RecordSetup
     {
-        return new RecordSetup($name, $this->records);
+        return new Records\RecordSetup($name, $this->records);
     }
 
     /**
      * Stores Records instantiated directly in container.
      *
-     * @param Record[] $records Flat associative array of Record instances
+     * @param Records\Record[] $records Flat associative array of Record instances
      *
      * @throws Exception\InvalidIdException
      */
