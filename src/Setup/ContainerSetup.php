@@ -11,6 +11,7 @@
 
 namespace Polymorphine\Container\Setup;
 
+use Polymorphine\Container\Records;
 use Polymorphine\Container\RecordContainer;
 use Polymorphine\Container\ConfigContainer;
 use Polymorphine\Container\TrackingRecordContainer;
@@ -26,7 +27,7 @@ class ContainerSetup
     /**
      * @param RecordCollection $records
      */
-    public function __construct(RecordCollection $records = null)
+    public function __construct(Records $records = null)
     {
         $this->records = $records ?? new RecordCollection();
     }
@@ -47,7 +48,7 @@ class ContainerSetup
         string $prefix = '.'
     ): self {
         $records = $container
-            ? new CombinedRecordCollection($records, $container, $prefix)
+            ? new CombinedRecordCollection(new RecordCollection($records), $container, $prefix)
             : new RecordCollection($records);
 
         return new self($records);
@@ -61,7 +62,7 @@ class ContainerSetup
      */
     public static function withConfig(array $config, string $prefix = '.'): self
     {
-        return new self(new CombinedRecordCollection([], new ConfigContainer($config), $prefix));
+        return new self(new CombinedRecordCollection(new RecordCollection([]), new ConfigContainer($config), $prefix));
     }
 
     /**

@@ -11,11 +11,12 @@
 
 namespace Polymorphine\Container\Setup;
 
+use Polymorphine\Container\Records;
 use Polymorphine\Container\Exception;
 use Psr\Container\ContainerInterface;
 
 
-class RecordCollection
+class RecordCollection implements Records
 {
     private $records;
 
@@ -27,41 +28,16 @@ class RecordCollection
         $this->records = $records;
     }
 
-    /**
-     * Checks if Record is stored at given identifier.
-     *
-     * @param string $id
-     *
-     * @return bool
-     */
     public function has(string $id): bool
     {
         return isset($this->records[$id]);
     }
 
-    /**
-     * Returns Record stored at given identifier.
-     *
-     * @param string             $id
-     * @param ContainerInterface $container
-     *
-     * @throws Exception\RecordNotFoundException
-     *
-     * @return mixed
-     */
     public function get(string $id, ContainerInterface $container)
     {
         return $this->getRecord($id)->value($container);
     }
 
-    /**
-     * Stores Record at given $name identifier.
-     *
-     * @param $id
-     * @param Record $record
-     *
-     * @throws Exception\InvalidIdException
-     */
     public function add(string $id, Record $record): void
     {
         if (isset($this->records[$id])) {
@@ -71,13 +47,6 @@ class RecordCollection
         $this->records[$id] = $record;
     }
 
-    /**
-     * Moves Record to different identifier.
-     *
-     * @param string $id
-     *
-     * @return string New identifier of moved Record
-     */
     public function moveRecord(string $id): string
     {
         if (!isset($this->records[$id])) {

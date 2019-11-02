@@ -11,6 +11,7 @@
 
 namespace Polymorphine\Container\Setup;
 
+use Polymorphine\Container\Records;
 use Polymorphine\Container\Exception;
 use Psr\Container\ContainerInterface;
 
@@ -18,40 +19,41 @@ use Psr\Container\ContainerInterface;
 /**
  * RecordCollection with secondary Container accessed using prefixed ids.
  */
-class CombinedRecordCollection extends RecordCollection
+class CombinedRecordCollection implements Records
 {
+    private $records;
     private $config;
     private $prefix;
     private $prefixLength;
 
     /**
-     * @param Record[]           $records
+     * @param Records            $records
      * @param ContainerInterface $config
      * @param string             $prefix
      *
      * @throws Exception\InvalidArgumentException
      */
-    public function __construct(array $records, ContainerInterface $config, string $prefix = '.')
+    public function __construct(Records $records, ContainerInterface $config, string $prefix = '.')
     {
-        $this->config = $config;
-        $this->prefix = $prefix;
+        $this->records = $records;
+        $this->config  = $config;
+        $this->prefix  = $prefix;
 
         $this->prefixLength = strlen($prefix);
-        parent::__construct($records);
     }
 
     public function has(string $id): bool
     {
         return $this->isConfigId($id)
             ? $this->config->has($this->removePrefix($id))
-            : parent::has($id);
+            : $this->records->has($id);
     }
 
     public function get(string $id, ContainerInterface $container)
     {
         return $this->isConfigId($id)
             ? $this->config->get($this->removePrefix($id))
-            : parent::get($id, $container);
+            : $this->records->get($id, $container);
     }
 
     public function add(string $id, Record $record): void
@@ -61,12 +63,12 @@ class CombinedRecordCollection extends RecordCollection
             throw new Exception\InvalidIdException(sprintf($message, $this->prefix));
         }
 
-        parent::add($id, $record);
+        $this->records->add($id, $record);
     }
 
     public function moveRecord(string $id): string
     {
-        return parent::moveRecord($id);
+        return $this->records->moveRecord($id);
     }
 
     private function isConfigId(string $id): bool
