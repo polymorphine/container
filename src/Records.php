@@ -11,7 +11,7 @@
 
 namespace Polymorphine\Container;
 
-use Polymorphine\Container\Setup\Record;
+use Polymorphine\Container\Records\Record;
 use Psr\Container\ContainerInterface;
 
 

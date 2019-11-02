@@ -13,8 +13,8 @@ namespace Polymorphine\Container\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Container\ConfigContainer;
-use Polymorphine\Container\Setup\ContainerSetup;
-use Polymorphine\Container\Setup\Record;
+use Polymorphine\Container\Records\ContainerSetup;
+use Polymorphine\Container\Records\Record;
 use Polymorphine\Container\Exception;
 use Polymorphine\Container\Tests\Fixtures\Example;
 use Psr\Container\ContainerInterface;
@@ -43,7 +43,7 @@ class ContainerTest extends TestCase
 
         $setup->records([
             'callback' => new Record\ValueRecord(function () {}),
-            'foo' => new Record\ComposeRecord(Example\ExampleClass::class, 'callback', 'test')
+            'foo'      => new Record\ComposeRecord(Example\ExampleClass::class, 'callback', 'test')
         ]);
         $container = $setup->container();
 
