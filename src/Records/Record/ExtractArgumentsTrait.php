@@ -9,7 +9,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Container\Setup\Record;
+namespace Polymorphine\Container\Records\Record;
 
 use Psr\Container\ContainerInterface;
 

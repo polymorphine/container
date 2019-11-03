@@ -9,13 +9,13 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Container\Setup;
+namespace Polymorphine\Container\Records;
 
 use Psr\Container\ContainerInterface;
 
 
 /**
- * Abstract strategy for retrieving values from RecordContainer
+ * Abstract strategy for retrieving values from RecordContainer.
  */
 interface Record
 {

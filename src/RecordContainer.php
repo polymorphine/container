@@ -11,7 +11,6 @@
 
 namespace Polymorphine\Container;
 
-use Polymorphine\Container\Setup\RecordCollection;
 use Psr\Container\ContainerInterface;
 
 
@@ -19,7 +18,7 @@ class RecordContainer implements ContainerInterface
 {
     protected $records;
 
-    public function __construct(RecordCollection $records)
+    public function __construct(Records $records)
     {
         $this->records = $records;
     }
