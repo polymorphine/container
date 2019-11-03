@@ -11,6 +11,7 @@
 
 namespace Polymorphine\Container;
 
+use Polymorphine\Container\Setup\RecordSetup;
 use Polymorphine\Container\Records\RecordCollection;
 use Polymorphine\Container\Records\CombinedRecordCollection;
 use Psr\Container\ContainerInterface as Container;
@@ -26,7 +27,7 @@ class Setup
      */
     public function __construct(Records $records = null)
     {
-        $this->records = $records ?? new Records\RecordCollection();
+        $this->records = $records ?? new RecordCollection();
     }
 
     /**
@@ -93,11 +94,11 @@ class Setup
      *
      * @param string $name
      *
-     * @return Records\RecordSetup
+     * @return RecordSetup
      */
-    public function entry(string $name): Records\RecordSetup
+    public function entry(string $name): RecordSetup
     {
-        return new Records\RecordSetup($name, $this->records);
+        return new RecordSetup($name, $this->records);
     }
 
     /**

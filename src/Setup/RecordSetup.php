@@ -9,9 +9,10 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Container\Records;
+namespace Polymorphine\Container\Setup;
 
 use Polymorphine\Container\Records;
+use Polymorphine\Container\Records\Record;
 use Polymorphine\Container\Exception;
 
 
