@@ -271,10 +271,9 @@ be covered in details.
 ### Call stack tracking and circular reference protection
 
 Calling `ContainerSetup::container()` method with `true` parameter will instantiate
-[`TrackingRecordContainer`](src/TrackingRecordContainer.php) that will track called
-dependencies - throw exceptions with appended path of used references to exception
-messages and throw `CircularReferenceException` when subsequent call would try to
-retrieve currently created record.
+container with call stack tracking that will throw exceptions with appended path of
+used references to exception messages and throw `CircularReferenceException` when
+subsequent call would try to retrieve currently created record.
 
 This feature may help to locate errors in composition structure, but it comes with
 performance cost, so it should be treated as **development tool**.

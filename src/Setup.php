@@ -14,6 +14,7 @@ namespace Polymorphine\Container;
 use Polymorphine\Container\Setup\RecordSetup;
 use Polymorphine\Container\Records\RecordCollection;
 use Polymorphine\Container\Records\CombinedRecordCollection;
+use Polymorphine\Container\Records\TrackedRecordCollection;
 use Psr\Container\ContainerInterface as Container;
 
 
@@ -84,7 +85,7 @@ class Setup
         if ($this->container) { return $this->container; }
 
         return $this->container = $tracking
-            ? new TrackingRecordContainer($this->records)
+            ? new RecordContainer(new TrackedRecordCollection($this->records))
             : new RecordContainer($this->records);
     }
 
