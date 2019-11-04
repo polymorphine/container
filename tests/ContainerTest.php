@@ -373,7 +373,7 @@ class ContainerTest extends TestCase
         $this->assertSame('Test:Test', $setup->container(true)->get('ref'));
     }
 
-    public function testIndirectMultipleCallToPassedContainer_ThrowsException()
+    public function testTrackingStopsAfterItemIsReturned()
     {
         $setup = $this->builder();
         $setup->entry('ref')->invoke(function (ContainerInterface $c) {
@@ -382,9 +382,7 @@ class ContainerTest extends TestCase
         $container = $setup->container(true);
 
         $trackedContainer = $container->get('ref');
-        $this->expectException(Exception\CircularReferenceException::class);
-        $this->expectExceptionMessage('ref->ref');
-        $trackedContainer->get('ref');
+        $this->assertSame($trackedContainer, $trackedContainer->get('ref'));
     }
 
     public function testCallStackIsAddedToContainerExceptionMessage()
@@ -403,9 +401,7 @@ class ContainerTest extends TestCase
 
     private function builder(array $config = [], array $records = [])
     {
-        if ($config && !$records) {
-            return Setup::withConfig($config);
-        }
+        if ($config && !$records) { return Setup::withConfig($config); }
 
         return $config
             ? Setup::prebuilt($records, new ConfigContainer($config))

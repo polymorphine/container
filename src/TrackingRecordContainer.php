@@ -34,10 +34,13 @@ class TrackingRecordContainer extends RecordContainer
         try {
             $track = clone $this;
             $track->references[$id] = true;
-            return $this->records->get($id, $track);
+            $item = $this->records->get($id, $track);
         } catch (Exception\RecordNotFoundException $e) {
             throw $e->withCallStack($this->callStackPath($id));
         }
+
+        $track->references[$id] = null;
+        return $item;
     }
 
     private function callStackPath(string $id): string

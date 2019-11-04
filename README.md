@@ -272,27 +272,12 @@ be covered in details.
 
 Calling `ContainerSetup::container()` method with `true` parameter will instantiate
 [`TrackingRecordContainer`](src/TrackingRecordContainer.php) that will track called
-dependencies and append path of used references to exception messages and throw
-`CircularReferenceException` when subsequent call would try to retrieve currently
-created record.
+dependencies - throw exceptions with appended path of used references to exception
+messages and throw `CircularReferenceException` when subsequent call would try to
+retrieve currently created record.
 
-This feature should be treated as **development tool** and self-constraint so that
-container was not overused. It may help to locate an error in composition structure,
-but it comes with performance cost.
-
-Some legitimate cases might become tricky to implement because object invoked from
-container may sometimes need to call for its instance at runtime - for example router
-built using container endpoints that use same router to produce urls (producing following call
-stack: `router->endpoint->view-model->router`). To prevent circular reference (detection)
-router should be called directly in front controller layer (not retrieved from container)
-or should be built using container instance from parent (setup) scope instead callback parameter.
-```php
-// anonymous function will be called with container parameter,
-// but we're using inherited $setup instead:
-$setup->entry('router')->invoke(function () use ($setup) {
-    return new Router($setup->container(true));
-});
-```
+This feature may help to locate errors in composition structure, but it comes with
+performance cost, so it should be treated as **development tool**.
 
 ### Recommended use
 
