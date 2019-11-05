@@ -11,58 +11,23 @@
 
 namespace Polymorphine\Container;
 
-use Polymorphine\Container\Setup\RecordSetup;
-use Polymorphine\Container\Records\RecordCollection;
-use Polymorphine\Container\Records\CombinedRecordCollection;
-use Polymorphine\Container\Records\TrackedRecordCollection;
-use Psr\Container\ContainerInterface as Container;
+use Psr\Container\ContainerInterface;
 
 
 class Setup
 {
     private $records;
+    private $containers;
     private $container;
 
     /**
-     * @param Records $records
+     * @param Records\Record[]     $records
+     * @param ContainerInterface[] $containers
      */
-    public function __construct(Records $records = null)
+    public function __construct(array $records = [], array $containers = [])
     {
-        $this->records = $records ?? new RecordCollection();
-    }
-
-    /**
-     * Provided Record entries will not be validated, make sure to avoid id conflicts
-     * with secondary container prefix and type or nesting Record values.
-     *
-     * @param Records\Record[] $records   $records Associative (flat) array of Record entries
-     * @param Container        $container Secondary container instance
-     * @param string           $prefix    Id prefix to access secondary container values
-     *
-     * @return Setup
-     */
-    public static function prebuilt(
-        array $records,
-        Container $container = null,
-        string $prefix = '.'
-    ): self {
-        $records = $container
-            ? new CombinedRecordCollection(new RecordCollection($records), $container, $prefix)
-            : new RecordCollection($records);
-
-        return new self($records);
-    }
-
-    /**
-     * @param array  $config Associative (multidimensional) array of configuration values
-     * @param string $prefix
-     *
-     * @return Setup
-     */
-    public static function withConfig(array $config, string $prefix = '.'): self
-    {
-        $records = new CombinedRecordCollection(new RecordCollection([]), new ConfigContainer($config), $prefix);
-        return new self($records);
+        $this->records    = new Records\RecordCollection($records);
+        $this->containers = $containers;
     }
 
     /**
@@ -78,15 +43,16 @@ class Setup
      * @param bool $tracking Enables call stack tracking and detects
      *                       circular references
      *
-     * @return Container
+     * @return ContainerInterface
      */
-    public function container(bool $tracking = false): Container
+    public function container(bool $tracking = false): ContainerInterface
     {
         if ($this->container) { return $this->container; }
 
-        return $this->container = $tracking
-            ? new RecordContainer(new TrackedRecordCollection($this->records))
-            : new RecordContainer($this->records);
+        $records = $tracking ? new Records\TrackedRecordCollection($this->records) : $this->records;
+        return $this->container = $this->containers
+            ? new CompositeContainer($records, $this->containers)
+            : new RecordContainer($records);
     }
 
     /**
@@ -95,11 +61,11 @@ class Setup
      *
      * @param string $name
      *
-     * @return RecordSetup
+     * @return Setup\RecordSetup
      */
-    public function entry(string $name): RecordSetup
+    public function entry(string $name): Setup\RecordSetup
     {
-        return new RecordSetup($name, $this->records);
+        return new Setup\RecordSetup($name, $this->records);
     }
 
     /**

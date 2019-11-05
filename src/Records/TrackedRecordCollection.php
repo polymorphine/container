@@ -42,7 +42,7 @@ class TrackedRecordCollection implements Records
             $this->callStack[$id] = true;
             $item = $this->records->get($id, $container);
         } catch (Exception\RecordNotFoundException $e) {
-            throw $e->withCallStack($this->callStackPath($id));
+            throw $e->withCallStack($this->callStackPath('?'));
         }
 
         unset($this->callStack[$id]);
