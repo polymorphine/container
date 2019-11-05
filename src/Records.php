@@ -11,7 +11,6 @@
 
 namespace Polymorphine\Container;
 
-use Polymorphine\Container\Records\Record;
 use Psr\Container\ContainerInterface;
 
 
@@ -37,23 +36,4 @@ interface Records
      * @return mixed
      */
     public function get(string $id, ContainerInterface $container);
-
-    /**
-     * Stores Record at given $name identifier.
-     *
-     * @param $id
-     * @param Record $record
-     *
-     * @throws Exception\InvalidIdException
-     */
-    public function add(string $id, Record $record): void;
-
-    /**
-     * Moves Record to different identifier.
-     *
-     * @param string $id
-     *
-     * @return string New identifier of moved Record
-     */
-    public function moveRecord(string $id): string;
 }

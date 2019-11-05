@@ -25,7 +25,7 @@ class RecordSetup
     private $name;
     private $records;
 
-    public function __construct(string $name, Records $records)
+    public function __construct(string $name, Records\RecordCollection $records)
     {
         $this->name    = $name;
         $this->records = $records;

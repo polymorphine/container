@@ -16,7 +16,7 @@ use Polymorphine\Container\Records;
 use Psr\Container\ContainerInterface;
 
 
-class TrackedRecordCollection implements Records
+class TrackedRecords implements Records
 {
     private $records;
     private $callStack = [];
@@ -47,16 +47,6 @@ class TrackedRecordCollection implements Records
 
         unset($this->callStack[$id]);
         return $item;
-    }
-
-    public function add(string $id, Record $record): void
-    {
-        $this->records->add($id, $record);
-    }
-
-    public function moveRecord(string $id): string
-    {
-        return $this->records->moveRecord($id);
     }
 
     private function callStackPath(string $id): string
