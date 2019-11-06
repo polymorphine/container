@@ -241,12 +241,12 @@ class ContainerTest extends TestCase
     public function testCompositeRecord()
     {
         $config = [
-            '.'   => new ConfigContainer(['env' => ['name' => 'Shudd3r', 'polite' => 'How are you?']]),
+            'foo' => new ConfigContainer(['env' => ['name' => 'Shudd3r', 'polite' => 'How are you?']]),
             'cfg' => new ConfigContainer(['hello' => function ($name) { return 'Hello ' . $name . '.'; }])
         ];
 
         $setup = $this->builder($config);
-        $setup->entry('small.talk')->compose(Example\ExampleClass::class, 'cfg.hello', '.env.name');
+        $setup->entry('small.talk')->compose(Example\ExampleClass::class, 'cfg.hello', 'foo.env.name');
         $container = $setup->container();
 
         $expect = 'Hello Shudd3r.';
@@ -254,8 +254,8 @@ class ContainerTest extends TestCase
 
         // Decorated record
         $setup = $this->builder($config);
-        $setup->entry('small.talk')->compose(Example\ExampleClass::class, 'cfg.hello', '.env.name');
-        $setup->entry('small.talk')->compose(Example\DecoratingExampleClass::class, 'small.talk', '.env.polite');
+        $setup->entry('small.talk')->compose(Example\ExampleClass::class, 'cfg.hello', 'foo.env.name');
+        $setup->entry('small.talk')->compose(Example\DecoratingExampleClass::class, 'small.talk', 'foo.env.polite');
         $container = $setup->container();
 
         $expect = 'Hello Shudd3r. How are you?';
@@ -264,8 +264,8 @@ class ContainerTest extends TestCase
         // Decorated Again
         $setup = $this->builder($config);
         $setup->entry('ask.football')->set('Have you seen that ridiculous display last night?');
-        $setup->entry('small.talk')->compose(Example\ExampleClass::class, 'cfg.hello', '.env.name');
-        $setup->entry('small.talk')->compose(Example\DecoratingExampleClass::class, 'small.talk', '.env.polite');
+        $setup->entry('small.talk')->compose(Example\ExampleClass::class, 'cfg.hello', 'foo.env.name');
+        $setup->entry('small.talk')->compose(Example\DecoratingExampleClass::class, 'small.talk', 'foo.env.polite');
         $setup->entry('small.talk')->compose(Example\DecoratingExampleClass::class, 'small.talk', 'ask.football');
         $container = $setup->container();
 
@@ -284,10 +284,10 @@ class ContainerTest extends TestCase
 
     public function testCreateMethodRecord()
     {
-        $config['.'] = new ConfigContainer(['one' => 'first', 'two' => 'second', 'three' => 'third']);
+        $config['foo'] = new ConfigContainer(['one' => 'first', 'two' => 'second', 'three' => 'third']);
         $setup = $this->builder($config);
         $setup->entry('factory')->set(new Example\Factory());
-        $setup->entry('product')->create('factory', 'create', '.one', '.two', '.three');
+        $setup->entry('product')->create('factory', 'create', 'foo.one', 'foo.two', 'foo.three');
         $container = $setup->container();
 
         $this->assertSame('first,second,third', $container->get('product'));
@@ -296,20 +296,22 @@ class ContainerTest extends TestCase
     public function testConfigsCanBeReadWithPath()
     {
         $data = ['key1' => ['nested' => ['double' => 'nested value']], 'key2' => 'value2'];
-        $config['.'] = new ConfigContainer(['env' => $data]);
+        $config['foo'] = new ConfigContainer(['env' => $data]);
         $container = $this->builder($config)->container();
 
-        $this->assertSame($data['key1']['nested']['double'], $container->get('.env.key1.nested.double'));
-        $this->assertSame($data['key1']['nested'], $container->get('.env.key1.nested'));
-        $this->assertSame($data['key2'], $container->get('.env.key2'));
-        $this->assertSame($data['key1'], $container->get('.env.key1'));
-        $this->assertSame($data, $container->get('.env'));
+        $this->assertSame($data['key1']['nested']['double'], $container->get('foo.env.key1.nested.double'));
+        $this->assertSame($data['key1']['nested'], $container->get('foo.env.key1.nested'));
+        $this->assertSame($data['key2'], $container->get('foo.env.key2'));
+        $this->assertSame($data['key1'], $container->get('foo.env.key1'));
+        $this->assertSame($data, $container->get('foo.env'));
+        $this->assertSame($config['foo'], $container->get('foo'));
 
-        $this->assertTrue($container->has('.env.key1.nested.double'));
-        $this->assertTrue($container->has('.env.key1.nested'));
-        $this->assertTrue($container->has('.env.key2'));
-        $this->assertTrue($container->has('.env.key1'));
-        $this->assertTrue($container->has('.env'));
+        $this->assertTrue($container->has('foo.env.key1.nested.double'));
+        $this->assertTrue($container->has('foo.env.key1.nested'));
+        $this->assertTrue($container->has('foo.env.key2'));
+        $this->assertTrue($container->has('foo.env.key1'));
+        $this->assertTrue($container->has('foo.env'));
+        $this->assertTrue($container->has('foo'));
     }
 
     /**
@@ -319,7 +321,7 @@ class ContainerTest extends TestCase
      */
     public function testGetMissingConfigRecord_ThrowsException(string $undefinedPath)
     {
-        $config['.'] = new ConfigContainer(['key1' => ['nested' => ['double' => 'nested value']], 'key2' => 'value2']);
+        $config['foo'] = new ConfigContainer(['key1' => ['nested' => ['double' => 'nested value']], 'key2' => 'value2']);
         $container = $this->builder($config)->container();
 
         $this->assertFalse($container->has($undefinedPath));
@@ -329,14 +331,7 @@ class ContainerTest extends TestCase
 
     public function undefinedPaths(): array
     {
-        return [['.key1.nested.value'], ['.key1.something'], ['.whatever'], ['notEnv']];
-    }
-
-    public function testUsingConfigKeyIndicatorDoesntMatterIfConfigNotPresent()
-    {
-        $builder = $this->builder();
-        $builder->entry('.starting.with.separator')->set(true);
-        $this->assertTrue($builder->container()->get('.starting.with.separator'));
+        return [['foo.key1.nested.value'], ['foo.key1.something'], ['foo.whatever'], ['notEnv']];
     }
 
     public function testDirectCircularCall_ThrowsException()
@@ -371,10 +366,10 @@ class ContainerTest extends TestCase
 
     public function testMultipleCallsAreNotCircular()
     {
-        $config['.'] = new ConfigContainer(['config' => 'value']);
+        $config['foo'] = new ConfigContainer(['config' => 'value']);
         $setup = $this->builder($config);
         $setup->entry('ref')->invoke(function (ContainerInterface $c) {
-            return $c->get('ref.multiple') . ':' . $c->get('ref.multiple') . ':' . $c->get('.config');
+            return $c->get('ref.multiple') . ':' . $c->get('ref.multiple') . ':' . $c->get('foo.config');
         });
         $setup->entry('ref.multiple')->set('Test');
         $this->assertSame('Test:Test:value', $setup->container(true)->get('ref'));

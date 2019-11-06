@@ -61,8 +61,6 @@ class CompositeContainer implements ContainerInterface
 
     private function splitId(string $id): array
     {
-        return $id[0] === static::SEPARATOR
-            ? [static::SEPARATOR, ltrim($id, static::SEPARATOR)]
-            : explode(static::SEPARATOR, $id, 2) + [false, null];
+        return explode(static::SEPARATOR, $id, 2) + [false, null];
     }
 }

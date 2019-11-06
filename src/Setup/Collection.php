@@ -54,7 +54,7 @@ class Collection
 
     public function addContainer(string $id, ContainerInterface $container)
     {
-        if (strpos($id, self::SEPARATOR)) {
+        if (strpos($id, self::SEPARATOR) !== false) {
             $message = 'Container id cannot contain `%s` separator - `%s` id given';
             throw new Exception\InvalidIdException(sprintf($message, self::SEPARATOR, $id));
         }
