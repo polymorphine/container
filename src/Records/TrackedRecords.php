@@ -11,11 +11,12 @@
 
 namespace Polymorphine\Container\Records;
 
+use Polymorphine\Container\Records;
 use Polymorphine\Container\Exception;
 use Psr\Container\ContainerInterface;
 
 
-class TrackedRecords extends RecordCollection
+class TrackedRecords extends Records
 {
     private $callStack = [];
 

@@ -14,8 +14,18 @@ namespace Polymorphine\Container;
 use Psr\Container\ContainerInterface;
 
 
-interface Records
+class Records
 {
+    private $records;
+
+    /**
+     * @param Records\Record[] $records Associative (flat) array of Record entries
+     */
+    public function __construct(array $records = [])
+    {
+        $this->records = $records;
+    }
+
     /**
      * Checks if Record is stored at given identifier.
      *
@@ -23,7 +33,10 @@ interface Records
      *
      * @return bool
      */
-    public function has(string $id): bool;
+    public function has(string $id): bool
+    {
+        return isset($this->records[$id]);
+    }
 
     /**
      * Returns Record stored at given identifier.
@@ -35,5 +48,11 @@ interface Records
      *
      * @return mixed
      */
-    public function get(string $id, ContainerInterface $container);
+    public function get(string $id, ContainerInterface $container)
+    {
+        if (!isset($this->records[$id])) {
+            throw new Exception\RecordNotFoundException(sprintf('Record `%s` not defined', $id));
+        }
+        return $this->records[$id]->value($container);
+    }
 }
