@@ -55,16 +55,16 @@ class Setup
     }
 
     /**
-     * Returns RecordSetup object able to configure Container's
-     * Record slot for given name id.
+     * Returns Entry object able to configure Container's
+     * data slot for given name id.
      *
      * @param string $name
      *
-     * @return Setup\RecordSetup
+     * @return Setup\Entry
      */
-    public function entry(string $name): Setup\RecordSetup
+    public function entry(string $name): Setup\Entry
     {
-        return new Setup\RecordSetup($name, $this->collection);
+        return new Setup\Entry($name, $this->collection);
     }
 
     /**
