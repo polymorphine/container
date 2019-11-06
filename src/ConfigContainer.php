@@ -16,7 +16,7 @@ use Psr\Container\ContainerInterface;
 
 /**
  * Container with multidimensional array values accessed using path notation identifiers.
- * Example: $config['key']['sub-key']['id'] = $instance->get('key.sub-key.id');
+ * Example: $config['key']['sub-key']['id'] is accessed with $instance->get('key.sub-key.id').
  */
 class ConfigContainer implements ContainerInterface
 {

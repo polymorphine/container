@@ -11,8 +11,8 @@
 
 namespace Polymorphine\Container\Records;
 
-use Polymorphine\Container\Exception;
 use Polymorphine\Container\Records;
+use Polymorphine\Container\Exception;
 use Psr\Container\ContainerInterface;
 
 
@@ -34,7 +34,7 @@ class TrackedRecords implements Records
     public function get(string $id, ContainerInterface $container)
     {
         if (isset($this->callStack[$id])) {
-            $message = 'Lazy composition of `%s` record is using reference to itself [call stack: %s ]';
+            $message = 'Lazy composition of `%s` record is using reference to itself [call stack: %s]';
             throw new Exception\CircularReferenceException(sprintf($message, (string) $id, $this->callStackPath($id)));
         }
 
@@ -42,7 +42,7 @@ class TrackedRecords implements Records
             $this->callStack[$id] = true;
             $item = $this->records->get($id, $container);
         } catch (Exception\RecordNotFoundException $e) {
-            throw $e->withCallStack($this->callStackPath('?'));
+            throw $e->withCallStack($this->callStackPath('...'));
         }
 
         unset($this->callStack[$id]);

@@ -387,7 +387,7 @@ class ContainerTest extends TestCase
         $setup->entry('C')->compose(Example\DecoratingExampleClass::class, 'B', '.config');
 
         $container = $setup->container(true);
-        $this->expectExceptionMessage('C->B->?');
+        $this->expectExceptionMessage('C->B->...');
         $container->get('C');
     }
 
