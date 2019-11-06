@@ -188,6 +188,16 @@ class ContainerTest extends TestCase
         ];
     }
 
+    public function testBuildConfigContainerWithSetup()
+    {
+        $setup = $this->builder();
+        $setup->entry('cfg')->container(new configContainer(['test' => 'value']));
+        $container = $setup->container();
+
+        $this->assertTrue($container->has('cfg.test'));
+        $this->assertSame('value', $container->get('cfg.test'));
+    }
+
     public function testSetupContainer_ReturnsSameInstanceOfContainer()
     {
         $config    = ['env' => new ConfigContainer(['config' => 'value'])];

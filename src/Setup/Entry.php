@@ -13,6 +13,7 @@ namespace Polymorphine\Container\Setup;
 
 use Polymorphine\Container\Records\Record;
 use Polymorphine\Container\Exception;
+use Psr\Container\ContainerInterface;
 
 
 /**
@@ -115,6 +116,11 @@ class Entry
     public function create(string $factoryId, string $method, string ...$arguments): void
     {
         $this->useRecord(new Record\CreateMethodRecord($factoryId, $method, ...$arguments));
+    }
+
+    public function container(ContainerInterface $container)
+    {
+        $this->records->addContainer($this->name, $container);
     }
 
     private function decoratedRecordAlias(): string

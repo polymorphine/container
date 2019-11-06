@@ -50,6 +50,11 @@ class Collection
         $this->records[$id] = $record;
     }
 
+    public function addContainer(string $id, ContainerInterface $container)
+    {
+        $this->containers[$id] = $container;
+    }
+
     public function moveRecord(string $id): string
     {
         if (!isset($this->records[$id])) {
