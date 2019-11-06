@@ -12,24 +12,33 @@
 namespace Polymorphine\Container\Setup;
 
 use Polymorphine\Container\Records;
+use Polymorphine\Container\RecordContainer;
+use Polymorphine\Container\CompositeContainer;
 use Polymorphine\Container\Exception;
+use Psr\Container\ContainerInterface;
 
 
 class Collection
 {
     private $records;
+    private $containers;
 
     /**
-     * @param Records\Record[] $records
+     * @param Records\Record[]     $records
+     * @param ContainerInterface[] $containers
      */
-    public function __construct(array $records)
+    public function __construct(array $records, array $containers)
     {
-        $this->records = $records;
+        $this->records    = $records;
+        $this->containers = $containers;
     }
 
-    public function records(bool $tracking = false): Records
+    public function container(bool $tracking = false): ContainerInterface
     {
-        return $tracking ? new Records\TrackedRecords($this->records) : new Records($this->records);
+        $records = $tracking ? new Records\TrackedRecords($this->records) : new Records($this->records);
+        return $this->containers
+            ? new CompositeContainer($records, $this->containers)
+            : new RecordContainer($records);
     }
 
     public function add(string $id, Records\Record $record): void

@@ -17,7 +17,6 @@ use Psr\Container\ContainerInterface;
 class Setup
 {
     private $collection;
-    private $containers;
     private $container;
 
     /**
@@ -26,8 +25,7 @@ class Setup
      */
     public function __construct(array $records = [], array $containers = [])
     {
-        $this->collection = new Setup\Collection($records);
-        $this->containers = $containers;
+        $this->collection = new Setup\Collection($records, $containers);
     }
 
     /**
@@ -47,11 +45,7 @@ class Setup
      */
     public function container(bool $tracking = false): ContainerInterface
     {
-        if ($this->container) { return $this->container; }
-
-        return $this->container = $this->containers
-            ? new CompositeContainer($this->collection->records($tracking), $this->containers)
-            : new RecordContainer($this->collection->records($tracking));
+        return $this->container ?: $this->container = $this->collection->container($tracking);
     }
 
     /**
