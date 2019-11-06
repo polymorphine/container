@@ -73,14 +73,16 @@ class ContainerTest extends TestCase
             'null'  => new Record\ValueRecord(null),
             'false' => new Record\ValueRecord(false)
         ];
-        $config = [
+        $config['cfg'] = new ConfigContainer([
             'null'  => null,
             'false' => false
-        ];
+        ]);
         $container = $this->builder($config, $records)->container();
 
         $this->assertTrue($container->has('null'));
         $this->assertTrue($container->has('false'));
+        $this->assertTrue($container->has('cfg.null'));
+        $this->assertTrue($container->has('cfg.false'));
     }
 
     public function testInvalidContainerIdTypeIsCastedToString()
@@ -188,7 +190,8 @@ class ContainerTest extends TestCase
 
     public function testSetupContainer_ReturnsSameInstanceOfContainer()
     {
-        $setup     = $this->builder(['config' => 'value'], ['exists' => new Record\ValueRecord(true)]);
+        $config    = ['env' => new ConfigContainer(['config' => 'value'])];
+        $setup     = $this->builder($config, ['exists' => new Record\ValueRecord(true)]);
         $container = $setup->container();
         $setup->entry('not.too.late')->set(true);
 
@@ -212,14 +215,13 @@ class ContainerTest extends TestCase
 
     public function testCompositeRecord()
     {
-        $config = ['env' => [
-            'name' => 'Shudd3r',
-            'hello' => function ($name) { return 'Hello ' . $name . '.'; },
-            'polite' => 'How are you?'
-        ]];
+        $config = [
+            '.'   => new ConfigContainer(['env' => ['name' => 'Shudd3r', 'polite' => 'How are you?']]),
+            'cfg' => new ConfigContainer(['hello' => function ($name) { return 'Hello ' . $name . '.'; }])
+        ];
 
         $setup = $this->builder($config);
-        $setup->entry('small.talk')->compose(Example\ExampleClass::class, '.env.hello', '.env.name');
+        $setup->entry('small.talk')->compose(Example\ExampleClass::class, 'cfg.hello', '.env.name');
         $container = $setup->container();
 
         $expect = 'Hello Shudd3r.';
@@ -227,7 +229,7 @@ class ContainerTest extends TestCase
 
         // Decorated record
         $setup = $this->builder($config);
-        $setup->entry('small.talk')->compose(Example\ExampleClass::class, '.env.hello', '.env.name');
+        $setup->entry('small.talk')->compose(Example\ExampleClass::class, 'cfg.hello', '.env.name');
         $setup->entry('small.talk')->compose(Example\DecoratingExampleClass::class, 'small.talk', '.env.polite');
         $container = $setup->container();
 
@@ -237,7 +239,7 @@ class ContainerTest extends TestCase
         // Decorated Again
         $setup = $this->builder($config);
         $setup->entry('ask.football')->set('Have you seen that ridiculous display last night?');
-        $setup->entry('small.talk')->compose(Example\ExampleClass::class, '.env.hello', '.env.name');
+        $setup->entry('small.talk')->compose(Example\ExampleClass::class, 'cfg.hello', '.env.name');
         $setup->entry('small.talk')->compose(Example\DecoratingExampleClass::class, 'small.talk', '.env.polite');
         $setup->entry('small.talk')->compose(Example\DecoratingExampleClass::class, 'small.talk', 'ask.football');
         $container = $setup->container();
@@ -257,7 +259,8 @@ class ContainerTest extends TestCase
 
     public function testCreateMethodRecord()
     {
-        $setup = $this->builder(['one' => 'first', 'two' => 'second', 'three' => 'third']);
+        $config['.'] = new ConfigContainer(['one' => 'first', 'two' => 'second', 'three' => 'third']);
+        $setup = $this->builder($config);
         $setup->entry('factory')->set(new Example\Factory());
         $setup->entry('product')->create('factory', 'create', '.one', '.two', '.three');
         $container = $setup->container();
@@ -267,8 +270,9 @@ class ContainerTest extends TestCase
 
     public function testConfigsCanBeReadWithPath()
     {
-        $data      = ['key1' => ['nested' => ['double' => 'nested value']], 'key2' => 'value2'];
-        $container = $this->builder(['env' => $data])->container();
+        $data = ['key1' => ['nested' => ['double' => 'nested value']], 'key2' => 'value2'];
+        $config['.'] = new ConfigContainer(['env' => $data]);
+        $container = $this->builder($config)->container();
 
         $this->assertSame($data['key1']['nested']['double'], $container->get('.env.key1.nested.double'));
         $this->assertSame($data['key1']['nested'], $container->get('.env.key1.nested'));
@@ -290,8 +294,8 @@ class ContainerTest extends TestCase
      */
     public function testGetMissingConfigRecord_ThrowsException(string $undefinedPath)
     {
-        $data      = ['key1' => ['nested' => ['double' => 'nested value']], 'key2' => 'value2'];
-        $container = $this->builder($data)->container();
+        $config['.'] = new ConfigContainer(['key1' => ['nested' => ['double' => 'nested value']], 'key2' => 'value2']);
+        $container = $this->builder($config)->container();
 
         $this->assertFalse($container->has($undefinedPath));
         $this->expectException(Exception\RecordNotFoundException::class);
@@ -300,7 +304,7 @@ class ContainerTest extends TestCase
 
     public function undefinedPaths(): array
     {
-        return [['.env.key1.nested.value'], ['.env.key1.something'], ['.env.whatever'], ['.notEnv']];
+        return [['.key1.nested.value'], ['.key1.something'], ['.whatever'], ['notEnv']];
     }
 
     public function testUsingConfigKeyIndicatorDoesntMatterIfConfigNotPresent()
@@ -342,7 +346,8 @@ class ContainerTest extends TestCase
 
     public function testMultipleCallsAreNotCircular()
     {
-        $setup = $this->builder(['config' => 'value']);
+        $config['.'] = new ConfigContainer(['config' => 'value']);
+        $setup = $this->builder($config);
         $setup->entry('ref')->invoke(function (ContainerInterface $c) {
             return $c->get('ref.multiple') . ':' . $c->get('ref.multiple') . ':' . $c->get('.config');
         });
@@ -391,8 +396,8 @@ class ContainerTest extends TestCase
         $container->get('C');
     }
 
-    private function builder(array $config = [], array $records = [])
+    private function builder(array $configs = [], array $records = [])
     {
-        return new Setup($records, $config ? ['.' => new ConfigContainer($config)] : []);
+        return new Setup($records, $configs);
     }
 }
