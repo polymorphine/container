@@ -16,7 +16,7 @@ use Psr\Container\ContainerInterface;
 
 class Setup
 {
-    private $records;
+    private $collection;
     private $containers;
     private $container;
 
@@ -26,7 +26,7 @@ class Setup
      */
     public function __construct(array $records = [], array $containers = [])
     {
-        $this->records    = new Records\RecordCollection($records);
+        $this->collection = new Setup\Collection($records);
         $this->containers = $containers;
     }
 
@@ -49,7 +49,7 @@ class Setup
     {
         if ($this->container) { return $this->container; }
 
-        $records = $tracking ? new Records\TrackedRecords($this->records) : $this->records;
+        $records = $tracking ? new Records\TrackedRecords($this->collection->records()) : $this->collection->records();
         return $this->container = $this->containers
             ? new CompositeContainer($records, $this->containers)
             : new RecordContainer($records);
@@ -65,7 +65,7 @@ class Setup
      */
     public function entry(string $name): Setup\RecordSetup
     {
-        return new Setup\RecordSetup($name, $this->records);
+        return new Setup\RecordSetup($name, $this->collection);
     }
 
     /**
@@ -78,7 +78,7 @@ class Setup
     public function records(array $records): void
     {
         foreach ($records as $id => $record) {
-            $this->records->add($id, $record);
+            $this->collection->add($id, $record);
         }
     }
 }

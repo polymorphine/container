@@ -35,41 +35,9 @@ class RecordCollection implements Records
 
     public function get(string $id, ContainerInterface $container)
     {
-        return $this->getRecord($id)->value($container);
-    }
-
-    public function add(string $id, Record $record): void
-    {
-        if (isset($this->records[$id])) {
-            throw new Exception\InvalidIdException(sprintf('Cannot overwrite defined `%s` Record', $id));
-        }
-
-        $this->records[$id] = $record;
-    }
-
-    public function moveRecord(string $id): string
-    {
-        if (!isset($this->records[$id])) {
-            $message = 'Undefined `%s` record cannot be moved';
-            throw new Exception\RecordNotFoundException(sprintf($message, $id));
-        }
-
-        $newId = $id . '.WRAP';
-        while (isset($this->records[$newId])) {
-            $newId .= '.WRAP';
-        }
-
-        $this->records[$newId] = $this->records[$id];
-        unset($this->records[$id]);
-
-        return $newId;
-    }
-
-    private function getRecord(string $id): Record
-    {
         if (!isset($this->records[$id])) {
             throw new Exception\RecordNotFoundException(sprintf('Record `%s` not defined', $id));
         }
-        return $this->records[$id];
+        return $this->records[$id]->value($container);
     }
 }
