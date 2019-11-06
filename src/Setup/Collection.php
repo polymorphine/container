@@ -27,9 +27,9 @@ class Collection
         $this->records = $records;
     }
 
-    public function records(): Records
+    public function records(bool $tracking = false): Records
     {
-        return new Records\RecordCollection($this->records);
+        return $tracking ? new Records\TrackedRecords($this->records) : new Records\RecordCollection($this->records);
     }
 
     public function add(string $id, Records\Record $record): void

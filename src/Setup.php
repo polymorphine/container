@@ -49,10 +49,9 @@ class Setup
     {
         if ($this->container) { return $this->container; }
 
-        $records = $tracking ? new Records\TrackedRecords($this->collection->records()) : $this->collection->records();
         return $this->container = $this->containers
-            ? new CompositeContainer($records, $this->containers)
-            : new RecordContainer($records);
+            ? new CompositeContainer($this->collection->records($tracking), $this->containers)
+            : new RecordContainer($this->collection->records($tracking));
     }
 
     /**

@@ -11,25 +11,13 @@
 
 namespace Polymorphine\Container\Records;
 
-use Polymorphine\Container\Records;
 use Polymorphine\Container\Exception;
 use Psr\Container\ContainerInterface;
 
 
-class TrackedRecords implements Records
+class TrackedRecords extends RecordCollection
 {
-    private $records;
     private $callStack = [];
-
-    public function __construct(Records $records)
-    {
-        $this->records = $records;
-    }
-
-    public function has(string $id): bool
-    {
-        return $this->records->has($id);
-    }
 
     public function get(string $id, ContainerInterface $container)
     {
@@ -38,9 +26,10 @@ class TrackedRecords implements Records
             throw new Exception\CircularReferenceException(sprintf($message, (string) $id, $this->callStackPath($id)));
         }
 
+        $this->callStack[$id] = true;
+
         try {
-            $this->callStack[$id] = true;
-            $item = $this->records->get($id, $container);
+            $item = parent::get($id, $container);
         } catch (Exception\RecordNotFoundException $e) {
             throw $e->withCallStack($this->callStackPath('...'));
         }
