@@ -44,19 +44,19 @@ class CompositeContainer implements ContainerInterface
     private function fromContainers($id)
     {
         [$containerId, $itemId] = $this->splitId($id);
-        if (!$containerId || !$itemId || !isset($this->containers[$containerId])) {
+        if (!isset($this->containers[$containerId])) {
             throw new Exception\RecordNotFoundException(sprintf('Record `%s` not defined', $id));
         }
 
-        return $this->containers[$containerId]->get($itemId);
+        return $itemId ? $this->containers[$containerId]->get($itemId) : $this->containers[$containerId];
     }
 
     private function inContainers(string $id): bool
     {
         [$containerId, $itemId] = $this->splitId($id);
-        if (!$containerId || !$itemId) { return false; }
+        if (!isset($this->containers[$containerId])) { return false; }
 
-        return isset($this->containers[$containerId]) ? $this->containers[$containerId]->has($itemId) : false;
+        return $itemId ? $this->containers[$containerId]->has($itemId) : true;
     }
 
     private function splitId(string $id): array
