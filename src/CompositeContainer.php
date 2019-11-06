@@ -16,7 +16,7 @@ use Psr\Container\ContainerInterface;
 
 class CompositeContainer implements ContainerInterface
 {
-    protected const SEPARATOR = '.';
+    public const SEPARATOR = '.';
 
     private $records;
     private $containers;

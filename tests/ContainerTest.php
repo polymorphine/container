@@ -198,6 +198,21 @@ class ContainerTest extends TestCase
         $this->assertSame('value', $container->get('cfg.test'));
     }
 
+    public function testOverwritingContainerId_ThrowsException()
+    {
+        $setup = $this->builder();
+        $setup->entry('data')->container(new ConfigContainer([]));
+        $this->expectException(Exception\InvalidIdException::class);
+        $setup->entry('data')->container(new ConfigContainer([]));
+    }
+
+    public function testContainerIdWithIdSeparator_ThrowsException()
+    {
+        $setup = $this->builder();
+        $this->expectException(Exception\InvalidIdException::class);
+        $setup->entry('cfg.data')->container(new ConfigContainer([]));
+    }
+
     public function testSetupContainer_ReturnsSameInstanceOfContainer()
     {
         $config    = ['env' => new ConfigContainer(['config' => 'value'])];
