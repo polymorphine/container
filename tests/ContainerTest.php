@@ -303,14 +303,6 @@ class ContainerTest extends TestCase
         return [['.env.key1.nested.value'], ['.env.key1.something'], ['.env.whatever'], ['.notEnv']];
     }
 
-    public function testUsingConfigKeyIndicatorForRecordEntry_ThrowsException()
-    {
-        $builder = $this->builder(['config' => 'value']);
-
-        $this->expectException(Exception\InvalidIdException::class);
-        $builder->entry('.starting.with.separator')->set(true);
-    }
-
     public function testUsingConfigKeyIndicatorDoesntMatterIfConfigNotPresent()
     {
         $builder = $this->builder();
@@ -373,7 +365,7 @@ class ContainerTest extends TestCase
         $this->assertSame('Test:Test', $setup->container(true)->get('ref'));
     }
 
-    public function testIndirectMultipleCallToPassedContainer_ThrowsException()
+    public function testTrackingStopsAfterItemIsReturned()
     {
         $setup = $this->builder();
         $setup->entry('ref')->invoke(function (ContainerInterface $c) {
@@ -382,9 +374,7 @@ class ContainerTest extends TestCase
         $container = $setup->container(true);
 
         $trackedContainer = $container->get('ref');
-        $this->expectException(Exception\CircularReferenceException::class);
-        $this->expectExceptionMessage('ref->ref');
-        $trackedContainer->get('ref');
+        $this->assertSame($trackedContainer, $trackedContainer->get('ref'));
     }
 
     public function testCallStackIsAddedToContainerExceptionMessage()
@@ -397,18 +387,12 @@ class ContainerTest extends TestCase
         $setup->entry('C')->compose(Example\DecoratingExampleClass::class, 'B', '.config');
 
         $container = $setup->container(true);
-        $this->expectExceptionMessage('C->B->undefined');
+        $this->expectExceptionMessage('C->B->...');
         $container->get('C');
     }
 
     private function builder(array $config = [], array $records = [])
     {
-        if ($config && !$records) {
-            return Setup::withConfig($config);
-        }
-
-        return $config
-            ? Setup::prebuilt($records, new ConfigContainer($config))
-            : Setup::prebuilt($records);
+        return new Setup($records, $config ? ['.' => new ConfigContainer($config)] : []);
     }
 }

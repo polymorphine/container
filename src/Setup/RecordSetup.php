@@ -11,7 +11,6 @@
 
 namespace Polymorphine\Container\Setup;
 
-use Polymorphine\Container\Records;
 use Polymorphine\Container\Records\Record;
 use Polymorphine\Container\Exception;
 
@@ -25,7 +24,7 @@ class RecordSetup
     private $name;
     private $records;
 
-    public function __construct(string $name, Records $records)
+    public function __construct(string $name, Collection $records)
     {
         $this->name    = $name;
         $this->records = $records;
