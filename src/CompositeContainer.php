@@ -16,6 +16,8 @@ use Psr\Container\ContainerInterface;
 
 class CompositeContainer implements ContainerInterface
 {
+    protected const SEPARATOR = '.';
+
     private $records;
     private $containers;
 
@@ -59,8 +61,8 @@ class CompositeContainer implements ContainerInterface
 
     private function splitId(string $id): array
     {
-        return $id[0] === '.'
-            ? ['.', ltrim($id, '.')]
-            : explode('.', $id, 2) + [false, null];
+        return $id[0] === static::SEPARATOR
+            ? [static::SEPARATOR, ltrim($id, static::SEPARATOR)]
+            : explode(static::SEPARATOR, $id, 2) + [false, null];
     }
 }

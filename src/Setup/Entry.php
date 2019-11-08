@@ -19,7 +19,7 @@ use Polymorphine\Container\Exception;
  * Write-only proxy with helper methods to instantiate and
  * set Record implementations for given Container name id.
  */
-class RecordSetup
+class Entry
 {
     private $name;
     private $records;
