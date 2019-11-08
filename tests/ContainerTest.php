@@ -418,6 +418,6 @@ class ContainerTest extends TestCase
 
     private function builder(array $configs = [], array $records = [])
     {
-        return new Setup($records, $configs);
+        return Setup::withData($records, $configs);
     }
 }

@@ -19,13 +19,20 @@ class Setup
     private $collection;
     private $container;
 
+    public function __construct(Setup\Collection $collection = null)
+    {
+        $this->collection = $collection ?: new Setup\Collection([], []);
+    }
+
     /**
      * @param Records\Record[]     $records
      * @param ContainerInterface[] $containers
+     *
+     * @return self
      */
-    public function __construct(array $records = [], array $containers = [])
+    public static function withData(array $records = [], array $containers = []): self
     {
-        $this->collection = new Setup\Collection($records, $containers);
+        return new self(new Setup\Collection($records, $containers));
     }
 
     /**
