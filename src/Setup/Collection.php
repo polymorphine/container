@@ -22,25 +22,24 @@ class Collection
 {
     private const SEPARATOR = CompositeContainer::SEPARATOR;
 
-    private $records;
-    private $containers;
+    protected $records;
+    protected $containers;
 
     /**
      * @param Records\Record[]     $records
      * @param ContainerInterface[] $containers
      */
-    public function __construct(array $records, array $containers)
+    public function __construct(array $records = [], array $containers = [])
     {
         $this->records    = $records;
         $this->containers = $containers;
     }
 
-    public function container(bool $tracking = false): ContainerInterface
+    public function container(): ContainerInterface
     {
-        $records = $tracking ? new Records\TrackedRecords($this->records) : new Records($this->records);
         return $this->containers
-            ? new CompositeContainer($records, $this->containers)
-            : new RecordContainer($records);
+            ? new CompositeContainer(new Records($this->records), $this->containers)
+            : new RecordContainer(new Records($this->records));
     }
 
     public function add(string $id, Records\Record $record): void

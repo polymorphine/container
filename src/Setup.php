@@ -21,18 +21,22 @@ class Setup
 
     public function __construct(Setup\Collection $collection = null)
     {
-        $this->collection = $collection ?: new Setup\Collection([], []);
+        $this->collection = $collection ?: new Setup\Collection();
     }
 
     /**
      * @param Records\Record[]     $records
      * @param ContainerInterface[] $containers
+     * @param bool                 $validate
      *
      * @return self
      */
-    public static function withData(array $records = [], array $containers = []): self
+    public static function withData(array $records = [], array $containers = [], bool $validate = false): self
     {
-        return new self(new Setup\Collection($records, $containers));
+        $collection = $validate
+            ? new Setup\ValidatedCollection($records, $containers)
+            : new Setup\Collection($records, $containers);
+        return new self($collection);
     }
 
     /**
@@ -45,14 +49,11 @@ class Setup
      * encapsulated and not passed to uncontrolled parts of application
      * (including container itself).
      *
-     * @param bool $tracking Enables call stack tracking and detects
-     *                       circular references
-     *
      * @return ContainerInterface
      */
-    public function container(bool $tracking = false): ContainerInterface
+    public function container(): ContainerInterface
     {
-        return $this->container ?: $this->container = $this->collection->container($tracking);
+        return $this->container ?: $this->container = $this->collection->container();
     }
 
     /**
