@@ -190,7 +190,7 @@ class ContainerTest extends TestCase
 
     public function testBuildConfigContainerWithSetup()
     {
-        $setup = Setup::withData();
+        $setup = Setup::withData([], [], true);
         $setup->entry('cfg')->container(new configContainer(['test' => 'value']));
         $container = $setup->container();
 
@@ -208,7 +208,7 @@ class ContainerTest extends TestCase
 
     public function testContainerIdWithIdSeparator_ThrowsException()
     {
-        $setup = Setup::withData();
+        $setup = Setup::withData([], [], true);
         $this->expectException(Exception\InvalidIdException::class);
         $setup->entry('cfg.data')->container(new ConfigContainer([]));
     }
@@ -273,7 +273,7 @@ class ContainerTest extends TestCase
         $this->assertSame($expect, $container->get('small.talk')->beNice());
     }
 
-    public function testCompositeForUndefinedDecoratedDependency_ThrowsException()
+    public function testCompositeRecordForUndefinedDecoratedDependency_ThrowsException()
     {
         $builder = Setup::withData();
         $builder->entry('someClass')->compose(Example\ExampleClass::class, 'not.exists', 'doesnt.matter');
@@ -322,11 +322,61 @@ class ContainerTest extends TestCase
     public function testGetMissingConfigRecord_ThrowsException(string $undefinedPath)
     {
         $config['foo'] = new ConfigContainer(['key1' => ['nested' => ['double' => 'nested value']], 'key2' => 'value2']);
-        $container = Setup::withData([], $config)->container();
+        $container = Setup::withData([], $config, true)->container();
 
         $this->assertFalse($container->has($undefinedPath));
         $this->expectException(Exception\RecordNotFoundException::class);
         $container->get($undefinedPath);
+    }
+
+    public function testRecordIdUsedAsContainerId_ThrowsException()
+    {
+        $setup = Setup::withData([], [], true);
+        $setup->entry('prefix')->container(new ConfigContainer([]));
+        $this->expectException(Exception\InvalidIdException::class);
+        $setup->entry('prefix.foo')->set(true);
+    }
+
+    public function testContainerIdUsedAsRecordPrefix_ThrowsException()
+    {
+        $setup = Setup::withData([], [], true);
+        $setup->entry('prefix.foo')->set(true);
+        $this->expectException(Exception\InvalidIdException::class);
+        $setup->entry('prefix')->container(new ConfigContainer([]));
+    }
+
+    public function testRecordPrefixUsedAsContainerId_ThrowsException()
+    {
+        $setup = Setup::withData([], [], true);
+        $setup->entry('prefix')->container(new ConfigContainer([]));
+        $this->expectException(Exception\InvalidIdException::class);
+        $setup->entry('prefix.foo')->set(true);
+    }
+
+    /**
+     * @dataProvider invalidSetupConstructorParams
+     *
+     * @param array  $records
+     * @param array  $config
+     * @param string $exception
+     */
+    public function testSetupWithInvalidConstructorStructures_ThrowsException(array $records, array $config, string $exception)
+    {
+        $this->expectException($exception);
+        Setup::withData($records, $config, true);
+    }
+
+    public function invalidSetupConstructorParams()
+    {
+        $record    = new Record\ValueRecord(true);
+        $container = new ConfigContainer([]);
+
+        return [
+            [['foo.bar' => $record], ['foo' => $container], Exception\InvalidIdException::class],
+            [['foo' => $record], ['foo' => $container], Exception\InvalidIdException::class],
+            [['foo' => true], ['bar' => $container], Exception\InvalidArgumentException::class],
+            [['foo' => $record], ['bar' => []], Exception\InvalidArgumentException::class]
+        ];
     }
 
     public function undefinedPaths(): array
@@ -404,7 +454,7 @@ class ContainerTest extends TestCase
 
     public function testCallStackIsAddedToContainerExceptionMessage()
     {
-        $setup = Setup::withData([], ['config' => 'value'], true);
+        $setup = Setup::withData([], ['config' => new ConfigContainer(['foo' => 'bar'])], true);
         $setup->entry('A')->set(function () {});
         $setup->entry('B')->invoke(function (ContainerInterface $c) {
             return new Example\ExampleClass($c->get('A'), $c->get('undefined'));
