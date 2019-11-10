@@ -329,6 +329,12 @@ class ContainerTest extends TestCase
         return [['foo.key1.nested.value'], ['foo.key1.something'], ['foo.whatever'], ['notEnv']];
     }
 
+    public function testInstantiatingSecureSetup()
+    {
+        $this->assertEquals(Setup::secure(), new Setup(new Setup\ValidatedCollection()));
+        $this->assertEquals(Setup::secure(), Setup::withData([], [], true));
+    }
+
     public function testContainerIdWithIdSeparator_SecureSetupThrowsException()
     {
         $setup = Setup::withData([], [], true);

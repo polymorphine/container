@@ -23,6 +23,11 @@ class Setup
         $this->collection = $collection ?: new Setup\Collection();
     }
 
+    public static function secure(): self
+    {
+        return new self(new Setup\ValidatedCollection());
+    }
+
     /**
      * @param Records\Record[]     $records
      * @param ContainerInterface[] $containers
