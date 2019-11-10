@@ -17,7 +17,6 @@ use Psr\Container\ContainerInterface;
 class Setup
 {
     private $collection;
-    private $container;
 
     public function __construct(Setup\Collection $collection = null)
     {
@@ -53,7 +52,7 @@ class Setup
      */
     public function container(): ContainerInterface
     {
-        return $this->container ?: $this->container = $this->collection->container();
+        return $this->collection->container();
     }
 
     /**

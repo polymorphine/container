@@ -213,14 +213,17 @@ class ContainerTest extends TestCase
         $setup->entry('cfg.data')->container(new ConfigContainer([]));
     }
 
-    public function testSetupContainer_ReturnsSameInstanceOfContainer()
+    public function testSetupContainer_ReturnsNewInstanceOfContainer()
     {
         $config    = ['env' => new ConfigContainer(['config' => 'value'])];
         $setup     = Setup::withData(['exists' => new Record\ValueRecord(true)], $config, true);
         $container = $setup->container();
         $setup->entry('not.too.late')->set(true);
 
-        $this->assertSame($setup->container(), $container);
+        $this->assertNotSame($newContainer = $setup->container(), $container);
+        $this->assertTrue($newContainer->has('exists'));
+        $this->assertTrue($newContainer->has('not.too.late'));
+        $this->assertFalse($container->has('not.too.late'));
     }
 
     public function testCallbackRecord()
