@@ -27,7 +27,6 @@ class ContainerTest extends TestCase
     public function testInstantiation()
     {
         $this->assertInstanceOf(ContainerInterface::class, Setup::withData()->container());
-        $this->assertInstanceOf(ContainerInterface::class, Setup::withData([], [], true)->container());
         $this->assertInstanceOf(ContainerExceptionInterface::class, new Exception\InvalidArgumentException());
         $this->assertInstanceOf(ContainerExceptionInterface::class, new Exception\InvalidIdException());
         $this->assertInstanceOf(NotFoundExceptionInterface::class, new Exception\RecordNotFoundException());
@@ -190,7 +189,7 @@ class ContainerTest extends TestCase
 
     public function testBuildConfigContainerWithSetup()
     {
-        $setup = Setup::withData([], [], true);
+        $setup = Setup::withData([], []);
         $setup->entry('cfg')->container(new configContainer(['test' => 'value']));
         $container = $setup->container();
 
@@ -206,17 +205,10 @@ class ContainerTest extends TestCase
         $setup->entry('data')->container(new ConfigContainer([]));
     }
 
-    public function testContainerIdWithIdSeparator_ThrowsException()
-    {
-        $setup = Setup::withData([], [], true);
-        $this->expectException(Exception\InvalidIdException::class);
-        $setup->entry('cfg.data')->container(new ConfigContainer([]));
-    }
-
     public function testSetupContainer_ReturnsNewInstanceOfContainer()
     {
         $config    = ['env' => new ConfigContainer(['config' => 'value'])];
-        $setup     = Setup::withData(['exists' => new Record\ValueRecord(true)], $config, true);
+        $setup     = Setup::withData(['exists' => new Record\ValueRecord(true)], $config);
         $container = $setup->container();
         $setup->entry('not.too.late')->set(true);
 
@@ -325,14 +317,26 @@ class ContainerTest extends TestCase
     public function testGetMissingConfigRecord_ThrowsException(string $undefinedPath)
     {
         $config['foo'] = new ConfigContainer(['key1' => ['nested' => ['double' => 'nested value']], 'key2' => 'value2']);
-        $container = Setup::withData([], $config, true)->container();
+        $container = Setup::withData([], $config)->container();
 
         $this->assertFalse($container->has($undefinedPath));
         $this->expectException(Exception\RecordNotFoundException::class);
         $container->get($undefinedPath);
     }
 
-    public function testRecordIdUsedAsContainerId_ThrowsException()
+    public function undefinedPaths(): array
+    {
+        return [['foo.key1.nested.value'], ['foo.key1.something'], ['foo.whatever'], ['notEnv']];
+    }
+
+    public function testContainerIdWithIdSeparator_SecureSetupThrowsException()
+    {
+        $setup = Setup::withData([], [], true);
+        $this->expectException(Exception\InvalidIdException::class);
+        $setup->entry('cfg.data')->container(new ConfigContainer([]));
+    }
+
+    public function testRecordIdUsedAsContainerId_SecureSetupThrowsException()
     {
         $setup = Setup::withData([], [], true);
         $setup->entry('prefix')->container(new ConfigContainer([]));
@@ -340,7 +344,7 @@ class ContainerTest extends TestCase
         $setup->entry('prefix.foo')->set(true);
     }
 
-    public function testContainerIdUsedAsRecordPrefix_ThrowsException()
+    public function testContainerIdUsedAsRecordPrefix_SecureSetupThrowsException()
     {
         $setup = Setup::withData([], [], true);
         $setup->entry('prefix.foo')->set(true);
@@ -348,7 +352,7 @@ class ContainerTest extends TestCase
         $setup->entry('prefix')->container(new ConfigContainer([]));
     }
 
-    public function testRecordPrefixUsedAsContainerId_ThrowsException()
+    public function testRecordPrefixUsedAsContainerId_SecureSetupThrowsException()
     {
         $setup = Setup::withData([], [], true);
         $setup->entry('prefix')->container(new ConfigContainer([]));
@@ -363,8 +367,11 @@ class ContainerTest extends TestCase
      * @param array  $config
      * @param string $exception
      */
-    public function testSetupWithInvalidConstructorStructures_ThrowsException(array $records, array $config, string $exception)
-    {
+    public function testSetupWithInvalidConstructorStructures_SecureSetupThrowsException(
+        array $records,
+        array $config,
+        string $exception
+    ) {
         $this->expectException($exception);
         Setup::withData($records, $config, true);
     }
@@ -380,11 +387,6 @@ class ContainerTest extends TestCase
             [['foo' => true], ['bar' => $container], Exception\InvalidArgumentException::class],
             [['foo' => $record], ['bar' => []], Exception\InvalidArgumentException::class]
         ];
-    }
-
-    public function undefinedPaths(): array
-    {
-        return [['foo.key1.nested.value'], ['foo.key1.something'], ['foo.whatever'], ['notEnv']];
     }
 
     public function testDirectCircularCall_ThrowsException()
