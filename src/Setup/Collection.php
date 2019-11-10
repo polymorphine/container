@@ -20,7 +20,7 @@ use Psr\Container\ContainerInterface;
 
 class Collection
 {
-    private const SEPARATOR = CompositeContainer::SEPARATOR;
+    protected const SEPARATOR = CompositeContainer::SEPARATOR;
 
     protected $records;
     protected $containers;
@@ -51,13 +51,8 @@ class Collection
         $this->records[$id] = $record;
     }
 
-    public function addContainer(string $id, ContainerInterface $container)
+    public function addContainer(string $id, ContainerInterface $container): void
     {
-        if (strpos($id, self::SEPARATOR) !== false) {
-            $message = 'Container id cannot contain `%s` separator - `%s` id given';
-            throw new Exception\InvalidIdException(sprintf($message, self::SEPARATOR, $id));
-        }
-
         if (isset($this->containers[$id])) {
             throw new Exception\InvalidIdException(sprintf('Cannot overwrite defined `%s` container', $id));
         }
