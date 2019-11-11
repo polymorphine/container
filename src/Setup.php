@@ -17,17 +17,30 @@ use Psr\Container\ContainerInterface;
 class Setup
 {
     private $collection;
-    private $containers;
-    private $container;
+
+    public function __construct(Setup\Collection $collection = null)
+    {
+        $this->collection = $collection ?: new Setup\Collection();
+    }
+
+    public static function secure(): self
+    {
+        return new self(new Setup\ValidatedCollection());
+    }
 
     /**
      * @param Records\Record[]     $records
      * @param ContainerInterface[] $containers
+     * @param bool                 $validate
+     *
+     * @return self
      */
-    public function __construct(array $records = [], array $containers = [])
+    public static function withData(array $records = [], array $containers = [], bool $validate = false): self
     {
-        $this->collection = new Setup\Collection($records);
-        $this->containers = $containers;
+        $collection = $validate
+            ? new Setup\ValidatedCollection($records, $containers)
+            : new Setup\Collection($records, $containers);
+        return new self($collection);
     }
 
     /**
@@ -40,18 +53,11 @@ class Setup
      * encapsulated and not passed to uncontrolled parts of application
      * (including container itself).
      *
-     * @param bool $tracking Enables call stack tracking and detects
-     *                       circular references
-     *
      * @return ContainerInterface
      */
-    public function container(bool $tracking = false): ContainerInterface
+    public function container(): ContainerInterface
     {
-        if ($this->container) { return $this->container; }
-
-        return $this->container = $this->containers
-            ? new CompositeContainer($this->collection->records($tracking), $this->containers)
-            : new RecordContainer($this->collection->records($tracking));
+        return $this->collection->container();
     }
 
     /**
