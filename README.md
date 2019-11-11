@@ -1,7 +1,7 @@
 # Polymorphine/Container
 [![Latest Stable Version](https://poser.pugx.org/polymorphine/container/version)](https://packagist.org/packages/polymorphine/container)
-[![Build status](https://travis-ci.org/polymorphine/container.svg?branch=master)](https://travis-ci.org/polymorphine/container)
-[![Coverage status](https://coveralls.io/repos/github/polymorphine/container/badge.svg?branch=master)](https://coveralls.io/github/polymorphine/container?branch=master)
+[![Build status](https://travis-ci.org/polymorphine/container.svg?branch=develop)](https://travis-ci.org/polymorphine/container)
+[![Coverage status](https://coveralls.io/repos/github/polymorphine/container/badge.svg?branch=develop)](https://coveralls.io/github/polymorphine/container?branch=develop)
 [![PHP version](https://img.shields.io/packagist/php-v/polymorphine/container.svg)](https://packagist.org/packages/polymorphine/container)
 [![LICENSE](https://img.shields.io/github/license/polymorphine/container.svg?color=blue)](LICENSE)
 ### PSR-11 Container for libraries & configuration
