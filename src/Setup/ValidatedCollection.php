@@ -56,8 +56,7 @@ class ValidatedCollection extends Collection
     private function checkRecord(string $id, $value): void
     {
         if (!$value instanceof Records\Record) {
-            $message = 'Setup record expected instance of Record in `%s` field';
-            throw new Exception\InvalidArgumentException(sprintf($message, $id));
+            throw Exception\InvalidArgumentException::recordExpected($id);
         }
         $this->checkRecordId($id);
     }
@@ -77,8 +76,7 @@ class ValidatedCollection extends Collection
     private function checkContainer(string $id, $value): void
     {
         if (!$value instanceof ContainerInterface) {
-            $message = 'Setup config expected instance of ContainerInterface in `%s` field';
-            throw new Exception\InvalidArgumentException(sprintf($message, $id));
+            throw Exception\InvalidArgumentException::containerExpected($id);
         }
         $this->checkContainerId($id);
     }

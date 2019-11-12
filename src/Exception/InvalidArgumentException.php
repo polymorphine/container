@@ -16,4 +16,15 @@ use Psr\Container\ContainerExceptionInterface;
 
 class InvalidArgumentException extends \InvalidArgumentException implements ContainerExceptionInterface
 {
+    public static function recordExpected(string $id): self
+    {
+        $message = 'Setup constructor expected instance of Record as records `%s` value';
+        return new self(sprintf($message, $id));
+    }
+
+    public static function containerExpected(string $id): self
+    {
+        $message = 'Setup constructor expected instance of ContainerInterface as containers `%s` value';
+        return new self(sprintf($message, $id));
+    }
 }
