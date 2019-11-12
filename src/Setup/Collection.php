@@ -63,8 +63,7 @@ class Collection
     public function moveRecord(string $id): string
     {
         if (!isset($this->records[$id])) {
-            $message = 'Undefined `%s` record cannot be moved';
-            throw new Exception\RecordNotFoundException(sprintf($message, $id));
+            throw Exception\RecordNotFoundException::cannotWrap($id);
         }
 
         $newId = $id . '.WRAP';

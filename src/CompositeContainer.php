@@ -45,7 +45,7 @@ class CompositeContainer implements ContainerInterface
     {
         [$containerId, $itemId] = $this->splitId($id);
         if (!isset($this->containers[$containerId])) {
-            throw new Exception\RecordNotFoundException(sprintf('Record `%s` not defined', $id));
+            throw Exception\RecordNotFoundException::undefined($id);
         }
 
         return $itemId ? $this->containers[$containerId]->get($itemId) : $this->containers[$containerId];

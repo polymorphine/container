@@ -17,4 +17,14 @@ use InvalidArgumentException;
 
 class RecordNotFoundException extends InvalidArgumentException implements NotFoundExceptionInterface
 {
+    public static function undefined(string $id): self
+    {
+        return new self(sprintf('Record `%s` not defined', $id));
+    }
+
+    public static function cannotWrap(string $id): self
+    {
+        $message = 'Attempted to decorate non-existent `%s` record with new composition';
+        throw new self(sprintf($message, $id));
+    }
 }
