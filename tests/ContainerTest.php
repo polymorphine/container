@@ -30,6 +30,7 @@ class ContainerTest extends TestCase
         $this->assertInstanceOf(ContainerExceptionInterface::class, new Exception\InvalidArgumentException());
         $this->assertInstanceOf(ContainerExceptionInterface::class, new Exception\InvalidIdException());
         $this->assertInstanceOf(NotFoundExceptionInterface::class, new Exception\RecordNotFoundException());
+        $this->assertInstanceOf(NotFoundExceptionInterface::class, new Exception\TrackedRecordNotFoundException());
         $this->assertInstanceOf(ContainerExceptionInterface::class, new Exception\CircularReferenceException());
     }
 

@@ -15,6 +15,12 @@ use Psr\Container\NotFoundExceptionInterface;
 use InvalidArgumentException;
 
 
-class RecordNotFoundException extends InvalidArgumentException implements NotFoundExceptionInterface
+class TrackedRecordNotFoundException extends InvalidArgumentException implements NotFoundExceptionInterface
 {
+    use CallStackMessageMethod;
+
+    public function __construct(string $message = '', array $callStack = [])
+    {
+        parent::__construct(self::extendMessage($message, $callStack));
+    }
 }

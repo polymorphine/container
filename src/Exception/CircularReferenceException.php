@@ -17,4 +17,11 @@ use RuntimeException;
 
 class CircularReferenceException extends RuntimeException implements ContainerExceptionInterface
 {
+    use CallStackMessageMethod;
+
+    public function __construct(string $id = '', array $callStack = [])
+    {
+        $message = 'Lazy composition of `%s` record is using reference to itself';
+        parent::__construct(self::extendMessage(sprintf($message, $id), $callStack, $id));
+    }
 }
