@@ -51,7 +51,7 @@ class Records
     public function get(string $id, ContainerInterface $container)
     {
         if (!isset($this->records[$id])) {
-            throw new Exception\RecordNotFoundException(sprintf('Record `%s` not defined', $id));
+            throw Exception\RecordNotFoundException::undefined($id);
         }
         return $this->records[$id]->value($container);
     }

@@ -41,7 +41,7 @@ class ConfigContainer implements ContainerInterface
         $keys = explode(self::SEPARATOR, $id);
         foreach ($keys as $key) {
             if (!is_array($data) || !array_key_exists($key, $data)) {
-                throw new Exception\RecordNotFoundException(sprintf('Record `%s` not defined', $id));
+                throw Exception\RecordNotFoundException::undefined($id);
             }
             $data = &$data[$key];
         }

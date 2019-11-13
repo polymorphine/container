@@ -27,9 +27,10 @@ class ContainerTest extends TestCase
     public function testInstantiation()
     {
         $this->assertInstanceOf(ContainerInterface::class, Setup::withData()->container());
-        $this->assertInstanceOf(ContainerExceptionInterface::class, new Exception\InvalidArgumentException());
+        $this->assertInstanceOf(ContainerExceptionInterface::class, new Exception\InvalidTypeException());
         $this->assertInstanceOf(ContainerExceptionInterface::class, new Exception\InvalidIdException());
         $this->assertInstanceOf(NotFoundExceptionInterface::class, new Exception\RecordNotFoundException());
+        $this->assertInstanceOf(NotFoundExceptionInterface::class, new Exception\TrackedRecordNotFoundException());
         $this->assertInstanceOf(ContainerExceptionInterface::class, new Exception\CircularReferenceException());
     }
 
@@ -390,8 +391,8 @@ class ContainerTest extends TestCase
         return [
             [['foo.bar' => $record], ['foo' => $container], Exception\InvalidIdException::class],
             [['foo' => $record], ['foo' => $container], Exception\InvalidIdException::class],
-            [['foo' => true], ['bar' => $container], Exception\InvalidArgumentException::class],
-            [['foo' => $record], ['bar' => []], Exception\InvalidArgumentException::class]
+            [['foo' => true], ['bar' => $container], Exception\InvalidTypeException::class],
+            [['foo' => $record], ['bar' => []], Exception\InvalidTypeException::class]
         ];
     }
 

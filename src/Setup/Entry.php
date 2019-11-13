@@ -95,7 +95,7 @@ class Entry
     {
         $idx = array_search($this->name, $dependencies, true);
         if ($idx !== false) {
-            $dependencies[$idx] = $this->decoratedRecordAlias();
+            $dependencies[$idx] = $this->records->moveRecord($this->name);
         }
 
         $this->useRecord(new Record\ComposeRecord($className, ...$dependencies));
@@ -121,15 +121,5 @@ class Entry
     public function container(ContainerInterface $container)
     {
         $this->records->addContainer($this->name, $container);
-    }
-
-    private function decoratedRecordAlias(): string
-    {
-        try {
-            return $this->records->moveRecord($this->name);
-        } catch (Exception\RecordNotFoundException $e) {
-            $message = 'Undefined `%s` record for decorating composition';
-            throw new Exception\RecordNotFoundException(sprintf($message, $this->name));
-        }
     }
 }

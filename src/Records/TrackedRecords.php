@@ -23,8 +23,7 @@ class TrackedRecords extends Records
     public function get(string $id, ContainerInterface $container)
     {
         if (isset($this->callStack[$id])) {
-            $message = 'Lazy composition of `%s` record is using reference to itself [call stack: %s]';
-            throw new Exception\CircularReferenceException(sprintf($message, (string) $id, $this->callStackPath($id)));
+            throw new Exception\CircularReferenceException($id, $this->callStack);
         }
 
         $this->callStack[$id] = true;
@@ -32,15 +31,10 @@ class TrackedRecords extends Records
         try {
             $item = parent::get($id, $container);
         } catch (Exception\RecordNotFoundException $e) {
-            throw $e->withCallStack($this->callStackPath('...'));
+            throw new Exception\TrackedRecordNotFoundException($e->getMessage(), $this->callStack);
         }
 
         unset($this->callStack[$id]);
         return $item;
-    }
-
-    private function callStackPath(string $id): string
-    {
-        return implode('->', array_keys($this->callStack)) . '->' . $id;
     }
 }
