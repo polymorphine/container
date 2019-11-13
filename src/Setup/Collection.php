@@ -45,7 +45,7 @@ class Collection
     public function add(string $id, Records\Record $record): void
     {
         if (isset($this->records[$id])) {
-            throw new Exception\InvalidIdException(sprintf('Cannot overwrite defined `%s` Record', $id));
+            throw Exception\InvalidIdException::alreadyDefined(sprintf('`%s` record', $id));
         }
 
         $this->records[$id] = $record;
@@ -54,7 +54,7 @@ class Collection
     public function addContainer(string $id, ContainerInterface $container): void
     {
         if (isset($this->containers[$id])) {
-            throw new Exception\InvalidIdException(sprintf('Cannot overwrite defined `%s` container', $id));
+            throw Exception\InvalidIdException::alreadyDefined(sprintf('`%s` container', $id));
         }
 
         $this->containers[$id] = $container;

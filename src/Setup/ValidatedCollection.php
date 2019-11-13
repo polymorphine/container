@@ -63,14 +63,17 @@ class ValidatedCollection extends Collection
 
     private function checkRecordId(string $id): void
     {
-        $separator = strpos($id, self::SEPARATOR);
-        $prefix    = $separator === false ? $id : substr($id, 0, $separator);
-        if (isset($this->containers[$prefix])) {
-            $message = 'Record id or prefix `%s` already used by stored Container';
-            throw new Exception\InvalidIdException(sprintf($message, $prefix));
+        if (isset($this->containers[$id])) {
+            throw Exception\InvalidIdException::alreadyDefined(sprintf('`%s` container', $id));
         }
 
-        $this->reservedIds[$prefix] = true;
+        $separator = strpos($id, self::SEPARATOR);
+        $reserved  = $separator === false ? $id : substr($id, 0, $separator);
+        if (isset($this->containers[$reserved])) {
+            throw Exception\InvalidIdException::prefixConflict($reserved);
+        }
+
+        $this->reservedIds[$reserved] = true;
     }
 
     private function checkContainer(string $id, $value): void
@@ -84,13 +87,11 @@ class ValidatedCollection extends Collection
     private function checkContainerId(string $id): void
     {
         if (strpos($id, self::SEPARATOR) !== false) {
-            $message = 'Container id cannot contain `%s` separator - `%s` id given';
-            throw new Exception\InvalidIdException(sprintf($message, self::SEPARATOR, $id));
+            throw Exception\InvalidIdException::unexpectedPrefixSeparator(self::SEPARATOR, $id);
         }
 
         if (isset($this->reservedIds[$id])) {
-            $message = 'Container id `%s` already used by some record (possibly as prefix)';
-            throw new Exception\InvalidIdException(sprintf($message, $id));
+            throw Exception\InvalidIdException::alreadyDefined(sprintf('`%s` record (prefix)', $id));
         }
     }
 }
