@@ -45,7 +45,7 @@ class Collection
     public function add(string $id, Records\Record $record): void
     {
         if (isset($this->records[$id])) {
-            throw Exception\InvalidIdException::alreadyDefined(sprintf('`%s` record', $id));
+            throw Exception\InvalidIdException::alreadyDefined("`$id` record");
         }
 
         $this->records[$id] = $record;
@@ -54,7 +54,7 @@ class Collection
     public function addContainer(string $id, ContainerInterface $container): void
     {
         if (isset($this->containers[$id])) {
-            throw Exception\InvalidIdException::alreadyDefined(sprintf('`%s` container', $id));
+            throw Exception\InvalidIdException::alreadyDefined("`$id` container");
         }
 
         $this->containers[$id] = $container;

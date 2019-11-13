@@ -21,7 +21,7 @@ class CircularReferenceException extends RuntimeException implements ContainerEx
 
     public function __construct(string $id = '', array $callStack = [])
     {
-        $message = 'Lazy composition of `%s` record is using reference to itself';
-        parent::__construct(self::extendMessage(sprintf($message, $id), $callStack, $id));
+        $message = "Lazy composition of `$id` record is using reference to itself";
+        parent::__construct(self::extendMessage($message, $callStack, $id));
     }
 }

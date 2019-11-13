@@ -19,13 +19,11 @@ class InvalidTypeException extends InvalidArgumentException implements Container
 {
     public static function recordExpected(string $id): self
     {
-        $message = 'Setup constructor expected instance of Record as records `%s` value';
-        return new self(sprintf($message, $id));
+        return new self("Setup constructor expected instance of Record as records `$id` value");
     }
 
     public static function containerExpected(string $id): self
     {
-        $message = 'Setup constructor expected instance of ContainerInterface as containers `%s` value';
-        return new self(sprintf($message, $id));
+        return new self("Setup constructor expected instance of ContainerInterface as containers `$id` value");
     }
 }

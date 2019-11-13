@@ -17,6 +17,6 @@ trait CallStackMessageMethod
     private static function extendMessage(string $message, array $callStack, string $lastCall = '...'): string
     {
         $stack = implode('->', array_keys($callStack)) . ($lastCall ? '->' . $lastCall : '');
-        return $message . ' [call stack:' . $stack . ']';
+        return "$message [call stack: $stack]";
     }
 }

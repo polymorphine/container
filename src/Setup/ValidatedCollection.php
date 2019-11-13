@@ -64,7 +64,7 @@ class ValidatedCollection extends Collection
     private function checkRecordId(string $id): void
     {
         if (isset($this->containers[$id])) {
-            throw Exception\InvalidIdException::alreadyDefined(sprintf('`%s` container', $id));
+            throw Exception\InvalidIdException::alreadyDefined("`$id` container");
         }
 
         $separator = strpos($id, self::SEPARATOR);
@@ -91,7 +91,7 @@ class ValidatedCollection extends Collection
         }
 
         if (isset($this->reservedIds[$id])) {
-            throw Exception\InvalidIdException::alreadyDefined(sprintf('`%s` record (prefix)', $id));
+            throw Exception\InvalidIdException::alreadyDefined("`$id` record (or record prefix)");
         }
     }
 }

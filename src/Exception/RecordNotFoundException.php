@@ -19,12 +19,11 @@ class RecordNotFoundException extends InvalidArgumentException implements NotFou
 {
     public static function undefined(string $id): self
     {
-        return new self(sprintf('Record `%s` not defined', $id));
+        return new self("Record `$id` not defined");
     }
 
     public static function cannotWrap(string $id): self
     {
-        $message = 'Attempted to decorate non-existent `%s` record with new composition';
-        throw new self(sprintf($message, $id));
+        throw new self("Attempted to decorate non-existent `$id` record with new composition");
     }
 }
