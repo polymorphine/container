@@ -14,6 +14,10 @@ namespace Polymorphine\Container;
 use Psr\Container\ContainerInterface;
 
 
+/**
+ * ContainerInterface implementation using Records instance
+ * with various strategies to deliver values.
+ */
 class RecordContainer implements ContainerInterface
 {
     protected $records;

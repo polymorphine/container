@@ -14,6 +14,9 @@ namespace Polymorphine\Container;
 use Psr\Container\ContainerInterface;
 
 
+/**
+ * Container of Record strategies to produce container values.
+ */
 class Records
 {
     private $records;
@@ -27,7 +30,8 @@ class Records
     }
 
     /**
-     * Checks if Record is stored at given identifier.
+     * Checks if Record is stored at given identifier without
+     * calling for its value.
      *
      * @param string $id
      *
@@ -39,7 +43,9 @@ class Records
     }
 
     /**
-     * Returns Record stored at given identifier.
+     * Returns Record value stored at given identifier.
+     * ContainerInterface is given for possibility of producing
+     * Record's value using another container entries.
      *
      * @param string             $id
      * @param ContainerInterface $container

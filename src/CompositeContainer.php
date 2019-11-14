@@ -14,6 +14,10 @@ namespace Polymorphine\Container;
 use Psr\Container\ContainerInterface;
 
 
+/**
+ * RecordContainer merged with additional sub-containers accessed
+ * with separated prefix identifier.
+ */
 class CompositeContainer implements ContainerInterface
 {
     public const SEPARATOR = '.';
@@ -22,6 +26,10 @@ class CompositeContainer implements ContainerInterface
     private $containers;
 
     /**
+     * Container identifiers cannot contain separator.
+     * Records will not be called when existing container
+     * identifier is used (as prefix).
+     *
      * @param Records              $records
      * @param ContainerInterface[] $containers
      */
