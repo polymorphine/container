@@ -39,7 +39,7 @@ class Entry
      *
      * @throws Exception\InvalidIdException
      */
-    public function useRecord(Record $record): void
+    public function record(Record $record): void
     {
         $this->records->addRecord($this->name, $record);
     }
@@ -53,9 +53,9 @@ class Entry
      *
      * @throws Exception\InvalidIdException
      */
-    public function set($value): void
+    public function value($value): void
     {
-        $this->useRecord(new Record\ValueRecord($value));
+        $this->record(new Record\ValueRecord($value));
     }
 
     /**
@@ -68,9 +68,9 @@ class Entry
      *
      * @throws Exception\InvalidIdException
      */
-    public function invoke(callable $callback): void
+    public function callback(callable $callback): void
     {
-        $this->useRecord(new Record\CallbackRecord($callback));
+        $this->record(new Record\CallbackRecord($callback));
     }
 
     /**
@@ -86,8 +86,8 @@ class Entry
      *
      * @see ComposeRecord
      *
-     * @param string   $className
-     * @param string[] $dependencies
+     * @param string $className
+     * @param string ...$dependencies
      *
      * @throws Exception\InvalidIdException | Exception\RecordNotFoundException
      */
@@ -98,7 +98,7 @@ class Entry
             $dependencies[$idx] = $this->records->wrapRecord($this->name);
         }
 
-        $this->useRecord(new Record\ComposeRecord($className, ...$dependencies));
+        $this->record(new Record\ComposeRecord($className, ...$dependencies));
     }
 
     /**
@@ -115,7 +115,7 @@ class Entry
      */
     public function create(string $factoryId, string $method, string ...$arguments): void
     {
-        $this->useRecord(new Record\CreateMethodRecord($factoryId, $method, ...$arguments));
+        $this->record(new Record\CreateMethodRecord($factoryId, $method, ...$arguments));
     }
 
     public function container(ContainerInterface $container)

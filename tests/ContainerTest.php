@@ -137,7 +137,7 @@ class ContainerTest extends TestCase
     public function testCallbacksCannotModifyRegistry()
     {
         $setup = Setup::withData();
-        $setup->entry('lazyModifier')->invoke(function ($c) {
+        $setup->entry('lazyModifier')->callback(function ($c) {
             $vars = get_object_vars($c);
 
             return isset($vars['records']);
@@ -148,9 +148,9 @@ class ContainerTest extends TestCase
     public function testOverwritingExistingKey_ThrowsException()
     {
         $setup = Setup::withData();
-        $setup->entry('test')->set('foo');
+        $setup->entry('test')->value('foo');
         $this->expectException(Exception\InvalidIdException::class);
-        $setup->entry('test')->set('bar');
+        $setup->entry('test')->value('bar');
     }
 
     public function testAddingRecordsArrayWithExistingRecord_ThrowsException()
@@ -181,10 +181,10 @@ class ContainerTest extends TestCase
     public function inputScenarios()
     {
         return [
-            ['set', 'direct', 'direct value', 'direct value'],
-            ['invoke', 'lazy', function () { return 'lazy value'; }, 'lazy value'],
-            ['useRecord', 'directRecord', new Record\ValueRecord('direct value'), 'direct value'],
-            ['useRecord', 'lazyRecord', new Record\CallbackRecord(function () { return 'lazy value'; }), 'lazy value']
+            ['value', 'direct', 'direct value', 'direct value'],
+            ['callback', 'lazy', function () { return 'lazy value'; }, 'lazy value'],
+            ['record', 'directRecord', new Record\ValueRecord('direct value'), 'direct value'],
+            ['record', 'lazyRecord', new Record\CallbackRecord(function () { return 'lazy value'; }), 'lazy value']
         ];
     }
 
@@ -211,7 +211,7 @@ class ContainerTest extends TestCase
         $config    = ['env' => new ConfigContainer(['config' => 'value'])];
         $setup     = Setup::withData(['exists' => new Record\ValueRecord(true)], $config);
         $container = $setup->container();
-        $setup->entry('not.too.late')->set(true);
+        $setup->entry('not.too.late')->value(true);
 
         $this->assertNotSame($newContainer = $setup->container(), $container);
         $this->assertTrue($newContainer->has('exists'));
@@ -222,7 +222,7 @@ class ContainerTest extends TestCase
     public function testCallbackRecord()
     {
         $setup = Setup::withData();
-        $setup->entry('lazy.goodbye')->invoke(function () {
+        $setup->entry('lazy.goodbye')->callback(function () {
             return new Example\ExampleClass(function ($name) {
                 return 'Goodbye ' . $name;
             }, 'Shudd3r');
@@ -259,7 +259,7 @@ class ContainerTest extends TestCase
 
         // Decorated Again
         $setup = Setup::withData([], $config);
-        $setup->entry('ask.football')->set('Have you seen that ridiculous display last night?');
+        $setup->entry('ask.football')->value('Have you seen that ridiculous display last night?');
         $setup->entry('small.talk')->compose(Example\ExampleClass::class, 'cfg.hello', 'foo.env.name');
         $setup->entry('small.talk')->compose(Example\DecoratingExampleClass::class, 'small.talk', 'foo.env.polite');
         $setup->entry('small.talk')->compose(Example\DecoratingExampleClass::class, 'small.talk', 'ask.football');
@@ -282,7 +282,7 @@ class ContainerTest extends TestCase
     {
         $config['foo'] = new ConfigContainer(['one' => 'first', 'two' => 'second', 'three' => 'third']);
         $setup = Setup::withData([], $config);
-        $setup->entry('factory')->set(new Example\Factory());
+        $setup->entry('factory')->value(new Example\Factory());
         $setup->entry('product')->create('factory', 'create', 'foo.one', 'foo.two', 'foo.three');
         $container = $setup->container();
 
@@ -348,13 +348,13 @@ class ContainerTest extends TestCase
         $setup = Setup::withData([], [], true);
         $setup->entry('prefix')->container(new ConfigContainer([]));
         $this->expectException(Exception\InvalidIdException::class);
-        $setup->entry('prefix.foo')->set(true);
+        $setup->entry('prefix.foo')->value(true);
     }
 
     public function testContainerIdUsedAsRecordPrefix_SecureSetupThrowsException()
     {
         $setup = Setup::withData([], [], true);
-        $setup->entry('prefix.foo')->set(true);
+        $setup->entry('prefix.foo')->value(true);
         $this->expectException(Exception\InvalidIdException::class);
         $setup->entry('prefix')->container(new ConfigContainer([]));
     }
@@ -364,7 +364,7 @@ class ContainerTest extends TestCase
         $setup = Setup::withData([], [], true);
         $setup->entry('prefix')->container(new ConfigContainer([]));
         $this->expectException(Exception\InvalidIdException::class);
-        $setup->entry('prefix.foo')->set(true);
+        $setup->entry('prefix.foo')->value(true);
     }
 
     /**
@@ -399,7 +399,7 @@ class ContainerTest extends TestCase
     public function testDirectCircularCall_ThrowsException()
     {
         $setup = Setup::withData([], [], true);
-        $setup->entry('ref.self')->invoke(function (ContainerInterface $c) {
+        $setup->entry('ref.self')->callback(function (ContainerInterface $c) {
             return $c->get('ref.self');
         });
         $container = $setup->container();
@@ -411,13 +411,13 @@ class ContainerTest extends TestCase
     public function testIndirectCircularCall_ThrowsException()
     {
         $setup = Setup::withData([], [], true);
-        $setup->entry('ref')->invoke(function (ContainerInterface $c) {
+        $setup->entry('ref')->callback(function (ContainerInterface $c) {
             return $c->get('ref.self');
         });
-        $setup->entry('ref.self')->invoke(function (ContainerInterface $c) {
+        $setup->entry('ref.self')->callback(function (ContainerInterface $c) {
             return $c->get('ref.dependency');
         });
-        $setup->entry('ref.dependency')->invoke(function (ContainerInterface $c) {
+        $setup->entry('ref.dependency')->callback(function (ContainerInterface $c) {
             return $c->get('ref.self');
         });
         $container = $setup->container();
@@ -430,32 +430,32 @@ class ContainerTest extends TestCase
     {
         $config['foo'] = new ConfigContainer(['config' => 'value']);
         $setup = Setup::withData([], $config, true);
-        $setup->entry('ref')->invoke(function (ContainerInterface $c) {
+        $setup->entry('ref')->callback(function (ContainerInterface $c) {
             return $c->get('ref.multiple') . ':' . $c->get('ref.multiple') . ':' . $c->get('foo.config');
         });
-        $setup->entry('ref.multiple')->set('Test');
+        $setup->entry('ref.multiple')->value('Test');
         $this->assertSame('Test:Test:value', $setup->container()->get('ref'));
     }
 
     public function testMultipleIndirectCallsAreNotCircular()
     {
         $setup = Setup::withData([], [], true);
-        $setup->entry('ref')->invoke(function (ContainerInterface $c) {
+        $setup->entry('ref')->callback(function (ContainerInterface $c) {
             return $c->get('function')($c);
         });
-        $setup->entry('function')->invoke(function (ContainerInterface $c) {
+        $setup->entry('function')->callback(function (ContainerInterface $c) {
             return function (ContainerInterface $test) use ($c) {
                 return $c->get('ref.multiple') . ':' . $test->get('ref.multiple');
             };
         });
-        $setup->entry('ref.multiple')->set('Test');
+        $setup->entry('ref.multiple')->value('Test');
         $this->assertSame('Test:Test', $setup->container()->get('ref'));
     }
 
     public function testTrackingStopsAfterItemIsReturned()
     {
         $setup = Setup::withData([], [], true);
-        $setup->entry('ref')->invoke(function (ContainerInterface $c) {
+        $setup->entry('ref')->callback(function (ContainerInterface $c) {
             return $c;
         });
         $container = $setup->container();
@@ -467,8 +467,8 @@ class ContainerTest extends TestCase
     public function testCallStackIsAddedToContainerExceptionMessage()
     {
         $setup = Setup::withData([], ['config' => new ConfigContainer(['foo' => 'bar'])], true);
-        $setup->entry('A')->set(function () {});
-        $setup->entry('B')->invoke(function (ContainerInterface $c) {
+        $setup->entry('A')->value(function () {});
+        $setup->entry('B')->callback(function (ContainerInterface $c) {
             return new Example\ExampleClass($c->get('A'), $c->get('undefined'));
         });
         $setup->entry('C')->compose(Example\DecoratingExampleClass::class, 'B', '.config');
