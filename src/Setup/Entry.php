@@ -41,7 +41,7 @@ class Entry
      */
     public function useRecord(Record $record): void
     {
-        $this->records->add($this->name, $record);
+        $this->records->addRecord($this->name, $record);
     }
 
     /**

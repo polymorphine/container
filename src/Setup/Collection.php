@@ -43,7 +43,7 @@ class Collection
             : new RecordContainer(new Records($this->records));
     }
 
-    public function add(string $id, Records\Record $record): void
+    public function addRecord(string $id, Records\Record $record): void
     {
         if (isset($this->records[$id])) {
             throw Exception\InvalidIdException::alreadyDefined("`$id` record");

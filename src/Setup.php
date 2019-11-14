@@ -83,7 +83,7 @@ class Setup
     public function records(array $records): void
     {
         foreach ($records as $id => $record) {
-            $this->collection->add($id, $record);
+            $this->collection->addRecord($id, $record);
         }
     }
 }

@@ -35,10 +35,10 @@ class ValidatedCollection extends Collection
             : new RecordContainer(new Records\TrackedRecords($this->records));
     }
 
-    public function add(string $id, Records\Record $record): void
+    public function addRecord(string $id, Records\Record $record): void
     {
         $this->checkRecordId($id);
-        parent::add($id, $record);
+        parent::addRecord($id, $record);
     }
 
     public function addContainer(string $id, ContainerInterface $container): void
