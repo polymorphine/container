@@ -33,30 +33,22 @@ class CompositeContainer implements ContainerInterface
 
     public function get($id)
     {
-        return $this->records->has($id) ? $this->records->get($id, $this) : $this->fromContainers($id);
+        [$containerId, $itemId] = $this->splitId($id);
+        if (isset($this->containers[$containerId])) {
+            return $itemId ? $this->containers[$containerId]->get($itemId) : $this->containers[$containerId];
+        }
+
+        return $this->records->get($id, $this);
     }
 
     public function has($id)
     {
-        return $this->records->has($id) || $this->inContainers($id);
-    }
-
-    private function fromContainers($id)
-    {
         [$containerId, $itemId] = $this->splitId($id);
-        if (!isset($this->containers[$containerId])) {
-            throw Exception\RecordNotFoundException::undefined($id);
+        if (isset($this->containers[$containerId])) {
+            return $itemId ? $this->containers[$containerId]->has($itemId) : true;
         }
 
-        return $itemId ? $this->containers[$containerId]->get($itemId) : $this->containers[$containerId];
-    }
-
-    private function inContainers(string $id): bool
-    {
-        [$containerId, $itemId] = $this->splitId($id);
-        if (!isset($this->containers[$containerId])) { return false; }
-
-        return $itemId ? $this->containers[$containerId]->has($itemId) : true;
+        return $this->records->has($id);
     }
 
     private function splitId(string $id): array
