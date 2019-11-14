@@ -20,7 +20,8 @@ use Psr\Container\ContainerInterface;
 
 class Collection
 {
-    protected const SEPARATOR = CompositeContainer::SEPARATOR;
+    protected const SEPARATOR   = CompositeContainer::SEPARATOR;
+    protected const WRAP_PREFIX = 'WRAP>';
 
     protected $records;
     protected $containers;
@@ -60,20 +61,22 @@ class Collection
         $this->containers[$id] = $container;
     }
 
-    public function moveRecord(string $id): string
+    public function wrapRecord(string $id): string
     {
         if (!isset($this->records[$id])) {
             throw Exception\RecordNotFoundException::cannotWrap($id);
         }
 
-        $newId = $id . '.WRAP';
-        while (isset($this->records[$newId])) {
-            $newId .= '.WRAP';
-        }
-
+        $newId = $this->wrappedId($id);
         $this->records[$newId] = $this->records[$id];
         unset($this->records[$id]);
 
         return $newId;
+    }
+
+    private function wrappedId(string $id): string
+    {
+        $newId = static::WRAP_PREFIX . $id;
+        return isset($this->records[$newId]) ? $this->wrappedId($newId) : $newId;
     }
 }

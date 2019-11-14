@@ -95,7 +95,7 @@ class Entry
     {
         $idx = array_search($this->name, $dependencies, true);
         if ($idx !== false) {
-            $dependencies[$idx] = $this->records->moveRecord($this->name);
+            $dependencies[$idx] = $this->records->wrapRecord($this->name);
         }
 
         $this->useRecord(new Record\ComposeRecord($className, ...$dependencies));
