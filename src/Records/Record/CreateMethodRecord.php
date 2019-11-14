@@ -16,10 +16,11 @@ use Psr\Container\ContainerInterface;
 
 
 /**
- * Record that creates its value by calling a method on (factory) object.
+ * Record that creates returned value by calling method name
+ * and container entries both as method's parameters and factory
+ * object the call is made on.
  *
- * Returned value is cached and returned directly when
- * value() method is called again.
+ * Returned value is cached and returned directly on subsequent calls.
  */
 class CreateMethodRecord implements Record
 {
@@ -31,9 +32,9 @@ class CreateMethodRecord implements Record
     private $product;
 
     /**
-     * @param string $method
-     * @param string $factoryId
-     * @param string ...$arguments
+     * @param string $factoryId    container identifier for factory object
+     * @param string $method       factory method name
+     * @param string ...$arguments container identifiers for method parameters
      */
     public function __construct(string $factoryId, string $method, string ...$arguments)
     {

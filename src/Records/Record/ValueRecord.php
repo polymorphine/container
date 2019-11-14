@@ -16,7 +16,7 @@ use Psr\Container\ContainerInterface;
 
 
 /**
- * Record that returns its property value directly.
+ * Record that directly returns its property value.
  */
 class ValueRecord implements Record
 {
