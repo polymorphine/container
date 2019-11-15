@@ -19,8 +19,7 @@ use Psr\Container\ContainerInterface;
  * Record that creates and returns object of given class name
  * created with Container entries as its constructor parameters.
  *
- * Returned object is cached and returned directly when
- * value() method is called again.
+ * Returned value is cached and returned directly on subsequent calls.
  */
 class ComposeRecord implements Record
 {
@@ -31,8 +30,8 @@ class ComposeRecord implements Record
     private $object;
 
     /**
-     * @param string   $className
-     * @param string[] $dependencies ContainerInterface ids to get constructor values from
+     * @param string $className       class to instantiate
+     * @param string ...$dependencies container identifiers for class constructor parameters
      */
     public function __construct(string $className, string ...$dependencies)
     {

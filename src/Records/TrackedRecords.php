@@ -16,6 +16,11 @@ use Polymorphine\Container\Exception;
 use Psr\Container\ContainerInterface;
 
 
+/**
+ * Instance of Records with nested call tracking, detecting
+ * circular calls to passed ContainerInterface and appending
+ * call stack paths to exception messages.
+ */
 class TrackedRecords extends Records
 {
     private $callStack = [];

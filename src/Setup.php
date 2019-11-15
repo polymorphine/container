@@ -23,12 +23,27 @@ class Setup
         $this->collection = $collection ?: new Setup\Collection();
     }
 
+    /**
+     * Creates Setup with validated collection.
+     *
+     * Added entries will be validated for identifier conflicts and
+     * created container will be monitored for circular references.
+     *
+     * @return self
+     */
     public static function secure(): self
     {
         return new self(new Setup\ValidatedCollection());
     }
 
     /**
+     * Creates Setup with predefined configuration.
+     *
+     * If `true` is passed as $validate param secure version of Setup
+     * will be created and predefined configuration will be validated.
+     *
+     * @see Setup::secure()
+     *
      * @param Records\Record[]     $records
      * @param ContainerInterface[] $containers
      * @param bool                 $validate
@@ -44,14 +59,11 @@ class Setup
     }
 
     /**
-     * Returns Container instance with provided records.
+     * Returns immutable Container instance with provided data.
      *
-     * Adding new entries to container is still possible, but only
-     * using this instance's entry() method.
-     *
-     * Strict immutability can be ensured only when this instance is
-     * encapsulated and not passed to uncontrolled parts of application
-     * (including container itself).
+     * Adding new entries to this setup is still possible, but created
+     * container will not be affected and this method will create new
+     * container instance with those added entries.
      *
      * @return ContainerInterface
      */
@@ -61,8 +73,8 @@ class Setup
     }
 
     /**
-     * Returns Entry object able to configure Container's
-     * data slot for given name id.
+     * Returns Entry object able to add new data to container configuration
+     * for given identifier.
      *
      * @param string $name
      *
@@ -74,7 +86,7 @@ class Setup
     }
 
     /**
-     * Stores Records instantiated directly in container.
+     * Adds Record instances directly to container configuration.
      *
      * @param Records\Record[] $records Flat associative array of Record instances
      *

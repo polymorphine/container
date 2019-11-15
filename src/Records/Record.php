@@ -23,11 +23,11 @@ interface Record
      * Unwraps value requested from container.
      *
      * Container instance is passed as parameter because value
-     * may derive from other Container entries.
+     * may need other container entries to be created.
      *
      * @param ContainerInterface $container
      *
-     * @return mixed unwrapped record value
+     * @return mixed
      */
     public function value(ContainerInterface $container);
 }

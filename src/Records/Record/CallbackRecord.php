@@ -16,10 +16,10 @@ use Psr\Container\ContainerInterface;
 
 
 /**
- * Record that returns value invoked from callable property.
+ * Record that returns value invoked from given callback, called with
+ * ContainerInterface instance as parameter.
  *
- * Returned value is cached and returned directly when
- * value() method is called again.
+ * Returned value is cached and returned directly on subsequent calls.
  */
 class CallbackRecord implements Record
 {

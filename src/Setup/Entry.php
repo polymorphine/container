@@ -17,8 +17,8 @@ use Psr\Container\ContainerInterface;
 
 
 /**
- * Write-only proxy with helper methods to instantiate and
- * set Record implementations for given Container name id.
+ * Write-only proxy with helper methods to instantiate and set
+ * Record implementations for given Container name identifier.
  */
 class Entry
 {
@@ -32,7 +32,7 @@ class Entry
     }
 
     /**
-     * Pushes given Record instance directly into Container's records
+     * Adds given Record instance directly into container records
      * using this instance's name property.
      *
      * @param Record $record
@@ -45,7 +45,7 @@ class Entry
     }
 
     /**
-     * Pushes ValueRecord with given value into Container's records.
+     * Adds ValueRecord with given value into container records.
      *
      * @see ValueRecord
      *
@@ -59,12 +59,12 @@ class Entry
     }
 
     /**
-     * Pushes CallbackRecord with given callable into Container's records.
+     * Adds CallbackRecord with given callable into container records.
      * Callback receives ContainerInterface instance as parameter.
      *
      * @see CallbackRecord
      *
-     * @param callable $callback
+     * @param callable $callback function (ContainerInterface): mixed
      *
      * @throws Exception\InvalidIdException
      */
@@ -74,15 +74,15 @@ class Entry
     }
 
     /**
-     * Pushes ComposeRecord with given className and its constructor
-     * parameters given as Container id names. Each dependency has
-     * to be defined within collection (otherwise circular references
-     * cannot be avoided).
+     * Adds ComposeRecord to container records with given className
+     * and its constructor parameters given as Container id names.
+     * Each dependency has to be defined within collection (otherwise
+     * circular references cannot be avoided).
      *
-     * When dependency id equals this instance name it is not overwritten and
-     * circular dependency is not created - it is decorated instead.
-     * Now every class depending on decorated object will take product of this
-     * record as its dependency. Objects can be decorated multiple times.
+     * When dependency id equals this instance name it is not overwritten
+     * and circular dependency is not created - it is decorated instead.
+     * Now every class depending on decorated object will take product of
+     * this record as its dependency. Objects can be wrapped multiple times.
      *
      * @see ComposeRecord
      *
@@ -102,22 +102,32 @@ class Entry
     }
 
     /**
-     * Pushes CreateMethodRecord with given method of container identified
-     * factory and its parameter values as container identifiers.
+     * Adds CreateMethodRecord to container records with given container
+     * identifier of factory class, factory method name and container
+     * identifiers of its parameters.
      *
      * @see CreateMethodRecord
      *
      * @param string $factoryId
      * @param string $method
-     * @param string ...$arguments Container identifiers of stored arguments
+     * @param string ...$arguments
      *
-     * @throws Exception\InvalidIdException | Exception\RecordNotFoundException
+     * @throws Exception\InvalidIdException
      */
     public function create(string $factoryId, string $method, string ...$arguments): void
     {
         $this->record(new Record\CreateMethodRecord($factoryId, $method, ...$arguments));
     }
 
+    /**
+     * Adds ContainerInterface instance as sub-container that may
+     * be accessed with current entry name prefix (entry name
+     * cannot contain prefix separator).
+     *
+     * @param ContainerInterface $container
+     *
+     * @throws Exception\InvalidIdException
+     */
     public function container(ContainerInterface $container)
     {
         $this->records->addContainer($this->name, $container);
