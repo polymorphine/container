@@ -18,7 +18,7 @@ use Polymorphine\Container\Exception;
 use Psr\Container\ContainerInterface;
 
 
-class Collection
+class DefaultBuilder
 {
     protected const SEPARATOR   = CompositeContainer::SEPARATOR;
     protected const WRAP_PREFIX = 'WRAP>';

@@ -16,11 +16,11 @@ use Psr\Container\ContainerInterface;
 
 class Setup
 {
-    private $collection;
+    private $builder;
 
-    public function __construct(Builder\Collection $collection = null)
+    public function __construct(Builder\DefaultBuilder $builder = null)
     {
-        $this->collection = $collection ?: new Builder\Collection();
+        $this->builder = $builder ?: new Builder\DefaultBuilder();
     }
 
     /**
@@ -33,7 +33,7 @@ class Setup
      */
     public static function secure(): self
     {
-        return new self(new Builder\ValidatedCollection());
+        return new self(new Builder\ValidatedBuilder());
     }
 
     /**
@@ -53,8 +53,8 @@ class Setup
     public static function withData(array $records = [], array $containers = [], bool $validate = false): self
     {
         $collection = $validate
-            ? new Builder\ValidatedCollection($records, $containers)
-            : new Builder\Collection($records, $containers);
+            ? new Builder\ValidatedBuilder($records, $containers)
+            : new Builder\DefaultBuilder($records, $containers);
         return new self($collection);
     }
 
@@ -69,7 +69,7 @@ class Setup
      */
     public function container(): ContainerInterface
     {
-        return $this->collection->container();
+        return $this->builder->container();
     }
 
     /**
@@ -82,7 +82,7 @@ class Setup
      */
     public function entry(string $name): Builder\Entry
     {
-        return new Builder\Entry($name, $this->collection);
+        return new Builder\Entry($name, $this->builder);
     }
 
     /**
@@ -95,7 +95,7 @@ class Setup
     public function records(array $records): void
     {
         foreach ($records as $id => $record) {
-            $this->collection->addRecord($id, $record);
+            $this->builder->addRecord($id, $record);
         }
     }
 }

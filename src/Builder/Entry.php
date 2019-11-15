@@ -23,12 +23,12 @@ use Psr\Container\ContainerInterface;
 class Entry
 {
     private $name;
-    private $records;
+    private $builder;
 
-    public function __construct(string $name, Collection $records)
+    public function __construct(string $name, DefaultBuilder $builder)
     {
         $this->name    = $name;
-        $this->records = $records;
+        $this->builder = $builder;
     }
 
     /**
@@ -41,7 +41,7 @@ class Entry
      */
     public function record(Record $record): void
     {
-        $this->records->addRecord($this->name, $record);
+        $this->builder->addRecord($this->name, $record);
     }
 
     /**
@@ -95,7 +95,7 @@ class Entry
     {
         $idx = array_search($this->name, $dependencies, true);
         if ($idx !== false) {
-            $dependencies[$idx] = $this->records->wrapRecord($this->name);
+            $dependencies[$idx] = $this->builder->wrapRecord($this->name);
         }
 
         $this->record(new Record\ComposeRecord($className, ...$dependencies));
@@ -130,6 +130,6 @@ class Entry
      */
     public function container(ContainerInterface $container)
     {
-        $this->records->addContainer($this->name, $container);
+        $this->builder->addContainer($this->name, $container);
     }
 }

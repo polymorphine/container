@@ -333,7 +333,7 @@ class ContainerTest extends TestCase
 
     public function testInstantiatingSecureSetup()
     {
-        $this->assertEquals(Setup::secure(), new Setup(new Builder\ValidatedCollection()));
+        $this->assertEquals(Setup::secure(), new Setup(new Builder\ValidatedBuilder()));
         $this->assertEquals(Setup::secure(), Setup::withData([], [], true));
     }
 

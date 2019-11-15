@@ -18,7 +18,7 @@ use Polymorphine\Container\Exception;
 use Psr\Container\ContainerInterface;
 
 
-class ValidatedCollection extends Collection
+class ValidatedBuilder extends DefaultBuilder
 {
     private $reservedIds = [];
 
