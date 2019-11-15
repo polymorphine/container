@@ -18,9 +18,9 @@ class Setup
 {
     private $collection;
 
-    public function __construct(Setup\Collection $collection = null)
+    public function __construct(Builder\Collection $collection = null)
     {
-        $this->collection = $collection ?: new Setup\Collection();
+        $this->collection = $collection ?: new Builder\Collection();
     }
 
     /**
@@ -33,7 +33,7 @@ class Setup
      */
     public static function secure(): self
     {
-        return new self(new Setup\ValidatedCollection());
+        return new self(new Builder\ValidatedCollection());
     }
 
     /**
@@ -53,8 +53,8 @@ class Setup
     public static function withData(array $records = [], array $containers = [], bool $validate = false): self
     {
         $collection = $validate
-            ? new Setup\ValidatedCollection($records, $containers)
-            : new Setup\Collection($records, $containers);
+            ? new Builder\ValidatedCollection($records, $containers)
+            : new Builder\Collection($records, $containers);
         return new self($collection);
     }
 
@@ -78,11 +78,11 @@ class Setup
      *
      * @param string $name
      *
-     * @return Setup\Entry
+     * @return Builder\Entry
      */
-    public function entry(string $name): Setup\Entry
+    public function entry(string $name): Builder\Entry
     {
-        return new Setup\Entry($name, $this->collection);
+        return new Builder\Entry($name, $this->collection);
     }
 
     /**
