@@ -34,11 +34,11 @@ $setup = new Setup();
 ````
 Using `Setup::entry()` method:
 ```php
-$setup->entry('value')->set('Hello world!');
-$setup->entry('domain')->set('http://api.example.com');
-$setup->entry('direct.object')->set(new ClassInstance());
+$setup->entry('value')->value('Hello world!');
+$setup->entry('domain')->value('http://api.example.com');
+$setup->entry('direct.object')->value(new ClassInstance());
 
-$setup->entry('deferred')->invoke(function (ContainerInterface $c) {
+$setup->entry('deferred')->callback(function (ContainerInterface $c) {
     return new DeferredClassInstance($c->get('value'));
 });
 
@@ -83,15 +83,15 @@ package's Record implementations:
 
 - `ValueRecord`: Direct value, that will be returned as it was passed (callbacks will be returned
   without evaluation as well). To push value record mapped to given `$id` into container with
-  setup object use `set()` method:
+  setup object use `value()` method:
   ```php
-  $setup->entry(string $id)->set(mixed $value);
+  $setup->entry(string $id)->value(mixed $value);
   ```
 - `CallbackRecord`: Lazily invoked and cached value. Takes callback that will be given container
   as parameter, and value of this call will be cached and returned on subsequent calls. Records
-  are added to setup with `invoke()` method:
+  are added to setup with `callback()` method:
   ```php
-  $setup->entry(string $id)->invoke(callable $callback);
+  $setup->entry(string $id)->callback(callable $callback);
   ```
 - `ComposeRecord`: Lazy instantiated (and cached) object of given class. Constructor parameters
   are passed as resolved aliases to other container entries. Setup with `compose()` method:
@@ -184,7 +184,7 @@ composition for single entry or to decorate object from currently used container
 For example: Let's assume that in dev environment we want to log messages passed/returned
 by a library stored at container's 'my.library' id:
 ```php
- $setup->entry('my.library')->invoke(function (ContainerInterface $c) {
+ $setup->entry('my.library')->callback(function (ContainerInterface $c) {
      return new MyLibrary($c->get('myLib.dependency'), ...);
  });
 
@@ -241,8 +241,8 @@ record-based and config container as a single Container using `Entry::container(
 ...
 $setup = new Setup();
 $setup->entry('env')->container($conatiner);
-$setup->entry('direct.object')->set(new ClassInstance());
-$setup->entry('deferred')->invoke(function (ContainerInterface $c) {
+$setup->entry('direct.object')->value(new ClassInstance());
+$setup->entry('deferred')->callback(function (ContainerInterface $c) {
   return new DeferredClassInstance($c->get('env.value'));
 });
 $setup->entry('composed.factory')->compose(ComposedClass::class, 'direct.object', 'deferred');
@@ -304,7 +304,7 @@ Now You can push values into container from the scope of `App` class object, but
 access them afterwards:
 ```php
 $app = new App(parse_ini_file('pdo.ini'));
-$app->set('database')->invoke(function (ContainerInterface $c) {
+$app->set('database')->callback(function (ContainerInterface $c) {
     return new PDO(...$c->get('env.pdo'));
 });
 ```
