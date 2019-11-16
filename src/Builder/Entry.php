@@ -11,6 +11,7 @@
 
 namespace Polymorphine\Container\Builder;
 
+use Polymorphine\Container\Builder;
 use Polymorphine\Container\Records\Record;
 use Polymorphine\Container\Exception;
 use Psr\Container\ContainerInterface;
@@ -25,7 +26,7 @@ class Entry
     private $name;
     private $builder;
 
-    public function __construct(string $name, DefaultBuilder $builder)
+    public function __construct(string $name, Builder $builder)
     {
         $this->name    = $name;
         $this->builder = $builder;

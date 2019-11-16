@@ -9,16 +9,13 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Container\Builder;
+namespace Polymorphine\Container;
 
-use Polymorphine\Container\Records;
-use Polymorphine\Container\RecordContainer;
-use Polymorphine\Container\CompositeContainer;
 use Polymorphine\Container\Exception;
 use Psr\Container\ContainerInterface;
 
 
-class DefaultBuilder
+class Builder
 {
     protected const SEPARATOR   = CompositeContainer::SEPARATOR;
     protected const WRAP_PREFIX = 'WRAP>';

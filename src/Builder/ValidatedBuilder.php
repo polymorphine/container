@@ -11,6 +11,7 @@
 
 namespace Polymorphine\Container\Builder;
 
+use Polymorphine\Container\Builder;
 use Polymorphine\Container\Records;
 use Polymorphine\Container\RecordContainer;
 use Polymorphine\Container\CompositeContainer;
@@ -18,7 +19,7 @@ use Polymorphine\Container\Exception;
 use Psr\Container\ContainerInterface;
 
 
-class ValidatedBuilder extends DefaultBuilder
+class ValidatedBuilder extends Builder
 {
     private $reservedIds = [];
 

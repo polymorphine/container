@@ -18,9 +18,9 @@ class Setup
 {
     private $builder;
 
-    public function __construct(Builder\DefaultBuilder $builder = null)
+    public function __construct(Builder $builder = null)
     {
-        $this->builder = $builder ?: new Builder\DefaultBuilder();
+        $this->builder = $builder ?: new Builder();
     }
 
     /**
@@ -54,7 +54,7 @@ class Setup
     {
         $collection = $validate
             ? new Builder\ValidatedBuilder($records, $containers)
-            : new Builder\DefaultBuilder($records, $containers);
+            : new Builder($records, $containers);
         return new self($collection);
     }
 
