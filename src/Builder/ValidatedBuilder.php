@@ -39,12 +39,18 @@ class ValidatedBuilder extends Builder
     public function addRecord(string $id, Records\Record $record): void
     {
         $this->checkRecordId($id);
+        if (isset($this->records[$id])) {
+            throw Exception\InvalidIdException::alreadyDefined("`$id` record");
+        }
         parent::addRecord($id, $record);
     }
 
     public function addContainer(string $id, ContainerInterface $container): void
     {
         $this->checkContainerId($id);
+        if (isset($this->containers[$id])) {
+            throw Exception\InvalidIdException::alreadyDefined("`$id` container");
+        }
         parent::addContainer($id, $container);
     }
 

@@ -11,7 +11,6 @@
 
 namespace Polymorphine\Container;
 
-use Polymorphine\Container\Exception;
 use Psr\Container\ContainerInterface;
 
 
@@ -42,19 +41,11 @@ class Builder
 
     public function addRecord(string $id, Records\Record $record): void
     {
-        if (isset($this->records[$id])) {
-            throw Exception\InvalidIdException::alreadyDefined("`$id` record");
-        }
-
         $this->records[$id] = $record;
     }
 
     public function addContainer(string $id, ContainerInterface $container): void
     {
-        if (isset($this->containers[$id])) {
-            throw Exception\InvalidIdException::alreadyDefined("`$id` container");
-        }
-
         $this->containers[$id] = $container;
     }
 

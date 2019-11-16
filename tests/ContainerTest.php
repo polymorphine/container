@@ -148,7 +148,7 @@ class ContainerTest extends TestCase
 
     public function testOverwritingExistingKey_ThrowsException()
     {
-        $setup = Setup::withData();
+        $setup = Setup::withData([], [], true);
         $setup->entry('test')->value('foo');
         $this->expectException(Exception\InvalidIdException::class);
         $setup->entry('test')->value('bar');
@@ -156,7 +156,7 @@ class ContainerTest extends TestCase
 
     public function testAddingRecordsArrayWithExistingRecord_ThrowsException()
     {
-        $setup = Setup::withData(['exists' => new Record\ValueRecord('something')]);
+        $setup = Setup::withData(['exists' => new Record\ValueRecord('something')], [], true);
         $this->expectException(Exception\InvalidIdException::class);
         $setup->records(['notExists' => new Record\ValueRecord('foo'), 'exists' => new Record\ValueRecord('bar')]);
     }
@@ -201,7 +201,7 @@ class ContainerTest extends TestCase
 
     public function testOverwritingContainerId_ThrowsException()
     {
-        $setup = Setup::withData();
+        $setup = Setup::withData([], [], true);
         $setup->entry('data')->container(new ConfigContainer([]));
         $this->expectException(Exception\InvalidIdException::class);
         $setup->entry('data')->container(new ConfigContainer([]));
