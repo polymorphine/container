@@ -13,9 +13,8 @@ namespace Polymorphine\Container\Builder;
 
 use Polymorphine\Container\Builder;
 use Polymorphine\Container\Records;
-use Polymorphine\Container\RecordContainer;
-use Polymorphine\Container\CompositeContainer;
 use Polymorphine\Container\Exception;
+use Polymorphine\Container\CompositeContainer;
 use Psr\Container\ContainerInterface;
 
 
@@ -27,13 +26,6 @@ class ValidatedBuilder extends Builder
     {
         parent::__construct($records, $containers);
         $this->validateState();
-    }
-
-    public function container(): ContainerInterface
-    {
-        return $this->containers
-            ? new CompositeContainer(new Records\TrackedRecords($this->records), $this->containers)
-            : new RecordContainer(new Records\TrackedRecords($this->records));
     }
 
     public function addRecord(string $id, Records\Record $record): void
@@ -52,6 +44,11 @@ class ValidatedBuilder extends Builder
             throw Exception\InvalidIdException::alreadyDefined("`$id` container");
         }
         parent::addContainer($id, $container);
+    }
+
+    protected function records(): Records
+    {
+        return new Records\TrackedRecords($this->records);
     }
 
     private function validateState()
@@ -74,7 +71,7 @@ class ValidatedBuilder extends Builder
             throw Exception\InvalidIdException::alreadyDefined("`$id` container");
         }
 
-        $separator = strpos($id, self::SEPARATOR);
+        $separator = strpos($id, CompositeContainer::SEPARATOR);
         $reserved  = $separator === false ? $id : substr($id, 0, $separator);
         if (isset($this->containers[$reserved])) {
             throw Exception\InvalidIdException::prefixConflict($reserved);
@@ -93,8 +90,8 @@ class ValidatedBuilder extends Builder
 
     private function checkContainerId(string $id): void
     {
-        if (strpos($id, self::SEPARATOR) !== false) {
-            throw Exception\InvalidIdException::unexpectedPrefixSeparator(self::SEPARATOR, $id);
+        if (strpos($id, CompositeContainer::SEPARATOR) !== false) {
+            throw Exception\InvalidIdException::unexpectedPrefixSeparator(CompositeContainer::SEPARATOR, $id);
         }
 
         if (isset($this->reservedIds[$id])) {

@@ -16,7 +16,6 @@ use Psr\Container\ContainerInterface;
 
 class Builder
 {
-    protected const SEPARATOR   = CompositeContainer::SEPARATOR;
     protected const WRAP_PREFIX = 'WRAP>';
 
     protected $records;
@@ -35,8 +34,8 @@ class Builder
     public function container(): ContainerInterface
     {
         return $this->containers
-            ? new CompositeContainer(new Records($this->records), $this->containers)
-            : new RecordContainer(new Records($this->records));
+            ? new CompositeContainer($this->records(), $this->containers)
+            : new RecordContainer($this->records());
     }
 
     public function addRecord(string $id, Records\Record $record): void
@@ -60,6 +59,11 @@ class Builder
         unset($this->records[$id]);
 
         return $newId;
+    }
+
+    protected function records(): Records
+    {
+        return new Records($this->records);
     }
 
     private function wrappedId(string $id): string
