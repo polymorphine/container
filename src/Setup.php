@@ -16,11 +16,11 @@ use Psr\Container\ContainerInterface;
 
 class Setup
 {
-    private $collection;
+    private $builder;
 
-    public function __construct(Setup\Collection $collection = null)
+    public function __construct(Builder $builder = null)
     {
-        $this->collection = $collection ?: new Setup\Collection();
+        $this->builder = $builder ?: new Builder();
     }
 
     /**
@@ -29,32 +29,45 @@ class Setup
      * Added entries will be validated for identifier conflicts and
      * created container will be monitored for circular references.
      *
+     * Additional $allowOverwrite parameter determines if adding entry with
+     * already defined id will be overwritten. Can be used to build container
+     * with container with default values that can change under some conditions.
+     *
+     * @param bool $allowOverwrite
+     *
      * @return self
      */
-    public static function secure(): self
+    public static function validated(bool $allowOverwrite = false): self
     {
-        return new self(new Setup\ValidatedCollection());
+        return new self(new Builder\ValidatedBuilder([], [], $allowOverwrite));
     }
 
     /**
      * Creates Setup with predefined configuration.
      *
-     * If `true` is passed as $validate param secure version of Setup
-     * will be created and predefined configuration will be validated.
+     * If `true` is passed as $validate param validated version of Setup
+     * will be created. Both passed data and added entries will be validated.
      *
-     * @see Setup::secure()
+     * Additional $allowOverwrite parameter determines if adding entry with
+     * already defined id will be overwritten. Can be used to build container
+     * with container with default values that can change under some conditions.
      *
      * @param Records\Record[]     $records
      * @param ContainerInterface[] $containers
      * @param bool                 $validate
+     * @param bool                 $allowOverwrite
      *
      * @return self
      */
-    public static function withData(array $records = [], array $containers = [], bool $validate = false): self
-    {
+    public static function withData(
+        array $records = [],
+        array $containers = [],
+        bool $validate = false,
+        bool $allowOverwrite = false
+    ): self {
         $collection = $validate
-            ? new Setup\ValidatedCollection($records, $containers)
-            : new Setup\Collection($records, $containers);
+            ? new Builder\ValidatedBuilder($records, $containers, $allowOverwrite)
+            : new Builder($records, $containers);
         return new self($collection);
     }
 
@@ -69,7 +82,7 @@ class Setup
      */
     public function container(): ContainerInterface
     {
-        return $this->collection->container();
+        return $this->builder->container();
     }
 
     /**
@@ -78,11 +91,11 @@ class Setup
      *
      * @param string $name
      *
-     * @return Setup\Entry
+     * @return Builder\Entry
      */
-    public function entry(string $name): Setup\Entry
+    public function entry(string $name): Builder\Entry
     {
-        return new Setup\Entry($name, $this->collection);
+        return new Builder\Entry($name, $this->builder);
     }
 
     /**
@@ -95,7 +108,7 @@ class Setup
     public function records(array $records): void
     {
         foreach ($records as $id => $record) {
-            $this->collection->addRecord($id, $record);
+            $this->builder->addRecord($id, $record);
         }
     }
 }

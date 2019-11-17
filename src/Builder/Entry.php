@@ -9,8 +9,9 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Container\Setup;
+namespace Polymorphine\Container\Builder;
 
+use Polymorphine\Container\Builder;
 use Polymorphine\Container\Records\Record;
 use Polymorphine\Container\Exception;
 use Psr\Container\ContainerInterface;
@@ -23,12 +24,12 @@ use Psr\Container\ContainerInterface;
 class Entry
 {
     private $name;
-    private $records;
+    private $builder;
 
-    public function __construct(string $name, Collection $records)
+    public function __construct(string $name, Builder $builder)
     {
         $this->name    = $name;
-        $this->records = $records;
+        $this->builder = $builder;
     }
 
     /**
@@ -41,7 +42,7 @@ class Entry
      */
     public function record(Record $record): void
     {
-        $this->records->addRecord($this->name, $record);
+        $this->builder->addRecord($this->name, $record);
     }
 
     /**
@@ -95,7 +96,7 @@ class Entry
     {
         $idx = array_search($this->name, $dependencies, true);
         if ($idx !== false) {
-            $dependencies[$idx] = $this->records->wrapRecord($this->name);
+            $dependencies[$idx] = $this->builder->wrapRecord($this->name);
         }
 
         $this->record(new Record\ComposeRecord($className, ...$dependencies));
@@ -130,6 +131,6 @@ class Entry
      */
     public function container(ContainerInterface $container)
     {
-        $this->records->addContainer($this->name, $container);
+        $this->builder->addContainer($this->name, $container);
     }
 }

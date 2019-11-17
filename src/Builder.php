@@ -9,18 +9,13 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Container\Setup;
+namespace Polymorphine\Container;
 
-use Polymorphine\Container\Records;
-use Polymorphine\Container\RecordContainer;
-use Polymorphine\Container\CompositeContainer;
-use Polymorphine\Container\Exception;
 use Psr\Container\ContainerInterface;
 
 
-class Collection
+class Builder
 {
-    protected const SEPARATOR   = CompositeContainer::SEPARATOR;
     protected const WRAP_PREFIX = 'WRAP>';
 
     protected $records;
@@ -39,25 +34,17 @@ class Collection
     public function container(): ContainerInterface
     {
         return $this->containers
-            ? new CompositeContainer(new Records($this->records), $this->containers)
-            : new RecordContainer(new Records($this->records));
+            ? new CompositeContainer($this->records(), $this->containers)
+            : new RecordContainer($this->records());
     }
 
     public function addRecord(string $id, Records\Record $record): void
     {
-        if (isset($this->records[$id])) {
-            throw Exception\InvalidIdException::alreadyDefined("`$id` record");
-        }
-
         $this->records[$id] = $record;
     }
 
     public function addContainer(string $id, ContainerInterface $container): void
     {
-        if (isset($this->containers[$id])) {
-            throw Exception\InvalidIdException::alreadyDefined("`$id` container");
-        }
-
         $this->containers[$id] = $container;
     }
 
@@ -72,6 +59,11 @@ class Collection
         unset($this->records[$id]);
 
         return $newId;
+    }
+
+    protected function records(): Records
+    {
+        return new Records($this->records);
     }
 
     private function wrappedId(string $id): string

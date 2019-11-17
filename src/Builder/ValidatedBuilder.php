@@ -9,42 +9,48 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Container\Setup;
+namespace Polymorphine\Container\Builder;
 
+use Polymorphine\Container\Builder;
 use Polymorphine\Container\Records;
-use Polymorphine\Container\RecordContainer;
-use Polymorphine\Container\CompositeContainer;
 use Polymorphine\Container\Exception;
+use Polymorphine\Container\CompositeContainer;
 use Psr\Container\ContainerInterface;
 
 
-class ValidatedCollection extends Collection
+class ValidatedBuilder extends Builder
 {
+    private $allowOverwrite;
     private $reservedIds = [];
 
-    public function __construct(array $records = [], array $containers = [])
+    public function __construct(array $records = [], array $containers = [], bool $allowOverwrite = false)
     {
         parent::__construct($records, $containers);
+        $this->allowOverwrite = $allowOverwrite;
         $this->validateState();
-    }
-
-    public function container(): ContainerInterface
-    {
-        return $this->containers
-            ? new CompositeContainer(new Records\TrackedRecords($this->records), $this->containers)
-            : new RecordContainer(new Records\TrackedRecords($this->records));
     }
 
     public function addRecord(string $id, Records\Record $record): void
     {
         $this->checkRecordId($id);
+        if (!$this->allowOverwrite && isset($this->records[$id])) {
+            throw Exception\InvalidIdException::alreadyDefined("`$id` record");
+        }
         parent::addRecord($id, $record);
     }
 
     public function addContainer(string $id, ContainerInterface $container): void
     {
         $this->checkContainerId($id);
+        if (!$this->allowOverwrite && isset($this->containers[$id])) {
+            throw Exception\InvalidIdException::alreadyDefined("`$id` container");
+        }
         parent::addContainer($id, $container);
+    }
+
+    protected function records(): Records
+    {
+        return new Records\TrackedRecords($this->records);
     }
 
     private function validateState()
@@ -67,7 +73,7 @@ class ValidatedCollection extends Collection
             throw Exception\InvalidIdException::alreadyDefined("`$id` container");
         }
 
-        $separator = strpos($id, self::SEPARATOR);
+        $separator = strpos($id, CompositeContainer::SEPARATOR);
         $reserved  = $separator === false ? $id : substr($id, 0, $separator);
         if (isset($this->containers[$reserved])) {
             throw Exception\InvalidIdException::prefixConflict($reserved);
@@ -86,8 +92,8 @@ class ValidatedCollection extends Collection
 
     private function checkContainerId(string $id): void
     {
-        if (strpos($id, self::SEPARATOR) !== false) {
-            throw Exception\InvalidIdException::unexpectedPrefixSeparator(self::SEPARATOR, $id);
+        if (strpos($id, CompositeContainer::SEPARATOR) !== false) {
+            throw Exception\InvalidIdException::unexpectedPrefixSeparator(CompositeContainer::SEPARATOR, $id);
         }
 
         if (isset($this->reservedIds[$id])) {
