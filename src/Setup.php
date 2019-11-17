@@ -29,31 +29,44 @@ class Setup
      * Added entries will be validated for identifier conflicts and
      * created container will be monitored for circular references.
      *
+     * Additional $allowOverwrite parameter determines if adding entry with
+     * already defined id will be overwritten. Can be used to build container
+     * with container with default values that can change under some conditions.
+     *
+     * @param bool $allowOverwrite
+     *
      * @return self
      */
-    public static function secure(): self
+    public static function validated(bool $allowOverwrite = false): self
     {
-        return new self(new Builder\ValidatedBuilder());
+        return new self(new Builder\ValidatedBuilder([], [], $allowOverwrite));
     }
 
     /**
      * Creates Setup with predefined configuration.
      *
-     * If `true` is passed as $validate param secure version of Setup
-     * will be created and predefined configuration will be validated.
+     * If `true` is passed as $validate param validated version of Setup
+     * will be created. Both passed data and added entries will be validated.
      *
-     * @see Setup::secure()
+     * Additional $allowOverwrite parameter determines if adding entry with
+     * already defined id will be overwritten. Can be used to build container
+     * with container with default values that can change under some conditions.
      *
      * @param Records\Record[]     $records
      * @param ContainerInterface[] $containers
      * @param bool                 $validate
+     * @param bool                 $allowOverwrite
      *
      * @return self
      */
-    public static function withData(array $records = [], array $containers = [], bool $validate = false): self
-    {
+    public static function withData(
+        array $records = [],
+        array $containers = [],
+        bool $validate = false,
+        bool $allowOverwrite = false
+    ): self {
         $collection = $validate
-            ? new Builder\ValidatedBuilder($records, $containers)
+            ? new Builder\ValidatedBuilder($records, $containers, $allowOverwrite)
             : new Builder($records, $containers);
         return new self($collection);
     }

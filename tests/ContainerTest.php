@@ -146,12 +146,20 @@ class ContainerTest extends TestCase
         $this->assertFalse($setup->container()->get('lazyModifier'));
     }
 
-    public function testOverwritingExistingKey_ThrowsException()
+    public function testOverwritingExistingKey_ValidatedWithOverwriteLock_ThrowsException()
     {
-        $setup = Setup::withData([], [], true);
+        $setup = Setup::withData([], [], true, false);
         $setup->entry('test')->value('foo');
         $this->expectException(Exception\InvalidIdException::class);
         $setup->entry('test')->value('bar');
+    }
+
+    public function testOverwritingExistingKey_ValidatedWithoutOverwriteLock_OverwritesRecordValue()
+    {
+        $setup = Setup::withData([], [], true, true);
+        $setup->entry('test')->value('foo');
+        $setup->entry('test')->value('bar');
+        $this->assertSame('bar', $setup->container()->get('test'));
     }
 
     public function testAddingRecordsArrayWithExistingRecord_ThrowsException()
@@ -199,12 +207,20 @@ class ContainerTest extends TestCase
         $this->assertSame('value', $container->get('cfg.test'));
     }
 
-    public function testOverwritingContainerId_ThrowsException()
+    public function testOverwritingContainerId_ValidatedWithOverwriteLock_ThrowsException()
     {
         $setup = Setup::withData([], [], true);
         $setup->entry('data')->container(new ConfigContainer([]));
         $this->expectException(Exception\InvalidIdException::class);
         $setup->entry('data')->container(new ConfigContainer([]));
+    }
+
+    public function testOverwritingContainerId_ValidatedWithOverwriteLock__OverwritesContainerValue()
+    {
+        $setup = Setup::withData([], [], true, true);
+        $setup->entry('data')->container(new ConfigContainer([]));
+        $setup->entry('data')->container($changedContainer = new ConfigContainer([]));
+        $this->assertSame($changedContainer, $setup->container()->get('data'));
     }
 
     public function testSetupContainer_ReturnsNewInstanceOfContainer()
@@ -333,8 +349,8 @@ class ContainerTest extends TestCase
 
     public function testInstantiatingSecureSetup()
     {
-        $this->assertEquals(Setup::secure(), new Setup(new Builder\ValidatedBuilder()));
-        $this->assertEquals(Setup::secure(), Setup::withData([], [], true));
+        $this->assertEquals(Setup::validated(), new Setup(new Builder\ValidatedBuilder()));
+        $this->assertEquals(Setup::validated(), Setup::withData([], [], true));
     }
 
     public function testContainerIdWithIdSeparator_SecureSetupThrowsException()

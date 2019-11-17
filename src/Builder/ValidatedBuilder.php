@@ -20,18 +20,20 @@ use Psr\Container\ContainerInterface;
 
 class ValidatedBuilder extends Builder
 {
+    private $allowOverwrite;
     private $reservedIds = [];
 
-    public function __construct(array $records = [], array $containers = [])
+    public function __construct(array $records = [], array $containers = [], bool $allowOverwrite = false)
     {
         parent::__construct($records, $containers);
+        $this->allowOverwrite = $allowOverwrite;
         $this->validateState();
     }
 
     public function addRecord(string $id, Records\Record $record): void
     {
         $this->checkRecordId($id);
-        if (isset($this->records[$id])) {
+        if (!$this->allowOverwrite && isset($this->records[$id])) {
             throw Exception\InvalidIdException::alreadyDefined("`$id` record");
         }
         parent::addRecord($id, $record);
@@ -40,7 +42,7 @@ class ValidatedBuilder extends Builder
     public function addContainer(string $id, ContainerInterface $container): void
     {
         $this->checkContainerId($id);
-        if (isset($this->containers[$id])) {
+        if (!$this->allowOverwrite && isset($this->containers[$id])) {
             throw Exception\InvalidIdException::alreadyDefined("`$id` container");
         }
         parent::addContainer($id, $container);
