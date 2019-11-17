@@ -130,12 +130,12 @@ and MUST NOT be used as id prefix for stored `Record`._
 Having container stored with `foo` identifier would make `foo.bar` record inaccessible.
 The rules might be hard to follow with multiple entries and sub-containers, so runtime checks
 were implemented. To instantiate `Setup` with integrity checks instantiate with static
-constructor: `$setup = Setup::secure();` - more on that in following sections.
+constructor: `$setup = Setup::validated();` - more on that in following sections.
 
 #### Preconfigured setup - constructor parameters
-`Setup` may be instantiated with [`Setup\Collection`](src/Setup/Collection.php) parameter that
-may contain already configured records or sub-containers. This collection can be also created
-with associative arrays passed to static constructor `Setup::withData()`. Both `Collection` and
+`Setup` may be instantiated with implementation of [`Builder`](src/Builder.php) parameter that
+may contain already configured records or sub-containers. This builder can be also created
+with associative arrays passed to static constructor `Setup::withData()`. Both `Builder` and
 `Setup::withData()` method takes associative `Recrod[]` and `ContainerInetrface[]` arrays.
 
 ```php
@@ -148,7 +148,7 @@ $containers = [
     // ...
 ];
 
-$setup = new Setup(new Setup\Collection($records, $containers));
+$setup = new Setup(new Builder\ProtectedBuilder($records, $containers));
 // or
 $setup = Setup::withData($records, $containers);
 ```
@@ -159,22 +159,30 @@ work with invalid configuration anyway. In development environment those checks 
 because they allow to fail as early as possible and help localize the source of an error.
 
 #### Secure setup & circular reference detection
-Instantiating `Setup` with [`Setup\ValidatedCollection`](src/Setup/ValidatedCollection.php),
-with `Setup::secure()` static constructor or passing `true` as third parameter of `Setup::withData()`
+By default container setup doesn't check if given identifiers are already defined or whether
+will cause name collision making some entries inaccessible (sub-containers with identifier used
+record entry prefix).
+
+Instantiating `Setup` with [`Builder\ValidatedBuilder`](src/Builder/ValidatedBuilder.php)
+class, `Setup::validated()` static constructor or passing `true` as third parameter of `Setup::withData()`
 will enable runtime integrity checks for container configuration and detect circular references
 when resolving dependencies with recursive container calls. Container will be created with
 identifiers that will be accessible, **call stack** will be added to all exceptions thrown from
 container, and `ContainerInterface::get()` method will throw `CircularReferenceException` immediately
 after subsequent call would try to retrieve currently resolved record without blowing up the stack.
 
-> This feature comes with minor performance overhead, and checking this kind of developer errors have
-almost no value in production. It is recommended to use it as **development tool** only.
+If you want to use container setup overriding some default values, you need to disable overwrite checks
+in validation mode. **Overwrite** might be allowed despite validation by instantiating `ValidatedBuilder`
+with `$allowOverwrite` (third) parameter. Instantiating with `true`, passing it to `Setup::validated();`
+or as forth parameter of `Setup::withData()` will have same effect.
 
-Checking such errors just because you can is pointless, because there are much more config related
-bugs that cannot be checked in other way than testing if application works before deploying it to
-production (invalid values or identifiers in container calling methods). On the other hand if those
-checks are causing visible drop in performance you probably using container to extensively (see
-[recommended use](#recommended-use) section).
+> These checks are separated from default setup behavior, because they should not be required in production
+environment. It is recommended to use them as **development tool** though.
+
+Integration tests are necessary in development, because misconfigured container will most likely crash
+the application, and it cannot be controlled by code anyway. This way some performance overhead might be
+eliminated from production, but if those checks are causing visible drop in performance you are probably
+using container too extensively (see [recommended use](#recommended-use) section).
 
 #### Composed entry - nested composition & decorator feature:
 Entry called for existing record can reassign it with `compose()` method if it uses it
@@ -197,14 +205,15 @@ currently using it would fail on type-checking, and due to lazy instantiation co
 can't ensure decorator use and possible errors will emerge at runtime.
 
 #### Direct instantiation & container composition
-All `Setup` does, beside ability to validate configuration, is providing help to compose final container
-based on provided configuration and chosen options. The simple container with `Record[]` array would be
-instantiated like this:
+All `Setup` does, beside ability to validate configuration, is providing helper methods creating
+Record entries and creating various container compositions based on given setup. Container can also
+0be instantiated directly - for example simple container (with `Record[]` array) would be instantiated
+this way:
 ```php
 $container = new RecordContainer(new Records($records));
 ``` 
-And here's an example composition of container with circular reference checking and encapsulated
-sub-containers (`ContainerInterface[]` array):
+When container needs circular reference checking and encapsulate some sub-containers it would need
+to be instantiated (with `ContainerInterface[]` array) this way:
 ```php
 $container = new CompositeContainer(new TrackedRecords($records), $containers);
 ```
