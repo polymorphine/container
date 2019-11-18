@@ -9,7 +9,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Container\Builder;
+namespace Polymorphine\Container\Setup;
 
 use Polymorphine\Container\Builder;
 use Polymorphine\Container\Records\Record;

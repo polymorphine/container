@@ -39,7 +39,7 @@ class Setup
      */
     public static function validated(bool $allowOverwrite = false): self
     {
-        return new self(new Builder\ValidatedBuilder([], [], $allowOverwrite));
+        return new self(new Setup\ValidatedBuilder([], [], $allowOverwrite));
     }
 
     /**
@@ -66,7 +66,7 @@ class Setup
         bool $allowOverwrite = false
     ): self {
         $collection = $validate
-            ? new Builder\ValidatedBuilder($records, $containers, $allowOverwrite)
+            ? new Setup\ValidatedBuilder($records, $containers, $allowOverwrite)
             : new Builder($records, $containers);
         return new self($collection);
     }
@@ -91,11 +91,11 @@ class Setup
      *
      * @param string $name
      *
-     * @return Builder\Entry
+     * @return Setup\Entry
      */
-    public function entry(string $name): Builder\Entry
+    public function entry(string $name): Setup\Entry
     {
-        return new Builder\Entry($name, $this->builder);
+        return new Setup\Entry($name, $this->builder);
     }
 
     /**

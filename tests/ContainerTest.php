@@ -14,7 +14,6 @@ namespace Polymorphine\Container\Tests;
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Container\ConfigContainer;
 use Polymorphine\Container\Setup;
-use Polymorphine\Container\Builder;
 use Polymorphine\Container\Records\Record;
 use Polymorphine\Container\Exception;
 use Polymorphine\Container\Tests\Fixtures\Example;
@@ -349,7 +348,7 @@ class ContainerTest extends TestCase
 
     public function testInstantiatingSecureSetup()
     {
-        $this->assertEquals(Setup::validated(), new Setup(new Builder\ValidatedBuilder()));
+        $this->assertEquals(Setup::validated(), new Setup(new Setup\ValidatedBuilder()));
         $this->assertEquals(Setup::validated(), Setup::withData([], [], true));
     }
 
