@@ -11,14 +11,14 @@
 
 namespace Polymorphine\Container\Setup;
 
-use Polymorphine\Container\Builder;
+use Polymorphine\Container\Setup;
 use Polymorphine\Container\Records;
 use Polymorphine\Container\Exception;
 use Polymorphine\Container\CompositeContainer;
 use Psr\Container\ContainerInterface;
 
 
-class ValidatedBuilder extends Builder
+class ValidatedSetup extends Setup
 {
     private $allowOverwrite;
     private $reservedIds = [];

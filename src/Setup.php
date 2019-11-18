@@ -16,59 +16,19 @@ use Psr\Container\ContainerInterface;
 
 class Setup
 {
-    private $builder;
+    protected const WRAP_PREFIX = 'WRAP>';
 
-    public function __construct(Builder $builder = null)
-    {
-        $this->builder = $builder ?: new Builder();
-    }
+    protected $records;
+    protected $containers;
 
     /**
-     * Creates Setup with validated collection.
-     *
-     * Added entries will be validated for identifier conflicts and
-     * created container will be monitored for circular references.
-     *
-     * Additional $allowOverwrite parameter determines if adding entry with
-     * already defined id will be overwritten. Can be used to build container
-     * with container with default values that can change under some conditions.
-     *
-     * @param bool $allowOverwrite
-     *
-     * @return self
-     */
-    public static function validated(bool $allowOverwrite = false): self
-    {
-        return new self(new Setup\ValidatedBuilder([], [], $allowOverwrite));
-    }
-
-    /**
-     * Creates Setup with predefined configuration.
-     *
-     * If `true` is passed as $validate param validated version of Setup
-     * will be created. Both passed data and added entries will be validated.
-     *
-     * Additional $allowOverwrite parameter determines if adding entry with
-     * already defined id will be overwritten. Can be used to build container
-     * with container with default values that can change under some conditions.
-     *
      * @param Records\Record[]     $records
      * @param ContainerInterface[] $containers
-     * @param bool                 $validate
-     * @param bool                 $allowOverwrite
-     *
-     * @return self
      */
-    public static function withData(
-        array $records = [],
-        array $containers = [],
-        bool $validate = false,
-        bool $allowOverwrite = false
-    ): self {
-        $collection = $validate
-            ? new Setup\ValidatedBuilder($records, $containers, $allowOverwrite)
-            : new Builder($records, $containers);
-        return new self($collection);
+    public function __construct(array $records = [], array $containers = [])
+    {
+        $this->records    = $records;
+        $this->containers = $containers;
     }
 
     /**
@@ -82,7 +42,9 @@ class Setup
      */
     public function container(): ContainerInterface
     {
-        return $this->builder->container();
+        return $this->containers
+            ? new CompositeContainer($this->records(), $this->containers)
+            : new RecordContainer($this->records());
     }
 
     /**
@@ -95,7 +57,7 @@ class Setup
      */
     public function entry(string $name): Setup\Entry
     {
-        return new Setup\Entry($name, $this->builder);
+        return new Setup\Entry($name, $this);
     }
 
     /**
@@ -105,10 +67,44 @@ class Setup
      *
      * @throws Exception\InvalidIdException
      */
-    public function records(array $records): void
+    public function addRecords(array $records): void
     {
         foreach ($records as $id => $record) {
-            $this->builder->addRecord($id, $record);
+            $this->addRecord($id, $record);
         }
+    }
+
+    public function addRecord(string $id, Records\Record $record): void
+    {
+        $this->records[$id] = $record;
+    }
+
+    public function addContainer(string $id, ContainerInterface $container): void
+    {
+        $this->containers[$id] = $container;
+    }
+
+    public function wrapRecord(string $id): string
+    {
+        if (!isset($this->records[$id])) {
+            throw Exception\RecordNotFoundException::cannotWrap($id);
+        }
+
+        $newId = $this->wrappedId($id);
+        $this->records[$newId] = $this->records[$id];
+        unset($this->records[$id]);
+
+        return $newId;
+    }
+
+    protected function records(): Records
+    {
+        return new Records($this->records);
+    }
+
+    private function wrappedId(string $id): string
+    {
+        $newId = static::WRAP_PREFIX . $id;
+        return isset($this->records[$newId]) ? $this->wrappedId($newId) : $newId;
     }
 }
