@@ -250,7 +250,7 @@ class ContainerTest extends TestCase
         $this->assertSame($object, $container->get('lazy.goodbye'));
     }
 
-    public function testCompositeRecord()
+    public function testComposeRecord()
     {
         $config = [
             'foo' => new ConfigContainer(['env' => ['name' => 'Shudd3r', 'polite' => 'How are you?']]),
@@ -261,37 +261,7 @@ class ContainerTest extends TestCase
         $setup->entry('small.talk')->compose(Example\ExampleClass::class, 'cfg.hello', 'foo.env.name');
         $container = $setup->container();
 
-        $expect = 'Hello Shudd3r.';
-        $this->assertSame($expect, $container->get('small.talk')->beNice());
-
-        // Decorated record
-        $setup = $this->defaultBuilder([], $config);
-        $setup->entry('small.talk')->compose(Example\ExampleClass::class, 'cfg.hello', 'foo.env.name');
-        $setup->entry('small.talk')->compose(Example\DecoratingExampleClass::class, 'small.talk', 'foo.env.polite');
-        $container = $setup->container();
-
-        $expect = 'Hello Shudd3r. How are you?';
-        $this->assertSame($expect, $container->get('small.talk')->beNice());
-
-        // Decorated Again
-        $setup = $this->defaultBuilder([], $config);
-        $setup->entry('ask.football')->value('Have you seen that ridiculous display last night?');
-        $setup->entry('small.talk')->compose(Example\ExampleClass::class, 'cfg.hello', 'foo.env.name');
-        $setup->entry('small.talk')->compose(Example\DecoratingExampleClass::class, 'small.talk', 'foo.env.polite');
-        $setup->entry('small.talk')->compose(Example\DecoratingExampleClass::class, 'small.talk', 'ask.football');
-        $container = $setup->container();
-
-        $expect = 'Hello Shudd3r. How are you? Have you seen that ridiculous display last night?';
-        $this->assertSame($expect, $container->get('small.talk')->beNice());
-    }
-
-    public function testCompositeRecordForUndefinedDecoratedDependency_ThrowsException()
-    {
-        $builder = $this->defaultBuilder();
-        $builder->entry('someClass')->compose(Example\ExampleClass::class, 'not.exists', 'doesnt.matter');
-        $entry = $builder->entry('decorating.undefined.id');
-        $this->expectException(Exception\RecordNotFoundException::class);
-        $entry->compose(Example\ExampleClass::class, 'undefined.record', 'decorating.undefined.id');
+        $this->assertSame('Hello Shudd3r.', $container->get('small.talk')->beNice());
     }
 
     public function testCreateMethodRecord()

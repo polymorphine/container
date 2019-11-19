@@ -77,28 +77,16 @@ class Entry
     /**
      * Adds ComposeRecord to container records with given className
      * and its constructor parameters given as Container id names.
-     * Each dependency has to be defined within collection (otherwise
-     * circular references cannot be avoided).
-     *
-     * When dependency id equals this instance name it is not overwritten
-     * and circular dependency is not created - it is decorated instead.
-     * Now every class depending on decorated object will take product of
-     * this record as its dependency. Objects can be wrapped multiple times.
      *
      * @see ComposeRecord
      *
      * @param string $className
      * @param string ...$dependencies
      *
-     * @throws Exception\InvalidIdException | Exception\RecordNotFoundException
+     * @throws Exception\InvalidIdException
      */
     public function compose(string $className, string ...$dependencies): void
     {
-        $idx = array_search($this->name, $dependencies, true);
-        if ($idx !== false) {
-            $dependencies[$idx] = $this->builder->wrapRecord($this->name);
-        }
-
         $this->record(new Record\ComposeRecord($className, ...$dependencies));
     }
 

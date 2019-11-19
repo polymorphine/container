@@ -16,8 +16,6 @@ use Psr\Container\ContainerInterface;
 
 class Setup
 {
-    protected const WRAP_PREFIX = 'WRAP>';
-
     protected $records;
     protected $containers;
 
@@ -84,27 +82,8 @@ class Setup
         $this->containers[$id] = $container;
     }
 
-    public function wrapRecord(string $id): string
-    {
-        if (!isset($this->records[$id])) {
-            throw Exception\RecordNotFoundException::cannotWrap($id);
-        }
-
-        $newId = $this->wrappedId($id);
-        $this->records[$newId] = $this->records[$id];
-        unset($this->records[$id]);
-
-        return $newId;
-    }
-
     protected function records(): Records
     {
         return new Records($this->records);
-    }
-
-    private function wrappedId(string $id): string
-    {
-        $newId = static::WRAP_PREFIX . $id;
-        return isset($this->records[$newId]) ? $this->wrappedId($newId) : $newId;
     }
 }
