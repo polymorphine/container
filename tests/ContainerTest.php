@@ -43,7 +43,7 @@ class ContainerTest extends TestCase
 
         $setup->addRecords([
             'callback' => new Record\ValueRecord(function () {}),
-            'foo'      => new Record\ComposeRecord(Example\ExampleClass::class, 'callback', 'test')
+            'foo'      => new Record\InstanceRecord(Example\ExampleClass::class, 'callback', 'test')
         ]);
         $container = $setup->container();
 
@@ -258,7 +258,7 @@ class ContainerTest extends TestCase
         ];
 
         $setup = $this->defaultBuilder([], $config);
-        $setup->entry('small.talk')->compose(Example\ExampleClass::class, 'cfg.hello', 'foo.env.name');
+        $setup->entry('small.talk')->instance(Example\ExampleClass::class, 'cfg.hello', 'foo.env.name');
         $container = $setup->container();
 
         $this->assertSame('Hello Shudd3r.', $container->get('small.talk')->beNice());
@@ -269,7 +269,7 @@ class ContainerTest extends TestCase
         $config['foo'] = new ConfigContainer(['one' => 'first', 'two' => 'second', 'three' => 'third']);
         $setup = $this->defaultBuilder([], $config);
         $setup->entry('factory')->value(new Example\Factory());
-        $setup->entry('product')->create('factory', 'create', 'foo.one', 'foo.two', 'foo.three');
+        $setup->entry('product')->product('factory', 'create', 'foo.one', 'foo.two', 'foo.three');
         $container = $setup->container();
 
         $this->assertSame('first,second,third', $container->get('product'));
@@ -451,7 +451,7 @@ class ContainerTest extends TestCase
         $setup->entry('B')->callback(function (ContainerInterface $c) {
             return new Example\ExampleClass($c->get('A'), $c->get('undefined'));
         });
-        $setup->entry('C')->compose(Example\DecoratingExampleClass::class, 'B', '.config');
+        $setup->entry('C')->instance(Example\DecoratingExampleClass::class, 'B', '.config');
 
         $container = $setup->container();
         $this->expectExceptionMessage('C->B->undefined->...');

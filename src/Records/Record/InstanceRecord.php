@@ -21,7 +21,7 @@ use Psr\Container\ContainerInterface;
  *
  * Returned value is cached and returned directly on subsequent calls.
  */
-class ComposeRecord implements Record
+class InstanceRecord implements Record
 {
     use ExtractArgumentsTrait;
 

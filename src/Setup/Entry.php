@@ -75,27 +75,27 @@ class Entry
     }
 
     /**
-     * Adds ComposeRecord to container records with given className
+     * Adds InstanceRecord to container records with given className
      * and its constructor parameters given as Container id names.
      *
-     * @see ComposeRecord
+     * @see InstanceRecord
      *
      * @param string $className
      * @param string ...$dependencies
      *
      * @throws Exception\InvalidIdException
      */
-    public function compose(string $className, string ...$dependencies): void
+    public function instance(string $className, string ...$dependencies): void
     {
-        $this->record(new Record\ComposeRecord($className, ...$dependencies));
+        $this->record(new Record\InstanceRecord($className, ...$dependencies));
     }
 
     /**
-     * Adds CreateMethodRecord to container records with given container
+     * Adds ProductRecord to container records with given container
      * identifier of factory class, factory method name and container
      * identifiers of its parameters.
      *
-     * @see CreateMethodRecord
+     * @see ProductRecord
      *
      * @param string $factoryId
      * @param string $method
@@ -103,9 +103,9 @@ class Entry
      *
      * @throws Exception\InvalidIdException
      */
-    public function create(string $factoryId, string $method, string ...$arguments): void
+    public function product(string $factoryId, string $method, string ...$arguments): void
     {
-        $this->record(new Record\CreateMethodRecord($factoryId, $method, ...$arguments));
+        $this->record(new Record\ProductRecord($factoryId, $method, ...$arguments));
     }
 
     /**

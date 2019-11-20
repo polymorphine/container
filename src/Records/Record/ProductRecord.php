@@ -22,7 +22,7 @@ use Psr\Container\ContainerInterface;
  *
  * Returned value is cached and returned directly on subsequent calls.
  */
-class CreateMethodRecord implements Record
+class ProductRecord implements Record
 {
     use ExtractArgumentsTrait;
 
