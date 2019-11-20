@@ -14,15 +14,10 @@ namespace Polymorphine\Container\Records\Record;
 use Psr\Container\ContainerInterface;
 
 
-trait ExtractArgumentsTrait
+trait ContainerMapMethod
 {
-    private function arguments(array $identifiers, ContainerInterface $container): array
+    private function containerValues(array $identifiers, ContainerInterface $container): array
     {
-        $arguments = [];
-        foreach ($identifiers as $id) {
-            $arguments[] = $container->get($id);
-        }
-
-        return $arguments;
+        return array_map(function ($id) use ($container) { return $container->get($id); }, $identifiers);
     }
 }

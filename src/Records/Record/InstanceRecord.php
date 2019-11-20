@@ -23,7 +23,7 @@ use Psr\Container\ContainerInterface;
  */
 class InstanceRecord implements Record
 {
-    use ExtractArgumentsTrait;
+    use ContainerMapMethod;
 
     private $className;
     private $dependencies;
@@ -46,6 +46,6 @@ class InstanceRecord implements Record
 
     private function create(ContainerInterface $container)
     {
-        return new $this->className(...$this->arguments($this->dependencies, $container));
+        return new $this->className(...$this->containerValues($this->dependencies, $container));
     }
 }
