@@ -9,14 +9,18 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Container\Exception;
+namespace Polymorphine\Container\Setup\Exception;
 
-use Psr\Container\ContainerExceptionInterface;
-use InvalidArgumentException;
+use LogicException;
 
 
-class InvalidIdException extends InvalidArgumentException implements ContainerExceptionInterface
+class IntegrityConstraintException extends LogicException
 {
+    public static function undefined(string $id): self
+    {
+        return new self("Record `$id` not defined");
+    }
+
     public static function alreadyDefined(string $resource): self
     {
         return new self("Cannot overwrite defined $resource");

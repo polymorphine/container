@@ -11,6 +11,7 @@
 
 namespace Polymorphine\Container;
 
+use Polymorphine\Container\Setup\Exception;
 use Psr\Container\ContainerInterface;
 
 
@@ -63,7 +64,7 @@ class Setup
      *
      * @param Records\Record[] $records Flat associative array of Record instances
      *
-     * @throws Exception\InvalidIdException
+     * @throws Exception\IntegrityConstraintException
      */
     public function addRecords(array $records): void
     {
@@ -72,11 +73,23 @@ class Setup
         }
     }
 
+    /**
+     * @param string         $id
+     * @param Records\Record $record
+     *
+     * @throws Exception\IntegrityConstraintException
+     */
     public function addRecord(string $id, Records\Record $record): void
     {
         $this->records[$id] = $record;
     }
 
+    /**
+     * @param string             $id
+     * @param ContainerInterface $container
+     *
+     * @throws Exception\IntegrityConstraintException
+     */
     public function addContainer(string $id, ContainerInterface $container): void
     {
         $this->containers[$id] = $container;

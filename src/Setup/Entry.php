@@ -13,7 +13,6 @@ namespace Polymorphine\Container\Setup;
 
 use Polymorphine\Container\Setup;
 use Polymorphine\Container\Records\Record;
-use Polymorphine\Container\Exception;
 use Psr\Container\ContainerInterface;
 
 
@@ -38,7 +37,7 @@ class Entry
      *
      * @param Record $record
      *
-     * @throws Exception\InvalidIdException
+     * @throws Exception\IntegrityConstraintException
      */
     public function record(Record $record): void
     {
@@ -52,7 +51,7 @@ class Entry
      *
      * @param $value
      *
-     * @throws Exception\InvalidIdException
+     * @throws Exception\IntegrityConstraintException
      */
     public function value($value): void
     {
@@ -67,7 +66,7 @@ class Entry
      *
      * @param callable $callback function (ContainerInterface): mixed
      *
-     * @throws Exception\InvalidIdException
+     * @throws Exception\IntegrityConstraintException
      */
     public function callback(callable $callback): void
     {
@@ -83,7 +82,7 @@ class Entry
      * @param string $className
      * @param string ...$dependencies
      *
-     * @throws Exception\InvalidIdException
+     * @throws Exception\IntegrityConstraintException
      */
     public function instance(string $className, string ...$dependencies): void
     {
@@ -101,7 +100,7 @@ class Entry
      * @param string $method
      * @param string ...$arguments
      *
-     * @throws Exception\InvalidIdException
+     * @throws Exception\IntegrityConstraintException
      */
     public function product(string $factoryId, string $method, string ...$arguments): void
     {
@@ -117,7 +116,7 @@ class Entry
      *
      * @param ContainerInterface $container
      *
-     * @throws Exception\InvalidIdException
+     * @throws Exception\IntegrityConstraintException
      */
     public function container(ContainerInterface $container)
     {

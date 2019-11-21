@@ -13,7 +13,6 @@ namespace Polymorphine\Container\Setup;
 
 use Polymorphine\Container\Setup;
 use Polymorphine\Container\Records;
-use Polymorphine\Container\Exception;
 use Polymorphine\Container\CompositeContainer;
 use Psr\Container\ContainerInterface;
 
@@ -34,7 +33,7 @@ class ValidatedSetup extends Setup
     {
         $this->checkRecordId($id);
         if (!$this->allowOverwrite && isset($this->records[$id])) {
-            throw Exception\InvalidIdException::alreadyDefined("`$id` record");
+            throw Exception\IntegrityConstraintException::alreadyDefined("`$id` record");
         }
         parent::addRecord($id, $record);
     }
@@ -43,7 +42,7 @@ class ValidatedSetup extends Setup
     {
         $this->checkContainerId($id);
         if (!$this->allowOverwrite && isset($this->containers[$id])) {
-            throw Exception\InvalidIdException::alreadyDefined("`$id` container");
+            throw Exception\IntegrityConstraintException::alreadyDefined("`$id` container");
         }
         parent::addContainer($id, $container);
     }
@@ -55,8 +54,13 @@ class ValidatedSetup extends Setup
 
     private function validateState()
     {
-        array_map([$this, 'checkRecord'], array_keys($this->records), $this->records);
-        array_map([$this, 'checkContainer'], array_keys($this->containers), $this->containers);
+        foreach ($this->records as $id => $record) {
+            $this->checkRecord($id, $record);
+        }
+
+        foreach ($this->containers as $id => $container) {
+            $this->checkContainer($id, $container);
+        }
     }
 
     private function checkRecord(string $id, $value): void
@@ -70,13 +74,13 @@ class ValidatedSetup extends Setup
     private function checkRecordId(string $id): void
     {
         if (isset($this->containers[$id])) {
-            throw Exception\InvalidIdException::alreadyDefined("`$id` container");
+            throw Exception\IntegrityConstraintException::alreadyDefined("`$id` container");
         }
 
         $separator = strpos($id, CompositeContainer::SEPARATOR);
         $reserved  = $separator === false ? $id : substr($id, 0, $separator);
         if (isset($this->containers[$reserved])) {
-            throw Exception\InvalidIdException::prefixConflict($reserved);
+            throw Exception\IntegrityConstraintException::prefixConflict($reserved);
         }
 
         $this->reservedIds[$reserved] = true;
@@ -93,11 +97,11 @@ class ValidatedSetup extends Setup
     private function checkContainerId(string $id): void
     {
         if (strpos($id, CompositeContainer::SEPARATOR) !== false) {
-            throw Exception\InvalidIdException::unexpectedPrefixSeparator(CompositeContainer::SEPARATOR, $id);
+            throw Exception\IntegrityConstraintException::unexpectedPrefixSeparator(CompositeContainer::SEPARATOR, $id);
         }
 
         if (isset($this->reservedIds[$id])) {
-            throw Exception\InvalidIdException::alreadyDefined("`$id` record (or record prefix)");
+            throw Exception\IntegrityConstraintException::alreadyDefined("`$id` record (or record prefix)");
         }
     }
 }

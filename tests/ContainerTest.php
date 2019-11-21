@@ -27,8 +27,6 @@ class ContainerTest extends TestCase
     public function testInstantiation()
     {
         $this->assertInstanceOf(ContainerInterface::class, (new Setup())->container());
-        $this->assertInstanceOf(ContainerExceptionInterface::class, new Exception\InvalidTypeException());
-        $this->assertInstanceOf(ContainerExceptionInterface::class, new Exception\InvalidIdException());
         $this->assertInstanceOf(NotFoundExceptionInterface::class, new Exception\RecordNotFoundException());
         $this->assertInstanceOf(NotFoundExceptionInterface::class, new Exception\TrackedRecordNotFoundException());
         $this->assertInstanceOf(ContainerExceptionInterface::class, new Exception\CircularReferenceException());
@@ -149,7 +147,7 @@ class ContainerTest extends TestCase
     {
         $setup = $this->validatedBuilder([], [], false);
         $setup->entry('test')->value('foo');
-        $this->expectException(Exception\InvalidIdException::class);
+        $this->expectException(Setup\Exception\IntegrityConstraintException::class);
         $setup->entry('test')->value('bar');
     }
 
@@ -164,7 +162,7 @@ class ContainerTest extends TestCase
     public function testAddingRecordsArrayWithExistingRecord_ThrowsException()
     {
         $setup = $this->validatedBuilder(['exists' => new Record\ValueRecord('something')]);
-        $this->expectException(Exception\InvalidIdException::class);
+        $this->expectException(Setup\Exception\IntegrityConstraintException::class);
         $setup->addRecords(['notExists' => new Record\ValueRecord('foo'), 'exists' => new Record\ValueRecord('bar')]);
     }
 
@@ -210,7 +208,7 @@ class ContainerTest extends TestCase
     {
         $setup = $this->validatedBuilder([], [], false);
         $setup->entry('data')->container(new ConfigContainer([]));
-        $this->expectException(Exception\InvalidIdException::class);
+        $this->expectException(Setup\Exception\IntegrityConstraintException::class);
         $setup->entry('data')->container(new ConfigContainer([]));
     }
 
@@ -319,7 +317,7 @@ class ContainerTest extends TestCase
     public function testContainerIdWithIdSeparator_SecureSetupThrowsException()
     {
         $setup = $this->validatedBuilder();
-        $this->expectException(Exception\InvalidIdException::class);
+        $this->expectException(Setup\Exception\IntegrityConstraintException::class);
         $setup->entry('cfg.data')->container(new ConfigContainer([]));
     }
 
@@ -327,7 +325,7 @@ class ContainerTest extends TestCase
     {
         $setup = $this->validatedBuilder();
         $setup->entry('prefix')->container(new ConfigContainer([]));
-        $this->expectException(Exception\InvalidIdException::class);
+        $this->expectException(Setup\Exception\IntegrityConstraintException::class);
         $setup->entry('prefix.foo')->value(true);
     }
 
@@ -335,7 +333,7 @@ class ContainerTest extends TestCase
     {
         $setup = $this->validatedBuilder();
         $setup->entry('prefix.foo')->value(true);
-        $this->expectException(Exception\InvalidIdException::class);
+        $this->expectException(Setup\Exception\IntegrityConstraintException::class);
         $setup->entry('prefix')->container(new ConfigContainer([]));
     }
 
@@ -343,7 +341,7 @@ class ContainerTest extends TestCase
     {
         $setup = $this->validatedBuilder();
         $setup->entry('prefix')->container(new ConfigContainer([]));
-        $this->expectException(Exception\InvalidIdException::class);
+        $this->expectException(Setup\Exception\IntegrityConstraintException::class);
         $setup->entry('prefix.foo')->value(true);
     }
 
@@ -369,10 +367,10 @@ class ContainerTest extends TestCase
         $container = new ConfigContainer([]);
 
         return [
-            [['foo.bar' => $record], ['foo' => $container], Exception\InvalidIdException::class],
-            [['foo' => $record], ['foo' => $container], Exception\InvalidIdException::class],
-            [['foo' => true], ['bar' => $container], Exception\InvalidTypeException::class],
-            [['foo' => $record], ['bar' => []], Exception\InvalidTypeException::class]
+            [['foo.bar' => $record], ['foo' => $container], Setup\Exception\IntegrityConstraintException::class],
+            [['foo' => $record], ['foo' => $container], Setup\Exception\IntegrityConstraintException::class],
+            [['foo' => true], ['bar' => $container], Setup\Exception\InvalidTypeException::class],
+            [['foo' => $record], ['bar' => []], Setup\Exception\InvalidTypeException::class]
         ];
     }
 
