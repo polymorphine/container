@@ -49,13 +49,13 @@ class Setup
      * Returns Entry object able to add new data to container configuration
      * for given identifier.
      *
-     * @param string $name
+     * @param string $id
      *
      * @return Setup\Entry
      */
-    public function entry(string $name): Setup\Entry
+    public function entry(string $id): Setup\Entry
     {
-        return new Setup\Entry($name, $this);
+        return new Setup\Entry($id, $this);
     }
 
     /**

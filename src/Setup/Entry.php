@@ -19,22 +19,22 @@ use Psr\Container\ContainerInterface;
 
 /**
  * Write-only proxy with helper methods to instantiate and set
- * Record implementations for given Container name identifier.
+ * Record implementations for given Container item identifier.
  */
 class Entry
 {
-    private $name;
+    private $id;
     private $builder;
 
-    public function __construct(string $name, Setup $builder)
+    public function __construct(string $id, Setup $builder)
     {
-        $this->name    = $name;
+        $this->id      = $id;
         $this->builder = $builder;
     }
 
     /**
      * Adds given Record instance directly into container records
-     * using this instance's name property.
+     * using this instance's id property.
      *
      * @param Record $record
      *
@@ -42,7 +42,7 @@ class Entry
      */
     public function record(Record $record): void
     {
-        $this->builder->addRecord($this->name, $record);
+        $this->builder->addRecord($this->id, $record);
     }
 
     /**
@@ -76,7 +76,7 @@ class Entry
 
     /**
      * Adds InstanceRecord to container records with given className
-     * and its constructor parameters given as Container id names.
+     * and its constructor parameters given as Container identifiers.
      *
      * @see InstanceRecord
      *
@@ -110,8 +110,10 @@ class Entry
 
     /**
      * Adds ContainerInterface instance as sub-container that may
-     * be accessed with current entry name prefix (entry name
-     * cannot contain prefix separator).
+     * be accessed with this instance id as prefix.
+     *
+     * WARNING: For id containing prefix separator exception will
+     * be thrown.
      *
      * @param ContainerInterface $container
      *
@@ -119,6 +121,6 @@ class Entry
      */
     public function container(ContainerInterface $container)
     {
-        $this->builder->addContainer($this->name, $container);
+        $this->builder->addContainer($this->id, $container);
     }
 }
