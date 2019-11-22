@@ -60,6 +60,26 @@ class Setup
         return new Setup\Entry($id, $this);
     }
 
+    /**
+     * Returns Wrapper object able to decorate existing Record and replacing
+     * it with composition of InstanceRecords using given id as a reference
+     * to one of their dependencies (reference to itself).
+     *
+     * If given id is not defined or wrapping record doesn't use its reference
+     * as one of dependencies IntegrityConstraintException will be thrown.
+     *
+     * Composition is finished with Wrapper::compose() call that will
+     * replace initial entry with ComposedInstanceRecord.
+     *
+     * @see Records\Record\InstanceRecord
+     * @see Wrapper
+     *
+     * @param string $id
+     *
+     * @throws Exception\IntegrityConstraintException
+     *
+     * @return Wrapper
+     */
     public function wrap(string $id): Setup\Wrapper
     {
         if (!isset($this->records[$id])) {

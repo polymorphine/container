@@ -89,6 +89,26 @@ class Entry
         $this->record(new Record\InstanceRecord($className, ...$dependencies));
     }
 
+    /**
+     * Creates InstanceRecord and returns Wrapper object that allows
+     * to define subsequent instanceRecords using this Entry id as
+     * one of its dependencies (reference to itself). This will create
+     * single Record being composition of all defined instances.
+     *
+     * If wrapping record doesn't use reference to itself as one of
+     * dependencies IntegrityConstraintException will be thrown.
+     *
+     * Composition is finished with Wrapper::compose() call that will
+     * add ComposedInstanceRecord to container records.
+     *
+     * @see Record\InstanceRecord
+     * @see Wrapper
+     *
+     * @param string $className
+     * @param string ...$dependencies
+     *
+     * @return Wrapper
+     */
     public function wrappedInstance(string $className, string ...$dependencies): Wrapper
     {
         $store = function (Record $record) { $this->builder->addRecord($this->id, $record); };
