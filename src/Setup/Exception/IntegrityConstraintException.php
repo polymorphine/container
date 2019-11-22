@@ -16,11 +16,6 @@ use LogicException;
 
 class IntegrityConstraintException extends LogicException
 {
-    public static function undefined(string $id): self
-    {
-        return new self("Record `$id` not defined");
-    }
-
     public static function alreadyDefined(string $resource): self
     {
         return new self("Cannot overwrite defined $resource");
@@ -34,5 +29,15 @@ class IntegrityConstraintException extends LogicException
     public static function unexpectedPrefixSeparator(string $separator, string $id): self
     {
         return new self("Container id cannot contain `$separator` separator - `$id` id given");
+    }
+
+    public static function undefined(string $id): self
+    {
+        return new self("Cannot wrap undefined `$id` Record");
+    }
+
+    public static function missingReference(string $id)
+    {
+        return new self("Wrapped `$id` entry should be referenced by decorating object");
     }
 }

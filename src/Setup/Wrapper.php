@@ -32,7 +32,7 @@ class Wrapper
     {
         $idx = array_search($this->wrappedId, $dependencies, true);
         if ($idx === false) {
-            throw Exception\IntegrityConstraintException::undefined($this->wrappedId);
+            throw Exception\IntegrityConstraintException::missingReference($this->wrappedId);
         }
 
         $this->wrappers[] = [$className, $dependencies];
