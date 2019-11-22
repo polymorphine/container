@@ -12,6 +12,7 @@
 namespace Polymorphine\Container;
 
 use Polymorphine\Container\Setup\Exception;
+use Polymorphine\Container\Setup\Wrapper;
 use Psr\Container\ContainerInterface;
 
 
@@ -57,6 +58,19 @@ class Setup
     public function entry(string $id): Setup\Entry
     {
         return new Setup\Entry($id, $this);
+    }
+
+    public function wrap(string $id): Setup\Wrapper
+    {
+        if (!$wrapped = $this->records[$id] ?? null) {
+            throw Exception\IntegrityConstraintException::undefined($id);
+        }
+
+        $replace = function (Records\Record $record) use ($id): void {
+            $this->records[$id] = $record;
+        };
+
+        return new Wrapper($id, $wrapped, $replace);
     }
 
     /**

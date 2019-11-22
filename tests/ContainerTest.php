@@ -279,7 +279,45 @@ class ContainerTest extends TestCase
             'another'  => new Record\ValueRecord('...and another')
         ]));
 
-        $this->assertSame('callback(foo-bar) ...and some text ...and another', $container->get('composed')->beNice());
+        $expected = 'callback(foo-bar) ...and some text ...and another';
+        $this->assertSame($expected, $container->get('composed')->beNice());
+    }
+
+    public function testSetupWrapMethod()
+    {
+        $setup = $this->validatedBuilder([
+            'composed' => new Record\ValueRecord('foo-bar'),
+            'callback' => new Record\ValueRecord(function (string $name) { return "callback($name)"; }),
+            'text'     => new Record\ValueRecord('...and some text'),
+            'another'  => new Record\ValueRecord('...and another')
+        ]);
+
+        $setup->wrap('composed')
+              ->with(Example\ExampleClass::class, 'callback', 'composed')
+              ->with(Example\DecoratingExampleClass::class, 'composed', 'text')
+              ->with(Example\DecoratingExampleClass::class, 'composed', 'another')
+              ->compose();
+
+        $expected = 'callback(foo-bar) ...and some text ...and another';
+        $this->assertSame($expected, $setup->container()->get('composed')->beNice());
+    }
+
+    public function testSetupWrapUndefinedRecord_ThrowsException()
+    {
+        $this->expectException(Setup\Exception\IntegrityConstraintException::class);
+        $this->defaultBuilder()->wrap('undefined');
+    }
+
+    public function testWrapWithoutWrappedDependency_ThrowsException()
+    {
+        $setup = $this->validatedBuilder([
+            'composed' => new Record\ValueRecord('foo-bar'),
+            'dummy'    => new Record\ValueRecord('baz')
+        ]);
+
+        $wrapper = $setup->wrap('composed');
+        $this->expectException(Setup\Exception\IntegrityConstraintException::class);
+        $wrapper->with(Example\ExampleClass::class, 'callback', 'dummy');
     }
 
     public function testProductRecord()
