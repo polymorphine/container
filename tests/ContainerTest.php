@@ -13,7 +13,9 @@ namespace Polymorphine\Container\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Polymorphine\Container\ConfigContainer;
+use Polymorphine\Container\RecordContainer;
 use Polymorphine\Container\Setup;
+use Polymorphine\Container\Records;
 use Polymorphine\Container\Records\Record;
 use Polymorphine\Container\Exception;
 use Polymorphine\Container\Tests\Fixtures\Example;
@@ -248,7 +250,7 @@ class ContainerTest extends TestCase
         $this->assertSame($object, $container->get('lazy.goodbye'));
     }
 
-    public function testComposeRecord()
+    public function testInstanceRecord()
     {
         $config = [
             'foo' => new ConfigContainer(['env' => ['name' => 'Shudd3r', 'polite' => 'How are you?']]),
@@ -262,7 +264,25 @@ class ContainerTest extends TestCase
         $this->assertSame('Hello Shudd3r.', $container->get('small.talk')->beNice());
     }
 
-    public function testCreateMethodRecord()
+    public function testComposedInstanceRecord()
+    {
+        $wrapped = new Record\ValueRecord('foo-bar');
+        $wrappers = [
+            [Example\ExampleClass::class, ['callback', 'composed']],
+            [Example\DecoratingExampleClass::class, ['composed', 'text']],
+            [Example\DecoratingExampleClass::class, ['composed', 'another']]
+        ];
+        $container = new RecordContainer(new Records([
+            'composed' => new Record\ComposedInstanceRecord('composed', $wrapped, $wrappers),
+            'callback' => new Record\ValueRecord(function (string $name) { return "callback($name)"; }),
+            'text'     => new Record\ValueRecord('...and some text'),
+            'another'  => new Record\ValueRecord('...and another')
+        ]));
+
+        $this->assertSame('callback(foo-bar) ...and some text ...and another', $container->get('composed')->beNice());
+    }
+
+    public function testProductRecord()
     {
         $config['foo'] = new ConfigContainer(['one' => 'first', 'two' => 'second', 'three' => 'third']);
         $setup = $this->defaultBuilder([], $config);
