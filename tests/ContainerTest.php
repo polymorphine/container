@@ -283,7 +283,7 @@ class ContainerTest extends TestCase
     {
         $setup = $this->validatedBuilder($this->components(['composed' => new Record\ValueRecord('foo-bar')]));
 
-        $setup->wrap('composed')
+        $setup->decorate('composed')
               ->with(Example\ExampleClass::class, 'callback', 'composed')
               ->with(Example\DecoratingExampleClass::class, 'composed', 'text')
               ->with(Example\DecoratingExampleClass::class, 'composed', 'another')
@@ -310,7 +310,7 @@ class ContainerTest extends TestCase
     public function testSetupWrapUndefinedRecord_ThrowsException()
     {
         $this->expectException(Setup\Exception\IntegrityConstraintException::class);
-        $this->defaultBuilder()->wrap('undefined');
+        $this->defaultBuilder()->decorate('undefined');
     }
 
     public function testWrapWithoutWrappedDependency_ThrowsException()
@@ -320,7 +320,7 @@ class ContainerTest extends TestCase
             'dummy'    => new Record\ValueRecord('baz')
         ]);
 
-        $wrapper = $setup->wrap('composed');
+        $wrapper = $setup->decorate('composed');
         $this->expectException(Setup\Exception\IntegrityConstraintException::class);
         $wrapper->with(Example\ExampleClass::class, 'callback', 'dummy');
     }

@@ -80,7 +80,7 @@ class Setup
      *
      * @return Wrapper
      */
-    public function wrap(string $id): Setup\Wrapper
+    public function decorate(string $id): Setup\Wrapper
     {
         if (!isset($this->records[$id])) {
             throw Exception\IntegrityConstraintException::undefined($id);
