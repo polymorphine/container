@@ -272,12 +272,8 @@ class ContainerTest extends TestCase
             [Example\DecoratingExampleClass::class, ['composed', 'text']],
             [Example\DecoratingExampleClass::class, ['composed', 'another']]
         ];
-        $container = new RecordContainer(new Records([
-            'composed' => new Record\ComposedInstanceRecord('composed', $wrapped, $wrappers),
-            'callback' => new Record\ValueRecord(function (string $name) { return "callback($name)"; }),
-            'text'     => new Record\ValueRecord('...and some text'),
-            'another'  => new Record\ValueRecord('...and another')
-        ]));
+        $composed  = new Record\ComposedInstanceRecord('composed', $wrapped, $wrappers);
+        $container = new RecordContainer(new Records($this->components(['composed' => $composed])));
 
         $expected = 'callback(foo-bar) ...and some text ...and another';
         $this->assertSame($expected, $container->get('composed')->beNice());
@@ -285,15 +281,24 @@ class ContainerTest extends TestCase
 
     public function testSetupWrapMethod()
     {
-        $setup = $this->validatedBuilder([
-            'composed' => new Record\ValueRecord('foo-bar'),
-            'callback' => new Record\ValueRecord(function (string $name) { return "callback($name)"; }),
-            'text'     => new Record\ValueRecord('...and some text'),
-            'another'  => new Record\ValueRecord('...and another')
-        ]);
+        $setup = $this->validatedBuilder($this->components(['composed' => new Record\ValueRecord('foo-bar')]));
 
         $setup->wrap('composed')
               ->with(Example\ExampleClass::class, 'callback', 'composed')
+              ->with(Example\DecoratingExampleClass::class, 'composed', 'text')
+              ->with(Example\DecoratingExampleClass::class, 'composed', 'another')
+              ->compose();
+
+        $expected = 'callback(foo-bar) ...and some text ...and another';
+        $this->assertSame($expected, $setup->container()->get('composed')->beNice());
+    }
+
+    public function testEntryComposeMethod()
+    {
+        $setup = $this->validatedBuilder($this->components(['name' => new Record\ValueRecord('foo-bar')]));
+
+        $setup->entry('composed')
+              ->wrappedInstance(Example\ExampleClass::class, 'callback', 'name')
               ->with(Example\DecoratingExampleClass::class, 'composed', 'text')
               ->with(Example\DecoratingExampleClass::class, 'composed', 'another')
               ->compose();
@@ -522,5 +527,14 @@ class ContainerTest extends TestCase
     private function validatedBuilder(array $records = [], array $containers = [], bool $overwrite = false)
     {
         return new Setup\ValidatedSetup($records, $containers, $overwrite);
+    }
+
+    private function components(array $records = []): array
+    {
+        return $records + [
+            'callback' => new Record\ValueRecord(function (string $name) { return "callback($name)"; }),
+            'text'     => new Record\ValueRecord('...and some text'),
+            'another'  => new Record\ValueRecord('...and another')
+        ];
     }
 }

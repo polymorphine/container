@@ -18,14 +18,14 @@ class Wrapper
 {
     private $wrappedId;
     private $wrappedRecord;
-    private $replaceCallback;
+    private $storeCallback;
     private $wrappers = [];
 
-    public function __construct(string $wrappedId, Record $wrappedRecord, callable $replaceCallback)
+    public function __construct(string $wrappedId, Record $wrappedRecord, callable $storeCallback)
     {
-        $this->wrappedId       = $wrappedId;
-        $this->wrappedRecord   = $wrappedRecord;
-        $this->replaceCallback = $replaceCallback;
+        $this->wrappedId     = $wrappedId;
+        $this->wrappedRecord = $wrappedRecord;
+        $this->storeCallback = $storeCallback;
     }
 
     public function with(string $className, string ...$dependencies): self
@@ -42,6 +42,6 @@ class Wrapper
     public function compose(): void
     {
         $record = new Record\ComposedInstanceRecord($this->wrappedId, $this->wrappedRecord, $this->wrappers);
-        ($this->replaceCallback)($record);
+        ($this->storeCallback)($record);
     }
 }

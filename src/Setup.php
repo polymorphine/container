@@ -62,7 +62,7 @@ class Setup
 
     public function wrap(string $id): Setup\Wrapper
     {
-        if (!$wrapped = $this->records[$id] ?? null) {
+        if (!isset($this->records[$id])) {
             throw Exception\IntegrityConstraintException::undefined($id);
         }
 
@@ -70,7 +70,7 @@ class Setup
             $this->records[$id] = $record;
         };
 
-        return new Wrapper($id, $wrapped, $replace);
+        return new Wrapper($id, $this->records[$id], $replace);
     }
 
     /**

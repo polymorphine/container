@@ -89,6 +89,12 @@ class Entry
         $this->record(new Record\InstanceRecord($className, ...$dependencies));
     }
 
+    public function wrappedInstance(string $className, string ...$dependencies): Wrapper
+    {
+        $store = function (Record $record) { $this->builder->addRecord($this->id, $record); };
+        return new Wrapper($this->id, new Record\InstanceRecord($className, ...$dependencies), $store);
+    }
+
     /**
      * Adds ProductRecord to container records with given container
      * identifier of factory class, factory method name and container
