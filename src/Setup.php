@@ -11,12 +11,10 @@
 
 namespace Polymorphine\Container;
 
-use Polymorphine\Container\Setup\Exception;
-use Polymorphine\Container\Setup\Wrapper;
 use Psr\Container\ContainerInterface;
 
 
-class Setup
+abstract class Setup
 {
     protected $records;
     protected $containers;
@@ -29,6 +27,29 @@ class Setup
     {
         $this->records    = $records;
         $this->containers = $containers;
+    }
+
+    /**
+     * @param Records\Record[]     $records
+     * @param ContainerInterface[] $containers
+     *
+     * @return static
+     */
+    public static function default(array $records = [], array $containers = []): self
+    {
+        return new Setup\DefaultSetup($records, $containers);
+    }
+
+    /**
+     * @param Records\Record[]     $records
+     * @param ContainerInterface[] $containers
+     * @param mixed                $allowOverwrite
+     *
+     * @return static
+     */
+    public static function validated(array $records = [], array $containers = [], $allowOverwrite = false): self
+    {
+        return new Setup\ValidatedSetup($records, $containers, $allowOverwrite);
     }
 
     /**
@@ -71,26 +92,25 @@ class Setup
      * Composition is finished with Wrapper::compose() call that will
      * replace initial entry with ComposedInstanceRecord.
      *
-     * @see Records\Record\InstanceRecord
-     * @see Wrapper
+     * @see \Polymorphine\Container\Records\Record\InstanceRecord
      *
      * @param string $id
      *
-     * @throws Exception\IntegrityConstraintException
+     * @throws Setup\Exception\IntegrityConstraintException
      *
-     * @return Wrapper
+     * @return Setup\Wrapper
      */
     public function decorate(string $id): Setup\Wrapper
     {
         if (!isset($this->records[$id])) {
-            throw Exception\IntegrityConstraintException::undefined($id);
+            throw Setup\Exception\IntegrityConstraintException::undefined($id);
         }
 
         $replace = function (Records\Record $record) use ($id): void {
             $this->records[$id] = $record;
         };
 
-        return new Wrapper($id, $this->records[$id], $replace);
+        return new Setup\Wrapper($id, $this->records[$id], $replace);
     }
 
     /**
@@ -98,7 +118,7 @@ class Setup
      *
      * @param Records\Record[] $records Flat associative array of Record instances
      *
-     * @throws Exception\IntegrityConstraintException
+     * @throws Setup\Exception\IntegrityConstraintException
      */
     public function addRecords(array $records): void
     {
@@ -111,26 +131,17 @@ class Setup
      * @param string         $id
      * @param Records\Record $record
      *
-     * @throws Exception\IntegrityConstraintException
+     * @throws Setup\Exception\IntegrityConstraintException
      */
-    public function addRecord(string $id, Records\Record $record): void
-    {
-        $this->records[$id] = $record;
-    }
+    abstract public function addRecord(string $id, Records\Record $record): void;
 
     /**
      * @param string             $id
      * @param ContainerInterface $container
      *
-     * @throws Exception\IntegrityConstraintException
+     * @throws Setup\Exception\IntegrityConstraintException
      */
-    public function addContainer(string $id, ContainerInterface $container): void
-    {
-        $this->containers[$id] = $container;
-    }
+    abstract public function addContainer(string $id, ContainerInterface $container): void;
 
-    protected function records(): Records
-    {
-        return new Records($this->records);
-    }
+    abstract protected function records(): Records;
 }

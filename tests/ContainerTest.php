@@ -28,7 +28,8 @@ class ContainerTest extends TestCase
 {
     public function testInstantiation()
     {
-        $this->assertInstanceOf(ContainerInterface::class, (new Setup())->container());
+        $this->assertInstanceOf(ContainerInterface::class, Setup::default()->container());
+        $this->assertInstanceOf(ContainerInterface::class, Setup::validated()->container());
         $this->assertInstanceOf(NotFoundExceptionInterface::class, new Exception\RecordNotFoundException());
         $this->assertInstanceOf(NotFoundExceptionInterface::class, new Exception\TrackedRecordNotFoundException());
         $this->assertInstanceOf(ContainerExceptionInterface::class, new Exception\CircularReferenceException());
@@ -521,12 +522,12 @@ class ContainerTest extends TestCase
 
     private function defaultBuilder(array $records = [], array $containers = [])
     {
-        return new Setup($records, $containers);
+        return Setup::default($records, $containers);
     }
 
     private function validatedBuilder(array $records = [], array $containers = [], bool $overwrite = false)
     {
-        return new Setup\ValidatedSetup($records, $containers, $overwrite);
+        return Setup::validated($records, $containers, $overwrite);
     }
 
     private function components(array $records = []): array

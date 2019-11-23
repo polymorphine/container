@@ -22,10 +22,17 @@ class ValidatedSetup extends Setup
     private $allowOverwrite;
     private $reservedIds = [];
 
+    /**
+     * @param Records\Record[]     $records
+     * @param ContainerInterface[] $containers
+     * @param bool                 $allowOverwrite
+     */
     public function __construct(array $records = [], array $containers = [], bool $allowOverwrite = false)
     {
-        parent::__construct($records, $containers);
+        $this->records        = $records;
+        $this->containers     = $containers;
         $this->allowOverwrite = $allowOverwrite;
+
         $this->validateState();
     }
 
@@ -35,7 +42,7 @@ class ValidatedSetup extends Setup
         if (!$this->allowOverwrite && isset($this->records[$id])) {
             throw Exception\IntegrityConstraintException::alreadyDefined("`$id` record");
         }
-        parent::addRecord($id, $record);
+        $this->records[$id] = $record;
     }
 
     public function addContainer(string $id, ContainerInterface $container): void
@@ -44,7 +51,7 @@ class ValidatedSetup extends Setup
         if (!$this->allowOverwrite && isset($this->containers[$id])) {
             throw Exception\IntegrityConstraintException::alreadyDefined("`$id` container");
         }
-        parent::addContainer($id, $container);
+        $this->containers[$id] = $container;
     }
 
     protected function records(): Records
