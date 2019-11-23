@@ -75,9 +75,22 @@ abstract class Setup
      *
      * @return Setup\Entry
      */
-    public function entry(string $id): Setup\Entry
+    public function add(string $id): Setup\Entry
     {
-        return new Setup\Entry($id, $this);
+        return new Setup\Entry\AddEntry($id, $this);
+    }
+
+    /**
+     * Returns Entry object able to replace data in container configuration
+     * for given identifier.
+     *
+     * @param string $id
+     *
+     * @return Setup\Entry
+     */
+    public function replace(string $id): Setup\Entry
+    {
+        return new Setup\Entry\ReplaceEntry($id, $this);
     }
 
     /**

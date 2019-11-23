@@ -138,7 +138,7 @@ class ContainerTest extends TestCase
     public function testCallbacksCannotModifyRegistry()
     {
         $setup = Setup::basic();
-        $setup->entry('lazyModifier')->callback(function ($c) {
+        $setup->add('lazyModifier')->callback(function ($c) {
             $vars = get_object_vars($c);
 
             return isset($vars['records']);
@@ -155,6 +155,10 @@ class ContainerTest extends TestCase
         $setup = Setup::validated();
         $setup->addRecord('foo', new Record\ValueRecord('bar'));
         $this->assertSame('bar', $setup->container()->get('foo'));
+
+        $setup = Setup::basic();
+        $setup->add('foo')->value('bar');
+        $this->assertSame('bar', $setup->container()->get('foo'));
     }
 
     public function testSetup_RecordsCanBeReplaced()
@@ -165,6 +169,10 @@ class ContainerTest extends TestCase
 
         $setup = Setup::validated(['foo' => new Record\ValueRecord('bar')]);
         $setup->replaceRecord('foo', new Record\ValueRecord('baz'));
+        $this->assertSame('baz', $setup->container()->get('foo'));
+
+        $setup = Setup::basic(['foo' => new Record\ValueRecord('bar')]);
+        $setup->replace('foo')->value('baz');
         $this->assertSame('baz', $setup->container()->get('foo'));
     }
 
@@ -177,6 +185,10 @@ class ContainerTest extends TestCase
         $setup = Setup::validated();
         $setup->addContainer('foo', $container = new ConfigContainer([]));
         $this->assertSame($container, $setup->container()->get('foo'));
+
+        $setup = Setup::basic();
+        $setup->add('foo')->container($container = new ConfigContainer([]));
+        $this->assertSame($container, $setup->container()->get('foo'));
     }
 
     public function testSetup_ContainersCanBeReplaced()
@@ -187,6 +199,10 @@ class ContainerTest extends TestCase
 
         $setup = Setup::validated([], ['foo' => new ConfigContainer([])]);
         $setup->replaceContainer('foo', $container = new ConfigContainer([]));
+        $this->assertSame($container, $setup->container()->get('foo'));
+
+        $setup = Setup::basic([], ['foo' => new ConfigContainer([])]);
+        $setup->replace('foo')->container($container = new ConfigContainer([]));
         $this->assertSame($container, $setup->container()->get('foo'));
     }
 
@@ -236,7 +252,7 @@ class ContainerTest extends TestCase
     public function testInputProxyMethods($method, $id, $value, $result)
     {
         $setup = Setup::basic();
-        $setup->entry($id)->{$method}($value);
+        $setup->add($id)->{$method}($value);
         $container = $setup->container();
 
         $this->assertTrue($container->has($id));
@@ -256,7 +272,7 @@ class ContainerTest extends TestCase
     public function testBuildConfigContainerWithSetup()
     {
         $setup = Setup::basic();
-        $setup->entry('cfg')->container(new configContainer(['test' => 'value']));
+        $setup->add('cfg')->container(new configContainer(['test' => 'value']));
         $container = $setup->container();
 
         $this->assertTrue($container->has('cfg.test'));
@@ -268,7 +284,7 @@ class ContainerTest extends TestCase
         $config    = ['env' => new ConfigContainer(['config' => 'value'])];
         $setup     = Setup::basic(['exists' => new Record\ValueRecord(true)], $config);
         $container = $setup->container();
-        $setup->entry('not.too.late')->value(true);
+        $setup->add('not.too.late')->value(true);
 
         $this->assertNotSame($newContainer = $setup->container(), $container);
         $this->assertTrue($newContainer->has('exists'));
@@ -279,7 +295,7 @@ class ContainerTest extends TestCase
     public function testCallbackRecord()
     {
         $setup = Setup::basic();
-        $setup->entry('lazy.goodbye')->callback(function () {
+        $setup->add('lazy.goodbye')->callback(function () {
             return new Example\ExampleClass(function ($name) {
                 return 'Goodbye ' . $name;
             }, 'Shudd3r');
@@ -299,7 +315,7 @@ class ContainerTest extends TestCase
         ];
 
         $setup = Setup::basic([], $config);
-        $setup->entry('small.talk')->instance(Example\ExampleClass::class, 'cfg.hello', 'foo.env.name');
+        $setup->add('small.talk')->instance(Example\ExampleClass::class, 'cfg.hello', 'foo.env.name');
         $container = $setup->container();
 
         $this->assertSame('Hello Shudd3r.', $container->get('small.talk')->beNice());
@@ -338,7 +354,7 @@ class ContainerTest extends TestCase
     {
         $setup = Setup::validated($this->components(['name' => new Record\ValueRecord('foo-bar')]));
 
-        $setup->entry('composed')
+        $setup->add('composed')
               ->wrappedInstance(Example\ExampleClass::class, 'callback', 'name')
               ->with(Example\DecoratingExampleClass::class, 'composed', 'text')
               ->with(Example\DecoratingExampleClass::class, 'composed', 'another')
@@ -370,8 +386,8 @@ class ContainerTest extends TestCase
     {
         $config['foo'] = new ConfigContainer(['one' => 'first', 'two' => 'second', 'three' => 'third']);
         $setup = Setup::basic([], $config);
-        $setup->entry('factory')->value(new Example\Factory());
-        $setup->entry('product')->product('factory', 'create', 'foo.one', 'foo.two', 'foo.three');
+        $setup->add('factory')->value(new Example\Factory());
+        $setup->add('product')->product('factory', 'create', 'foo.one', 'foo.two', 'foo.three');
         $container = $setup->container();
 
         $this->assertSame('first,second,third', $container->get('product'));
@@ -422,31 +438,31 @@ class ContainerTest extends TestCase
     {
         $setup = Setup::validated();
         $this->expectException(Setup\Exception\IntegrityConstraintException::class);
-        $setup->entry('cfg.data')->container(new ConfigContainer([]));
+        $setup->add('cfg.data')->container(new ConfigContainer([]));
     }
 
     public function testRecordIdUsedAsContainerId_SecureSetupThrowsException()
     {
         $setup = Setup::validated();
-        $setup->entry('prefix')->container(new ConfigContainer([]));
+        $setup->add('prefix')->container(new ConfigContainer([]));
         $this->expectException(Setup\Exception\IntegrityConstraintException::class);
-        $setup->entry('prefix.foo')->value(true);
+        $setup->add('prefix.foo')->value(true);
     }
 
     public function testContainerIdUsedAsRecordPrefix_SecureSetupThrowsException()
     {
         $setup = Setup::validated();
-        $setup->entry('prefix.foo')->value(true);
+        $setup->add('prefix.foo')->value(true);
         $this->expectException(Setup\Exception\IntegrityConstraintException::class);
-        $setup->entry('prefix')->container(new ConfigContainer([]));
+        $setup->add('prefix')->container(new ConfigContainer([]));
     }
 
     public function testRecordPrefixUsedAsContainerId_SecureSetupThrowsException()
     {
         $setup = Setup::validated();
-        $setup->entry('prefix')->container(new ConfigContainer([]));
+        $setup->add('prefix')->container(new ConfigContainer([]));
         $this->expectException(Setup\Exception\IntegrityConstraintException::class);
-        $setup->entry('prefix.foo')->value(true);
+        $setup->add('prefix.foo')->value(true);
     }
 
     /**
@@ -481,7 +497,7 @@ class ContainerTest extends TestCase
     public function testDirectCircularCall_ThrowsException()
     {
         $setup = Setup::validated();
-        $setup->entry('ref.self')->callback(function (ContainerInterface $c) {
+        $setup->add('ref.self')->callback(function (ContainerInterface $c) {
             return $c->get('ref.self');
         });
         $container = $setup->container();
@@ -493,13 +509,13 @@ class ContainerTest extends TestCase
     public function testIndirectCircularCall_ThrowsException()
     {
         $setup = Setup::validated();
-        $setup->entry('ref')->callback(function (ContainerInterface $c) {
+        $setup->add('ref')->callback(function (ContainerInterface $c) {
             return $c->get('ref.self');
         });
-        $setup->entry('ref.self')->callback(function (ContainerInterface $c) {
+        $setup->add('ref.self')->callback(function (ContainerInterface $c) {
             return $c->get('ref.dependency');
         });
-        $setup->entry('ref.dependency')->callback(function (ContainerInterface $c) {
+        $setup->add('ref.dependency')->callback(function (ContainerInterface $c) {
             return $c->get('ref.self');
         });
         $container = $setup->container();
@@ -512,32 +528,32 @@ class ContainerTest extends TestCase
     {
         $config['foo'] = new ConfigContainer(['config' => 'value']);
         $setup = Setup::validated([], $config);
-        $setup->entry('ref')->callback(function (ContainerInterface $c) {
+        $setup->add('ref')->callback(function (ContainerInterface $c) {
             return $c->get('ref.multiple') . ':' . $c->get('ref.multiple') . ':' . $c->get('foo.config');
         });
-        $setup->entry('ref.multiple')->value('Test');
+        $setup->add('ref.multiple')->value('Test');
         $this->assertSame('Test:Test:value', $setup->container()->get('ref'));
     }
 
     public function testMultipleIndirectCallsAreNotCircular()
     {
         $setup = Setup::validated();
-        $setup->entry('ref')->callback(function (ContainerInterface $c) {
+        $setup->add('ref')->callback(function (ContainerInterface $c) {
             return $c->get('function')($c);
         });
-        $setup->entry('function')->callback(function (ContainerInterface $c) {
+        $setup->add('function')->callback(function (ContainerInterface $c) {
             return function (ContainerInterface $test) use ($c) {
                 return $c->get('ref.multiple') . ':' . $test->get('ref.multiple');
             };
         });
-        $setup->entry('ref.multiple')->value('Test');
+        $setup->add('ref.multiple')->value('Test');
         $this->assertSame('Test:Test', $setup->container()->get('ref'));
     }
 
     public function testTrackingStopsAfterItemIsReturned()
     {
         $setup = Setup::validated();
-        $setup->entry('ref')->callback(function (ContainerInterface $c) {
+        $setup->add('ref')->callback(function (ContainerInterface $c) {
             return $c;
         });
         $container = $setup->container();
@@ -549,11 +565,11 @@ class ContainerTest extends TestCase
     public function testCallStackIsAddedToContainerExceptionMessage()
     {
         $setup = Setup::validated([], ['config' => new ConfigContainer(['foo' => 'bar'])]);
-        $setup->entry('A')->value(function () {});
-        $setup->entry('B')->callback(function (ContainerInterface $c) {
+        $setup->add('A')->value(function () {});
+        $setup->add('B')->callback(function (ContainerInterface $c) {
             return new Example\ExampleClass($c->get('A'), $c->get('undefined'));
         });
-        $setup->entry('C')->instance(Example\DecoratingExampleClass::class, 'B', '.config');
+        $setup->add('C')->instance(Example\DecoratingExampleClass::class, 'B', '.config');
 
         $container = $setup->container();
         $this->expectExceptionMessage('C->B->undefined->...');

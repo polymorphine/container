@@ -20,10 +20,10 @@ use Psr\Container\ContainerInterface;
  * Write-only proxy with helper methods to instantiate and set
  * Record implementations for given Container item identifier.
  */
-class Entry
+abstract class Entry
 {
-    private $id;
-    private $builder;
+    protected $id;
+    protected $builder;
 
     public function __construct(string $id, Setup $builder)
     {
@@ -32,17 +32,27 @@ class Entry
     }
 
     /**
-     * Adds given Record instance directly into container records
+     * Sets given Record instance directly into container records
      * using this instance's id property.
      *
      * @param Record $record
      *
      * @throws Exception\IntegrityConstraintException
      */
-    public function record(Record $record): void
-    {
-        $this->builder->addRecord($this->id, $record);
-    }
+    abstract public function record(Record $record): void;
+
+    /**
+     * Sets ContainerInterface instance as sub-container that may
+     * be accessed with this instance id as prefix.
+     *
+     * WARNING: For id containing prefix separator exception will
+     * be thrown.
+     *
+     * @param ContainerInterface $container
+     *
+     * @throws Exception\IntegrityConstraintException
+     */
+    abstract public function container(ContainerInterface $container): void;
 
     /**
      * Adds ValueRecord with given value into container records.
@@ -131,21 +141,5 @@ class Entry
     public function product(string $factoryId, string $method, string ...$arguments): void
     {
         $this->record(new Record\ProductRecord($factoryId, $method, ...$arguments));
-    }
-
-    /**
-     * Adds ContainerInterface instance as sub-container that may
-     * be accessed with this instance id as prefix.
-     *
-     * WARNING: For id containing prefix separator exception will
-     * be thrown.
-     *
-     * @param ContainerInterface $container
-     *
-     * @throws Exception\IntegrityConstraintException
-     */
-    public function container(ContainerInterface $container)
-    {
-        $this->builder->addContainer($this->id, $container);
     }
 }
