@@ -35,9 +35,9 @@ abstract class Setup
      *
      * @return static
      */
-    public static function default(array $records = [], array $containers = []): self
+    public static function basic(array $records = [], array $containers = []): self
     {
-        return new Setup\DefaultSetup($records, $containers);
+        return new Setup\BasicSetup($records, $containers);
     }
 
     /**

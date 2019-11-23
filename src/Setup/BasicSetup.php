@@ -16,7 +16,7 @@ use Polymorphine\Container\Records;
 use Psr\Container\ContainerInterface;
 
 
-class DefaultSetup extends Setup
+class BasicSetup extends Setup
 {
     public function addRecord(string $id, Records\Record $record): void
     {
