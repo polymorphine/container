@@ -11,6 +11,7 @@
 
 namespace Polymorphine\Container;
 
+use Polymorphine\Container\Setup\Entry;
 use Psr\Container\ContainerInterface;
 
 
@@ -75,9 +76,9 @@ abstract class Setup
      *
      * @return Setup\Entry
      */
-    public function add(string $id): Setup\Entry
+    public function add(string $id): Entry
     {
-        return new Setup\Entry\AddEntry($id, $this);
+        return new Entry\AddEntry($id, $this);
     }
 
     /**
@@ -88,9 +89,9 @@ abstract class Setup
      *
      * @return Setup\Entry
      */
-    public function replace(string $id): Setup\Entry
+    public function replace(string $id): Entry
     {
-        return new Setup\Entry\ReplaceEntry($id, $this);
+        return new Entry\ReplaceEntry($id, $this);
     }
 
     /**
@@ -110,19 +111,15 @@ abstract class Setup
      *
      * @throws Setup\Exception\IntegrityConstraintException
      *
-     * @return Setup\Wrapper
+     * @return Setup\Entry\Wrapper
      */
-    public function decorate(string $id): Setup\Wrapper
+    public function decorate(string $id): Entry\Wrapper
     {
         if (!isset($this->records[$id])) {
             throw Setup\Exception\IntegrityConstraintException::undefined($id);
         }
 
-        $replace = function (Records\Record $record) use ($id): void {
-            $this->records[$id] = $record;
-        };
-
-        return new Setup\Wrapper($id, $this->records[$id], $replace);
+        return new Entry\Wrapper($id, $this->records[$id], new Entry\ReplaceEntry($id, $this));
     }
 
     /**
