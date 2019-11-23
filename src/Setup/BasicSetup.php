@@ -28,6 +28,16 @@ class BasicSetup extends Setup
         $this->containers[$id] = $container;
     }
 
+    public function replaceRecord(string $id, Records\Record $record): void
+    {
+        $this->records[$id] = $record;
+    }
+
+    public function replaceContainer(string $id, ContainerInterface $container): void
+    {
+        $this->containers[$id] = $container;
+    }
+
     protected function records(): Records
     {
         return new Records($this->records);

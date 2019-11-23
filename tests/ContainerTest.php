@@ -146,20 +146,76 @@ class ContainerTest extends TestCase
         $this->assertFalse($setup->container()->get('lazyModifier'));
     }
 
-    public function testOverwritingExistingKey_ValidatedWithOverwriteLock_ThrowsException()
+    public function testSetup_RecordsCanBeAdded()
     {
-        $setup = Setup::validated([], [], false);
-        $setup->entry('test')->value('foo');
-        $this->expectException(Setup\Exception\IntegrityConstraintException::class);
-        $setup->entry('test')->value('bar');
+        $setup = Setup::basic();
+        $setup->addRecord('foo', new Record\ValueRecord('bar'));
+        $this->assertSame('bar', $setup->container()->get('foo'));
+
+        $setup = Setup::validated();
+        $setup->addRecord('foo', new Record\ValueRecord('bar'));
+        $this->assertSame('bar', $setup->container()->get('foo'));
     }
 
-    public function testOverwritingExistingKey_ValidatedWithoutOverwriteLock_OverwritesRecordValue()
+    public function testSetup_RecordsCanBeReplaced()
     {
-        $setup = Setup::validated([], [], true);
-        $setup->entry('test')->value('foo');
-        $setup->entry('test')->value('bar');
-        $this->assertSame('bar', $setup->container()->get('test'));
+        $setup = Setup::basic(['foo' => new Record\ValueRecord('bar')]);
+        $setup->replaceRecord('foo', new Record\ValueRecord('baz'));
+        $this->assertSame('baz', $setup->container()->get('foo'));
+
+        $setup = Setup::validated(['foo' => new Record\ValueRecord('bar')]);
+        $setup->replaceRecord('foo', new Record\ValueRecord('baz'));
+        $this->assertSame('baz', $setup->container()->get('foo'));
+    }
+
+    public function testSetup_ContainersCanBeAdded()
+    {
+        $setup = Setup::basic();
+        $setup->addContainer('foo', $container = new ConfigContainer([]));
+        $this->assertSame($container, $setup->container()->get('foo'));
+
+        $setup = Setup::validated();
+        $setup->addContainer('foo', $container = new ConfigContainer([]));
+        $this->assertSame($container, $setup->container()->get('foo'));
+    }
+
+    public function testSetup_ContainersCanBeReplaced()
+    {
+        $setup = Setup::basic([], ['foo' => new ConfigContainer([])]);
+        $setup->replaceContainer('foo', $container = new ConfigContainer([]));
+        $this->assertSame($container, $setup->container()->get('foo'));
+
+        $setup = Setup::validated([], ['foo' => new ConfigContainer([])]);
+        $setup->replaceContainer('foo', $container = new ConfigContainer([]));
+        $this->assertSame($container, $setup->container()->get('foo'));
+    }
+
+    public function testValidatedSetup_ReplaceUndefinedRecord_ThrowsException()
+    {
+        $setup = Setup::validated();
+        $this->expectException(Setup\Exception\IntegrityConstraintException::class);
+        $setup->replaceRecord('foo', new Record\ValueRecord('bar'));
+    }
+
+    public function testValidatedSetup_ReplaceUndefinedContainer_ThrowsException()
+    {
+        $setup = Setup::validated();
+        $this->expectException(Setup\Exception\IntegrityConstraintException::class);
+        $setup->replaceContainer('foo', new ConfigContainer([]));
+    }
+
+    public function testValidatedSetup_AddExistingRecord_ThrowsException()
+    {
+        $setup = Setup::validated(['test' => new Record\ValueRecord('bar')]);
+        $this->expectException(Setup\Exception\IntegrityConstraintException::class);
+        $setup->addRecord('test', new Record\ValueRecord('baz'));
+    }
+
+    public function testValidatedSetup_AddExistingContainer_ThrowsException()
+    {
+        $setup = Setup::validated([], ['foo' => new ConfigContainer([])]);
+        $this->expectException(Setup\Exception\IntegrityConstraintException::class);
+        $setup->addContainer('foo', new ConfigContainer([]));
     }
 
     public function testAddingRecordsArrayWithExistingRecord_ThrowsException()
@@ -205,22 +261,6 @@ class ContainerTest extends TestCase
 
         $this->assertTrue($container->has('cfg.test'));
         $this->assertSame('value', $container->get('cfg.test'));
-    }
-
-    public function testOverwritingContainerId_ValidatedWithOverwriteLock_ThrowsException()
-    {
-        $setup = Setup::validated([], [], false);
-        $setup->entry('data')->container(new ConfigContainer([]));
-        $this->expectException(Setup\Exception\IntegrityConstraintException::class);
-        $setup->entry('data')->container(new ConfigContainer([]));
-    }
-
-    public function testOverwritingContainerId_ValidatedWithOverwriteLock__OverwritesContainerValue()
-    {
-        $setup = Setup::validated([], [], true);
-        $setup->entry('data')->container(new ConfigContainer([]));
-        $setup->entry('data')->container($changedContainer = new ConfigContainer([]));
-        $this->assertSame($changedContainer, $setup->container()->get('data'));
     }
 
     public function testSetupContainer_ReturnsNewInstanceOfContainer()

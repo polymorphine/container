@@ -33,7 +33,7 @@ class IntegrityConstraintException extends LogicException
 
     public static function undefined(string $id): self
     {
-        return new self("Cannot wrap undefined `$id` Record");
+        return new self("Cannot change undefined `$id` Record");
     }
 
     public static function missingReference(string $id)

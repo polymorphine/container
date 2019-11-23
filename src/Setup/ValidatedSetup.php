@@ -19,27 +19,22 @@ use Psr\Container\ContainerInterface;
 
 class ValidatedSetup extends Setup
 {
-    private $allowOverwrite;
     private $reservedIds = [];
 
     /**
      * @param Records\Record[]     $records
      * @param ContainerInterface[] $containers
-     * @param bool                 $allowOverwrite
      */
-    public function __construct(array $records = [], array $containers = [], bool $allowOverwrite = false)
+    public function __construct(array $records = [], array $containers = [])
     {
-        $this->records        = $records;
-        $this->containers     = $containers;
-        $this->allowOverwrite = $allowOverwrite;
-
+        parent::__construct($records, $containers);
         $this->validateState();
     }
 
     public function addRecord(string $id, Records\Record $record): void
     {
         $this->checkRecordId($id);
-        if (!$this->allowOverwrite && isset($this->records[$id])) {
+        if (isset($this->records[$id])) {
             throw Exception\IntegrityConstraintException::alreadyDefined("`$id` record");
         }
         $this->records[$id] = $record;
@@ -48,8 +43,26 @@ class ValidatedSetup extends Setup
     public function addContainer(string $id, ContainerInterface $container): void
     {
         $this->checkContainerId($id);
-        if (!$this->allowOverwrite && isset($this->containers[$id])) {
+        if (isset($this->containers[$id])) {
             throw Exception\IntegrityConstraintException::alreadyDefined("`$id` container");
+        }
+        $this->containers[$id] = $container;
+    }
+
+    public function replaceRecord(string $id, Records\Record $record): void
+    {
+        $this->checkRecordId($id);
+        if (!isset($this->records[$id])) {
+            throw Exception\IntegrityConstraintException::undefined("`$id` record");
+        }
+        $this->records[$id] = $record;
+    }
+
+    public function replaceContainer(string $id, ContainerInterface $container): void
+    {
+        $this->checkContainerId($id);
+        if (!isset($this->containers[$id])) {
+            throw Exception\IntegrityConstraintException::undefined("`$id` container");
         }
         $this->containers[$id] = $container;
     }

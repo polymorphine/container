@@ -43,13 +43,12 @@ abstract class Setup
     /**
      * @param Records\Record[]     $records
      * @param ContainerInterface[] $containers
-     * @param mixed                $allowOverwrite
      *
      * @return static
      */
-    public static function validated(array $records = [], array $containers = [], $allowOverwrite = false): self
+    public static function validated(array $records = [], array $containers = []): self
     {
-        return new Setup\ValidatedSetup($records, $containers, $allowOverwrite);
+        return new Setup\ValidatedSetup($records, $containers);
     }
 
     /**
@@ -142,6 +141,22 @@ abstract class Setup
      * @throws Setup\Exception\IntegrityConstraintException
      */
     abstract public function addContainer(string $id, ContainerInterface $container): void;
+
+    /**
+     * @param string         $id
+     * @param Records\Record $record
+     *
+     * @throws Setup\Exception\IntegrityConstraintException
+     */
+    abstract public function replaceRecord(string $id, Records\Record $record): void;
+
+    /**
+     * @param string             $id
+     * @param ContainerInterface $container
+     *
+     * @throws Setup\Exception\IntegrityConstraintException
+     */
+    abstract public function replaceContainer(string $id, ContainerInterface $container): void;
 
     abstract protected function records(): Records;
 }
