@@ -9,7 +9,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Container\Exception;
+namespace Polymorphine\Container\Setup\Exception;
 
 use Psr\Container\ContainerExceptionInterface;
 use InvalidArgumentException;

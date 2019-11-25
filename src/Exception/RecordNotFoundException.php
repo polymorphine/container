@@ -21,9 +21,4 @@ class RecordNotFoundException extends InvalidArgumentException implements NotFou
     {
         return new self("Record `$id` not defined");
     }
-
-    public static function cannotWrap(string $id): self
-    {
-        throw new self("Attempted to decorate non-existent `$id` record with new composition");
-    }
 }

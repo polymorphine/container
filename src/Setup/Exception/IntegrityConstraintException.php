@@ -9,13 +9,12 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Container\Exception;
+namespace Polymorphine\Container\Setup\Exception;
 
-use Psr\Container\ContainerExceptionInterface;
-use InvalidArgumentException;
+use LogicException;
 
 
-class InvalidIdException extends InvalidArgumentException implements ContainerExceptionInterface
+class IntegrityConstraintException extends LogicException
 {
     public static function alreadyDefined(string $resource): self
     {
@@ -30,5 +29,15 @@ class InvalidIdException extends InvalidArgumentException implements ContainerEx
     public static function unexpectedPrefixSeparator(string $separator, string $id): self
     {
         return new self("Container id cannot contain `$separator` separator - `$id` id given");
+    }
+
+    public static function undefined(string $id): self
+    {
+        return new self("Cannot change undefined `$id` Record");
+    }
+
+    public static function missingReference(string $id)
+    {
+        return new self("Wrapped `$id` entry should be referenced by decorating object");
     }
 }

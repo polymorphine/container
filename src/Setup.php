@@ -11,64 +11,45 @@
 
 namespace Polymorphine\Container;
 
+use Polymorphine\Container\Setup\Entry;
 use Psr\Container\ContainerInterface;
 
 
-class Setup
+abstract class Setup
 {
-    private $builder;
-
-    public function __construct(Builder $builder = null)
-    {
-        $this->builder = $builder ?: new Builder();
-    }
+    protected $records;
+    protected $containers;
 
     /**
-     * Creates Setup with validated collection.
-     *
-     * Added entries will be validated for identifier conflicts and
-     * created container will be monitored for circular references.
-     *
-     * Additional $allowOverwrite parameter determines if adding entry with
-     * already defined id will be overwritten. Can be used to build container
-     * with container with default values that can change under some conditions.
-     *
-     * @param bool $allowOverwrite
-     *
-     * @return self
-     */
-    public static function validated(bool $allowOverwrite = false): self
-    {
-        return new self(new Builder\ValidatedBuilder([], [], $allowOverwrite));
-    }
-
-    /**
-     * Creates Setup with predefined configuration.
-     *
-     * If `true` is passed as $validate param validated version of Setup
-     * will be created. Both passed data and added entries will be validated.
-     *
-     * Additional $allowOverwrite parameter determines if adding entry with
-     * already defined id will be overwritten. Can be used to build container
-     * with container with default values that can change under some conditions.
-     *
      * @param Records\Record[]     $records
      * @param ContainerInterface[] $containers
-     * @param bool                 $validate
-     * @param bool                 $allowOverwrite
-     *
-     * @return self
      */
-    public static function withData(
-        array $records = [],
-        array $containers = [],
-        bool $validate = false,
-        bool $allowOverwrite = false
-    ): self {
-        $collection = $validate
-            ? new Builder\ValidatedBuilder($records, $containers, $allowOverwrite)
-            : new Builder($records, $containers);
-        return new self($collection);
+    public function __construct(array $records = [], array $containers = [])
+    {
+        $this->records    = $records;
+        $this->containers = $containers;
+    }
+
+    /**
+     * @param Records\Record[]     $records
+     * @param ContainerInterface[] $containers
+     *
+     * @return static
+     */
+    public static function basic(array $records = [], array $containers = []): self
+    {
+        return new Setup\BasicSetup($records, $containers);
+    }
+
+    /**
+     * @param Records\Record[]     $records
+     * @param ContainerInterface[] $containers
+     *
+     * @return static
+     */
+    public static function validated(array $records = [], array $containers = []): self
+    {
+        return new Setup\ValidatedSetup($records, $containers);
     }
 
     /**
@@ -82,20 +63,63 @@ class Setup
      */
     public function container(): ContainerInterface
     {
-        return $this->builder->container();
+        return $this->containers
+            ? new CompositeContainer($this->records(), $this->containers)
+            : new RecordContainer($this->records());
     }
 
     /**
      * Returns Entry object able to add new data to container configuration
      * for given identifier.
      *
-     * @param string $name
+     * @param string $id
      *
-     * @return Builder\Entry
+     * @return Setup\Entry
      */
-    public function entry(string $name): Builder\Entry
+    public function add(string $id): Entry
     {
-        return new Builder\Entry($name, $this->builder);
+        return new Entry\AddEntry($id, $this);
+    }
+
+    /**
+     * Returns Entry object able to replace data in container configuration
+     * for given identifier.
+     *
+     * @param string $id
+     *
+     * @return Setup\Entry
+     */
+    public function replace(string $id): Entry
+    {
+        return new Entry\ReplaceEntry($id, $this);
+    }
+
+    /**
+     * Returns Wrapper object able to decorate existing Record and replacing
+     * it with composition of InstanceRecords using given id as a reference
+     * to one of their dependencies (reference to itself).
+     *
+     * If given id is not defined or wrapping record doesn't use its reference
+     * as one of dependencies IntegrityConstraintException will be thrown.
+     *
+     * Composition is finished with Wrapper::compose() call that will
+     * replace initial entry with ComposedInstanceRecord.
+     *
+     * @see \Polymorphine\Container\Records\Record\InstanceRecord
+     *
+     * @param string $id
+     *
+     * @throws Setup\Exception\IntegrityConstraintException
+     *
+     * @return Setup\Entry\Wrapper
+     */
+    public function decorate(string $id): Entry\Wrapper
+    {
+        if (!isset($this->records[$id])) {
+            throw Setup\Exception\IntegrityConstraintException::undefined($id);
+        }
+
+        return new Entry\Wrapper($id, $this->records[$id], new Entry\ReplaceEntry($id, $this));
     }
 
     /**
@@ -103,12 +127,46 @@ class Setup
      *
      * @param Records\Record[] $records Flat associative array of Record instances
      *
-     * @throws Exception\InvalidIdException
+     * @throws Setup\Exception\IntegrityConstraintException
      */
-    public function records(array $records): void
+    public function addRecords(array $records): void
     {
         foreach ($records as $id => $record) {
-            $this->builder->addRecord($id, $record);
+            $this->addRecord($id, $record);
         }
     }
+
+    /**
+     * @param string         $id
+     * @param Records\Record $record
+     *
+     * @throws Setup\Exception\IntegrityConstraintException
+     */
+    abstract public function addRecord(string $id, Records\Record $record): void;
+
+    /**
+     * @param string             $id
+     * @param ContainerInterface $container
+     *
+     * @throws Setup\Exception\IntegrityConstraintException
+     */
+    abstract public function addContainer(string $id, ContainerInterface $container): void;
+
+    /**
+     * @param string         $id
+     * @param Records\Record $record
+     *
+     * @throws Setup\Exception\IntegrityConstraintException
+     */
+    abstract public function replaceRecord(string $id, Records\Record $record): void;
+
+    /**
+     * @param string             $id
+     * @param ContainerInterface $container
+     *
+     * @throws Setup\Exception\IntegrityConstraintException
+     */
+    abstract public function replaceContainer(string $id, ContainerInterface $container): void;
+
+    abstract protected function records(): Records;
 }

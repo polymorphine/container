@@ -22,9 +22,9 @@ use Psr\Container\ContainerInterface;
  *
  * Returned value is cached and returned directly on subsequent calls.
  */
-class CreateMethodRecord implements Record
+class ProductRecord implements Record
 {
-    use ExtractArgumentsTrait;
+    use ContainerMapMethod;
 
     private $factoryId;
     private $method;
@@ -51,6 +51,6 @@ class CreateMethodRecord implements Record
     private function create(ContainerInterface $container)
     {
         $factory = $container->get($this->factoryId);
-        return $factory->{$this->method}(...$this->arguments($this->arguments, $container));
+        return $factory->{$this->method}(...$this->containerValues($this->arguments, $container));
     }
 }
