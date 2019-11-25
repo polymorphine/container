@@ -18,7 +18,6 @@ use Polymorphine\Container\Setup;
 use Polymorphine\Container\Records;
 use Polymorphine\Container\Records\Record;
 use Polymorphine\Container\Exception;
-use Polymorphine\Container\Tests\Fixtures\Example;
 use Psr\Container\ContainerInterface;
 use Psr\Container\NotFoundExceptionInterface;
 use Psr\Container\ContainerExceptionInterface;
@@ -44,14 +43,14 @@ class ContainerTest extends TestCase
 
         $setup->addRecords([
             'callback' => new Record\ValueRecord(function () {}),
-            'foo'      => new Record\InstanceRecord(Example\ExampleClass::class, 'callback', 'test')
+            'foo'      => new Record\InstanceRecord(Fixtures\ExampleImpl::class, 'callback', 'test')
         ]);
         $container = $setup->container();
 
         $this->assertTrue($container->has('test') && $container->has('lazy'));
         $this->assertSame('Hello World!', $container->get('test'));
         $this->assertSame('Lazy Foo', $container->get('lazy'));
-        $this->assertInstanceOf(Example\ExampleClass::class, $container->get('foo'));
+        $this->assertInstanceOf(Fixtures\ExampleImpl::class, $container->get('foo'));
     }
 
     public function testClosuresForLazyLoadedValuesCanAccessContainer()
@@ -296,14 +295,14 @@ class ContainerTest extends TestCase
     {
         $setup = Setup::basic();
         $setup->add('lazy.goodbye')->callback(function () {
-            return new Example\ExampleClass(function ($name) {
+            return new Fixtures\ExampleImpl(function ($name) {
                 return 'Goodbye ' . $name;
             }, 'Shudd3r');
         });
         $container = $setup->container();
         $object    = $container->get('lazy.goodbye');
 
-        $this->assertSame('Goodbye Shudd3r', $object->beNice());
+        $this->assertSame('Goodbye Shudd3r', $object->getString());
         $this->assertSame($object, $container->get('lazy.goodbye'));
     }
 
@@ -315,25 +314,25 @@ class ContainerTest extends TestCase
         ];
 
         $setup = Setup::basic([], $config);
-        $setup->add('small.talk')->instance(Example\ExampleClass::class, 'cfg.hello', 'foo.env.name');
+        $setup->add('small.talk')->instance(Fixtures\ExampleImpl::class, 'cfg.hello', 'foo.env.name');
         $container = $setup->container();
 
-        $this->assertSame('Hello Shudd3r.', $container->get('small.talk')->beNice());
+        $this->assertSame('Hello Shudd3r.', $container->get('small.talk')->getString());
     }
 
     public function testComposedInstanceRecord()
     {
         $wrapped = new Record\ValueRecord('foo-bar');
         $wrappers = [
-            [Example\ExampleClass::class, ['callback', 'composed']],
-            [Example\DecoratingExampleClass::class, ['composed', 'text']],
-            [Example\DecoratingExampleClass::class, ['composed', 'another']]
+            [Fixtures\ExampleImpl::class, ['callback', 'composed']],
+            [Fixtures\DecoratorExample::class, ['composed', 'text']],
+            [Fixtures\DecoratorExample::class, ['composed', 'another']]
         ];
         $composed  = new Record\ComposedInstanceRecord('composed', $wrapped, $wrappers);
         $container = new RecordContainer(new Records($this->components(['composed' => $composed])));
 
         $expected = 'callback(foo-bar) ...and some text ...and another';
-        $this->assertSame($expected, $container->get('composed')->beNice());
+        $this->assertSame($expected, $container->get('composed')->getString());
     }
 
     public function testSetupWrapMethod()
@@ -341,13 +340,13 @@ class ContainerTest extends TestCase
         $setup = Setup::validated($this->components(['composed' => new Record\ValueRecord('foo-bar')]));
 
         $setup->decorate('composed')
-              ->with(Example\ExampleClass::class, 'callback', 'composed')
-              ->with(Example\DecoratingExampleClass::class, 'composed', 'text')
-              ->with(Example\DecoratingExampleClass::class, 'composed', 'another')
+              ->with(Fixtures\ExampleImpl::class, 'callback', 'composed')
+              ->with(Fixtures\DecoratorExample::class, 'composed', 'text')
+              ->with(Fixtures\DecoratorExample::class, 'composed', 'another')
               ->compose();
 
         $expected = 'callback(foo-bar) ...and some text ...and another';
-        $this->assertSame($expected, $setup->container()->get('composed')->beNice());
+        $this->assertSame($expected, $setup->container()->get('composed')->getString());
     }
 
     public function testEntryComposeMethod()
@@ -355,13 +354,13 @@ class ContainerTest extends TestCase
         $setup = Setup::validated($this->components(['name' => new Record\ValueRecord('foo-bar')]));
 
         $setup->add('composed')
-              ->wrappedInstance(Example\ExampleClass::class, 'callback', 'name')
-              ->with(Example\DecoratingExampleClass::class, 'composed', 'text')
-              ->with(Example\DecoratingExampleClass::class, 'composed', 'another')
+              ->wrappedInstance(Fixtures\ExampleImpl::class, 'callback', 'name')
+              ->with(Fixtures\DecoratorExample::class, 'composed', 'text')
+              ->with(Fixtures\DecoratorExample::class, 'composed', 'another')
               ->compose();
 
         $expected = 'callback(foo-bar) ...and some text ...and another';
-        $this->assertSame($expected, $setup->container()->get('composed')->beNice());
+        $this->assertSame($expected, $setup->container()->get('composed')->getString());
     }
 
     public function testSetupWrapUndefinedRecord_ThrowsException()
@@ -379,18 +378,18 @@ class ContainerTest extends TestCase
 
         $wrapper = $setup->decorate('composed');
         $this->expectException(Setup\Exception\IntegrityConstraintException::class);
-        $wrapper->with(Example\ExampleClass::class, 'callback', 'dummy');
+        $wrapper->with(Fixtures\ExampleImpl::class, 'callback', 'dummy');
     }
 
     public function testProductRecord()
     {
         $config['foo'] = new ConfigContainer(['one' => 'first', 'two' => 'second', 'three' => 'third']);
         $setup = Setup::basic([], $config);
-        $setup->add('factory')->value(new Example\Factory());
+        $setup->add('factory')->value(new Fixtures\FactoryExample());
         $setup->add('product')->product('factory', 'create', 'foo.one', 'foo.two', 'foo.three');
         $container = $setup->container();
 
-        $this->assertSame('first,second,third', $container->get('product'));
+        $this->assertEquals(Fixtures\ExampleImpl::new('first second third'), $container->get('product'));
     }
 
     public function testConfigsCanBeReadWithPath()
@@ -567,9 +566,9 @@ class ContainerTest extends TestCase
         $setup = Setup::validated([], ['config' => new ConfigContainer(['foo' => 'bar'])]);
         $setup->add('A')->value(function () {});
         $setup->add('B')->callback(function (ContainerInterface $c) {
-            return new Example\ExampleClass($c->get('A'), $c->get('undefined'));
+            return new Fixtures\ExampleImpl($c->get('A'), $c->get('undefined'));
         });
-        $setup->add('C')->instance(Example\DecoratingExampleClass::class, 'B', '.config');
+        $setup->add('C')->instance(Fixtures\DecoratorExample::class, 'B', '.config');
 
         $container = $setup->container();
         $this->expectExceptionMessage('C->B->undefined->...');
