@@ -18,6 +18,7 @@ use Psr\Container\ContainerInterface;
 class MockedRecord implements Record
 {
     public $value;
+    public $passedContainer;
 
     public function __construct($value = null)
     {
@@ -31,6 +32,7 @@ class MockedRecord implements Record
 
     public function value(ContainerInterface $container)
     {
-        return $this->value;
+        $this->passedContainer = $container;
+        return is_callable($this->value) ? ($this->value)($container) : $this->value;
     }
 }
