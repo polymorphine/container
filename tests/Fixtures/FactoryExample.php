@@ -9,13 +9,13 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Container\Tests\Fixtures\Example;
+namespace Polymorphine\Container\Tests\Fixtures;
 
 
-class Factory
+class FactoryExample
 {
-    public function create(string ...$args): string
+    public function create(string ...$strings): Example
     {
-        return implode(',', $args);
+        return ExampleImpl::new(implode(' ', $strings));
     }
 }

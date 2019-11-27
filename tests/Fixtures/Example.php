@@ -14,5 +14,5 @@ namespace Polymorphine\Container\Tests\Fixtures;
 
 interface Example
 {
-    public function beNice();
+    public function getString(): string;
 }
