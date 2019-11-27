@@ -32,13 +32,13 @@ class FakeContainer implements ContainerInterface
     public function get($id)
     {
         if (!array_key_exists($id, $this->data)) {
-            throw new Exception\RecordNotFoundException();
+            throw new Exception\RecordNotFoundException("MockedContainer: missing `$id` entry");
         }
         return $this->data[$id];
     }
 
     public function has($id)
     {
-        return isset($this->data[$id]);
+        return array_key_exists($id, $this->data);
     }
 }
