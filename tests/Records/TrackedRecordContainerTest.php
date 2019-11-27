@@ -14,9 +14,9 @@ namespace Polymorphine\Container\Tests\Records;
 use Polymorphine\Container\Tests\RecordContainerTest;
 use Polymorphine\Container\RecordContainer;
 use Polymorphine\Container\Records;
-use Polymorphine\Container\Exception;
 use Polymorphine\Container\Tests\Doubles\MockedRecord;
 use Psr\Container\ContainerInterface;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
 
 
@@ -43,7 +43,7 @@ class TrackedRecordContainerTest extends RecordContainerTest
             'baz' => MockedRecord::new(function (ContainerInterface $c) { return $c->get('foo'); })
         ]);
 
-        $this->expectException(Exception\CircularReferenceException::class);
+        $this->expectException(ContainerExceptionInterface::class);
         $this->expectExceptionMessage('foo->bar->baz->foo');
         $container->get('foo');
     }
