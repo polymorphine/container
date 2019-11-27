@@ -35,7 +35,7 @@ class TrackedRecordContainerTest extends RecordContainerTest
         $container->get('foo');
     }
 
-    public function testTrackedContainer_getSelfReferenceRecord_ThrowsExceptionWithCallStack()
+    public function testTrackedContainer_getSelfReferencedRecord_ThrowsExceptionWithCallStack()
     {
         $container = $this->container([
             'foo' => MockedRecord::new(function (ContainerInterface $c) { return $c->get('bar'); }),
@@ -48,7 +48,7 @@ class TrackedRecordContainerTest extends RecordContainerTest
         $container->get('foo');
     }
 
-    public function testTrackedContainer_getRecordValueWithSelfReference_ReturnsRecordValue()
+    public function testTrackedContainer_getRecordValueWithEncapsulatedSelfReference_ReturnsRecordValue()
     {
         $container = $this->container([
             'foo' => MockedRecord::new(function (ContainerInterface $c) { return $c->get('bar'); }),
