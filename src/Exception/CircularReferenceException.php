@@ -12,10 +12,10 @@
 namespace Polymorphine\Container\Exception;
 
 use Psr\Container\ContainerExceptionInterface;
-use RuntimeException;
+use LogicException;
 
 
-class CircularReferenceException extends RuntimeException implements ContainerExceptionInterface
+class CircularReferenceException extends LogicException implements ContainerExceptionInterface
 {
     use CallStackMessageMethod;
 
