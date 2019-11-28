@@ -12,6 +12,7 @@
 namespace Polymorphine\Container;
 
 use Psr\Container\ContainerInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 
 /**
@@ -43,7 +44,7 @@ class CompositeContainer implements ContainerInterface
     {
         [$containerId, $itemId] = $this->splitId($id);
         if (isset($this->containers[$containerId])) {
-            return $itemId ? $this->containers[$containerId]->get($itemId) : $this->containers[$containerId];
+            return $itemId ? $this->fromContainer($containerId, $itemId) : $this->containers[$containerId];
         }
 
         return $this->records->get($id, $this);
@@ -62,5 +63,14 @@ class CompositeContainer implements ContainerInterface
     private function splitId(string $id): array
     {
         return explode(static::SEPARATOR, $id, 2) + [false, null];
+    }
+
+    private function fromContainer(string $containerId, string $id)
+    {
+        try {
+            return $this->containers[$containerId]->get($id);
+        } catch (NotFoundExceptionInterface $e) {
+            throw Exception\RecordNotFoundException::undefined("$containerId.$id");
+        }
     }
 }
