@@ -11,11 +11,10 @@
 
 namespace Polymorphine\Container\Setup\Exception;
 
-use Psr\Container\ContainerExceptionInterface;
 use InvalidArgumentException;
 
 
-class InvalidTypeException extends InvalidArgumentException implements ContainerExceptionInterface
+class InvalidTypeException extends InvalidArgumentException
 {
     public static function recordExpected(string $id): self
     {
