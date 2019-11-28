@@ -19,8 +19,8 @@ class TrackedRecordNotFoundException extends InvalidArgumentException implements
 {
     use CallStackMessageMethod;
 
-    public function __construct(string $message = '', array $callStack = [])
+    public function __construct(string $message = '', array $callStack = [], ?string $id = null)
     {
-        parent::__construct(self::extendMessage($message, $callStack));
+        parent::__construct(self::extendMessage($message, $callStack, $id));
     }
 }
