@@ -70,7 +70,7 @@ class CompositeContainer implements ContainerInterface
         try {
             return $this->containers[$containerId]->get($id);
         } catch (NotFoundExceptionInterface $e) {
-            throw Exception\RecordNotFoundException::undefined("$containerId.$id");
+            throw Exception\RecordNotFoundException::notFoundInSubContainer($containerId, $id, $e);
         }
     }
 }

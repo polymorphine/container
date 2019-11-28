@@ -127,7 +127,7 @@ class CompositeContainerTest extends TestCase
         $container = new CompositeContainer(new Records\TrackedRecords($records), $containers);
 
         $this->expectException(NotFoundExceptionInterface::class);
-        $this->expectExceptionMessage('Record `sub.undefined` not defined [call stack: foo->bar->sub.undefined]');
+        $this->expectExceptionMessage('Sub-container `sub.undefined` entry not found [call stack: foo->bar->sub.undefined]');
         $container->get('foo');
     }
 
