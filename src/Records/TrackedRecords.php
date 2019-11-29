@@ -36,19 +36,10 @@ class TrackedRecords extends Records
         try {
             $item = parent::get($id, $container);
         } catch (Exception\RecordNotFoundException $e) {
-            $message     = $e->getMessage();
-            $unstackedId = $this->unstackedId($message, $id);
-            throw new Exception\TrackedRecordNotFoundException($message, $this->callStack, $unstackedId);
+            throw new Exception\TrackedRecordNotFoundException($id, $this->callStack, $e);
         }
 
         unset($this->callStack[$id]);
         return $item;
-    }
-
-    private function unstackedId(string $message, string $id): ?string
-    {
-        $idFound = preg_match('#`(?P<id>.+?)`#', $message, $matches);
-        if (!$idFound || $matches['id'] === $id) { return null; }
-        return $matches['id'];
     }
 }
