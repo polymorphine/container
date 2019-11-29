@@ -21,4 +21,12 @@ class RecordNotFoundException extends InvalidArgumentException implements NotFou
     {
         return new self("Record `$id` not defined");
     }
+
+    public static function notFoundInSubContainer(
+        string $containerId,
+        string $id,
+        NotFoundExceptionInterface $previous
+    ): self {
+        return new self("Sub-container `$containerId.$id` entry not found", 0, $previous);
+    }
 }

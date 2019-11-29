@@ -36,7 +36,7 @@ class TrackedRecords extends Records
         try {
             $item = parent::get($id, $container);
         } catch (Exception\RecordNotFoundException $e) {
-            throw new Exception\TrackedRecordNotFoundException($e->getMessage(), $this->callStack);
+            throw new Exception\TrackedRecordNotFoundException($id, $this->callStack, $e);
         }
 
         unset($this->callStack[$id]);

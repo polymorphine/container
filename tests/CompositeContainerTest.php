@@ -55,7 +55,7 @@ class CompositeContainerTest extends TestCase
         $this->assertSame('subFooValue', $container->get('foo.bar'));
     }
 
-    public function testContainer_has_ReturnsIfEntryIsDefinedAndAccessible()
+    public function testContainer_has_ReturnsWhetherEntryIsDefinedAndAccessible()
     {
         $container = $this->container([
             'foo.something' => Doubles\MockedRecord::new('inaccessible'),
@@ -113,7 +113,7 @@ class CompositeContainerTest extends TestCase
         $this->assertSame('subFoo + subBar', $container->get('foo'));
     }
 
-    public function testContainerWithTrackedRecords_getEntryWithUndefinedReferences_ThrowsExceptionWithCallStack()
+    public function testContainerWithTrackedRecords_getEntryWithUndefinedContainerReference_ThrowsExceptionWithFullCallStack()
     {
         $records = [
             'foo' => Doubles\MockedRecord::new(function (ContainerInterface $c) { return $c->get('sub.foo') . $c->get('bar'); }),
@@ -127,7 +127,7 @@ class CompositeContainerTest extends TestCase
         $container = new CompositeContainer(new Records\TrackedRecords($records), $containers);
 
         $this->expectException(NotFoundExceptionInterface::class);
-        $this->expectExceptionMessage('MockedContainer: missing `undefined` entry [call stack: foo->bar->...]');
+        $this->expectExceptionMessage('Sub-container `sub.undefined` entry not found [call stack: foo->bar->sub.undefined]');
         $container->get('foo');
     }
 

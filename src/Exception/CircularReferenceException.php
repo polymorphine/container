@@ -19,7 +19,7 @@ class CircularReferenceException extends LogicException implements ContainerExce
 {
     use CallStackMessageMethod;
 
-    public function __construct(string $id = '', array $callStack = [])
+    public function __construct(string $id, array $callStack)
     {
         $message = "Lazy composition of `$id` record is using reference to itself";
         parent::__construct(self::extendMessage($message, $callStack, $id));

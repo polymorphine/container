@@ -14,9 +14,9 @@ namespace Polymorphine\Container\Exception;
 
 trait CallStackMessageMethod
 {
-    private static function extendMessage(string $message, array $callStack, string $lastCall = '...'): string
+    private static function extendMessage(string $message, array $callStack, ?string $id): string
     {
-        $stack = implode('->', array_keys($callStack)) . ($lastCall ? '->' . $lastCall : '');
+        $stack = implode('->', array_keys($callStack)) . ($id ? '->' . $id : '');
         return "$message [call stack: $stack]";
     }
 }
