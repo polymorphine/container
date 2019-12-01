@@ -9,22 +9,19 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Container\Setup;
+namespace Polymorphine\Container\Setup\Build;
 
-use Polymorphine\Container\Setup;
+use Polymorphine\Container\Setup\Build;
+use Polymorphine\Container\Setup\Exception;
 use Polymorphine\Container\Records;
 use Polymorphine\Container\CompositeContainer;
 use Psr\Container\ContainerInterface;
 
 
-class ValidatedSetup extends Setup
+class ValidatedBuild extends Build
 {
     private $reservedIds = [];
 
-    /**
-     * @param Records\Record[]     $records
-     * @param ContainerInterface[] $containers
-     */
     public function __construct(array $records = [], array $containers = [])
     {
         parent::__construct($records, $containers);
@@ -34,37 +31,25 @@ class ValidatedSetup extends Setup
     public function addRecord(string $id, Records\Record $record): void
     {
         $this->checkRecordId($id);
-        if (isset($this->records[$id])) {
-            throw Exception\IntegrityConstraintException::alreadyDefined("`$id` record");
-        }
-        $this->records[$id] = $record;
+        parent::addRecord($id, $record);
     }
 
     public function addContainer(string $id, ContainerInterface $container): void
     {
         $this->checkContainerId($id);
-        if (isset($this->containers[$id])) {
-            throw Exception\IntegrityConstraintException::alreadyDefined("`$id` container");
-        }
-        $this->containers[$id] = $container;
+        parent::addContainer($id, $container);
     }
 
     public function replaceRecord(string $id, Records\Record $record): void
     {
         $this->checkRecordId($id);
-        if (!isset($this->records[$id])) {
-            throw Exception\IntegrityConstraintException::undefined("`$id` record");
-        }
-        $this->records[$id] = $record;
+        parent::replaceRecord($id, $record);
     }
 
     public function replaceContainer(string $id, ContainerInterface $container): void
     {
         $this->checkContainerId($id);
-        if (!isset($this->containers[$id])) {
-            throw Exception\IntegrityConstraintException::undefined("`$id` container");
-        }
-        $this->containers[$id] = $container;
+        parent::replaceContainer($id, $container);
     }
 
     protected function records(): Records

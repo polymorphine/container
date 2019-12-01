@@ -11,23 +11,18 @@
 
 namespace Polymorphine\Container;
 
+use Polymorphine\Container\Setup\Build;
 use Polymorphine\Container\Setup\Entry;
 use Psr\Container\ContainerInterface;
 
 
-abstract class Setup
+class Setup
 {
-    protected $records;
-    protected $containers;
+    private $build;
 
-    /**
-     * @param Records\Record[]     $records
-     * @param ContainerInterface[] $containers
-     */
-    public function __construct(array $records = [], array $containers = [])
+    public function __construct(Build $build = null)
     {
-        $this->records    = $records;
-        $this->containers = $containers;
+        $this->build = $build;
     }
 
     /**
@@ -38,7 +33,7 @@ abstract class Setup
      */
     public static function basic(array $records = [], array $containers = []): self
     {
-        return new Setup\BasicSetup($records, $containers);
+        return new self(new Setup\Build\BasicBuild($records, $containers));
     }
 
     /**
@@ -49,7 +44,7 @@ abstract class Setup
      */
     public static function validated(array $records = [], array $containers = []): self
     {
-        return new Setup\ValidatedSetup($records, $containers);
+        return new self(new Setup\Build\ValidatedBuild($records, $containers));
     }
 
     /**
@@ -63,9 +58,7 @@ abstract class Setup
      */
     public function container(): ContainerInterface
     {
-        return $this->containers
-            ? new CompositeContainer($this->records(), $this->containers)
-            : new RecordContainer($this->records());
+        return $this->build->container();
     }
 
     /**
@@ -78,7 +71,7 @@ abstract class Setup
      */
     public function add(string $id): Entry
     {
-        return new Entry\AddEntry($id, $this);
+        return new Entry\AddEntry($id, $this->build);
     }
 
     /**
@@ -91,7 +84,7 @@ abstract class Setup
      */
     public function replace(string $id): Entry
     {
-        return new Entry\ReplaceEntry($id, $this);
+        return new Entry\ReplaceEntry($id, $this->build);
     }
 
     /**
@@ -115,58 +108,6 @@ abstract class Setup
      */
     public function decorate(string $id): Entry\Wrapper
     {
-        if (!isset($this->records[$id])) {
-            throw Setup\Exception\IntegrityConstraintException::undefined($id);
-        }
-
-        return new Entry\Wrapper($id, $this->records[$id], new Entry\ReplaceEntry($id, $this));
+        return $this->build->decorator($id);
     }
-
-    /**
-     * Adds Record instances directly to container configuration.
-     *
-     * @param Records\Record[] $records Flat associative array of Record instances
-     *
-     * @throws Setup\Exception\IntegrityConstraintException
-     */
-    public function addRecords(array $records): void
-    {
-        foreach ($records as $id => $record) {
-            $this->addRecord($id, $record);
-        }
-    }
-
-    /**
-     * @param string         $id
-     * @param Records\Record $record
-     *
-     * @throws Setup\Exception\IntegrityConstraintException
-     */
-    abstract public function addRecord(string $id, Records\Record $record): void;
-
-    /**
-     * @param string             $id
-     * @param ContainerInterface $container
-     *
-     * @throws Setup\Exception\IntegrityConstraintException
-     */
-    abstract public function addContainer(string $id, ContainerInterface $container): void;
-
-    /**
-     * @param string         $id
-     * @param Records\Record $record
-     *
-     * @throws Setup\Exception\IntegrityConstraintException
-     */
-    abstract public function replaceRecord(string $id, Records\Record $record): void;
-
-    /**
-     * @param string             $id
-     * @param ContainerInterface $container
-     *
-     * @throws Setup\Exception\IntegrityConstraintException
-     */
-    abstract public function replaceContainer(string $id, ContainerInterface $container): void;
-
-    abstract protected function records(): Records;
 }

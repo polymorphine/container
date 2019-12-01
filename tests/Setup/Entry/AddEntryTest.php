@@ -18,13 +18,13 @@ use Polymorphine\Container\Tests\Doubles;
 
 class AddEntryTest extends EntryTest
 {
-    protected function entry(string $id, Doubles\MockedSetup $setup = null): Entry
+    protected function entry(string $id, Doubles\MockedBuild $build = null): Entry
     {
-        return new Entry\AddEntry($id, $setup ?? $this->builder());
+        return new Entry\AddEntry($id, $build ?? $this->builder());
     }
 
-    protected function builder(): Doubles\MockedSetup
+    protected function builder(): Doubles\MockedBuild
     {
-        return Doubles\MockedSetup::added();
+        return Doubles\MockedBuild::added();
     }
 }

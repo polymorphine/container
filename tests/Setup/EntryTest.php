@@ -131,7 +131,7 @@ abstract class EntryTest extends TestCase
         $this->assertSame([['foo', $fooContainer], ['bar', $barContainer]], $setup->containerChanges());
     }
 
-    abstract protected function builder(): Doubles\MockedSetup;
+    abstract protected function builder(): Doubles\MockedBuild;
 
-    abstract protected function entry(string $name, Doubles\MockedSetup $setup = null): Entry;
+    abstract protected function entry(string $name, Doubles\MockedBuild $build = null): Entry;
 }

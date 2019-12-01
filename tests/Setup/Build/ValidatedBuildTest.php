@@ -9,16 +9,16 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Container\Tests\Setup;
+namespace Polymorphine\Container\Tests\Setup\Build;
 
+use Polymorphine\Container\Tests\Setup\BuildTest;
 use Polymorphine\Container\Tests\Fixtures\ExampleImpl;
-use Polymorphine\Container\Tests\SetupTest;
-use Polymorphine\Container\Setup;
-use Polymorphine\Container\Records;
 use Polymorphine\Container\Tests\Doubles;
+use Polymorphine\Container\Records;
+use Polymorphine\Container\Setup;
 
 
-class ValidatedSetupTest extends SetupTest
+class ValidatedBuildTest extends BuildTest
 {
     public function testValidatedSetup_InstantiationWithInvalidRecordType_ThrowsException()
     {
@@ -93,9 +93,9 @@ class ValidatedSetupTest extends SetupTest
         $setup->replaceContainer('undefined', Doubles\FakeContainer::new());
     }
 
-    protected function builder(array $records = [], array $containers = []): Setup
+    protected function builder(array $records = [], array $containers = []): Setup\Build
     {
-        return Setup::validated($records, $containers);
+        return new Setup\Build\ValidatedBuild($records, $containers);
     }
 
     protected function records(array $records = []): Records

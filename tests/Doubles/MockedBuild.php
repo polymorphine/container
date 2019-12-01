@@ -11,13 +11,18 @@
 
 namespace Polymorphine\Container\Tests\Doubles;
 
-use Polymorphine\Container\Setup;
 use Polymorphine\Container\Records;
+use Polymorphine\Container\Setup\Build;
+use Polymorphine\Container\Setup\Entry\ReplaceEntry;
+use Polymorphine\Container\Setup\Entry\Wrapper;
 use Psr\Container\ContainerInterface;
 
 
-class MockedSetup extends Setup
+class MockedBuild extends Build
 {
+    public $container;
+    public $wrapper;
+
     private $addedRecords       = [];
     private $replacedRecords    = [];
     private $addedContainers    = [];
@@ -37,6 +42,16 @@ class MockedSetup extends Setup
         $object = new self();
         $object->replace = true;
         return $object;
+    }
+
+    public function container(): ContainerInterface
+    {
+        return $this->container = new FakeContainer();
+    }
+
+    public function decorator(string $id): Wrapper
+    {
+        return $this->wrapper = new Wrapper($id, new MockedRecord(), new ReplaceEntry($id, $this));
     }
 
     public function recordChanges(): array
@@ -71,6 +86,6 @@ class MockedSetup extends Setup
 
     protected function records(): Records
     {
-        return new Records();
+        return new Records($this->records);
     }
 }

@@ -11,7 +11,6 @@
 
 namespace Polymorphine\Container\Setup;
 
-use Polymorphine\Container\Setup;
 use Polymorphine\Container\Records\Record;
 use Psr\Container\ContainerInterface;
 
@@ -25,10 +24,10 @@ abstract class Entry
     protected $id;
     protected $builder;
 
-    public function __construct(string $id, Setup $builder)
+    public function __construct(string $id, Collection $build)
     {
         $this->id      = $id;
-        $this->builder = $builder;
+        $this->builder = $build;
     }
 
     /**
