@@ -14,8 +14,6 @@ namespace Polymorphine\Container\Tests\Setup\Build;
 use Polymorphine\Container\Tests\Setup\BuildTest;
 use Polymorphine\Container\Records;
 use Polymorphine\Container\Setup;
-use Polymorphine\Container\RecordContainer;
-use Polymorphine\Container\CompositeContainer;
 use Polymorphine\Container\Tests\Doubles;
 
 
@@ -25,32 +23,28 @@ class BasicBuildTest extends BuildTest
     {
         $setup = $this->builder(['foo' => Doubles\MockedRecord::new('original')]);
         $setup->addRecord('foo', $added = Doubles\MockedRecord::new('added'));
-        $expected = new RecordContainer($this->records(['foo' => $added]));
-        $this->assertEquals($expected, $setup->container());
+        $this->assertSame('added', $setup->container()->get('foo'));
     }
 
     public function testBasicBuild_addContainerWithAlreadyDefinedId_ReplacesContainer()
     {
-        $setup = $this->builder([], ['foo' => Doubles\FakeContainer::new(['defined'])]);
+        $setup = $this->builder([], ['foo' => Doubles\FakeContainer::new()]);
         $setup->addContainer('foo', $added = Doubles\FakeContainer::new());
-        $expected = new CompositeContainer($this->records([]), ['foo' => $added]);
-        $this->assertEquals($expected, $setup->container());
+        $this->assertSame($added, $setup->container()->get('foo'));
     }
 
     public function testBasicBuild_replaceRecordWithUndefinedId_AddsRecord()
     {
         $setup = $this->builder();
-        $setup->replaceRecord('undefined', $replaced = Doubles\MockedRecord::new());
-        $expected = new RecordContainer($this->records(['undefined' => $replaced]));
-        $this->assertEquals($expected, $setup->container());
+        $setup->replaceRecord('undefined', $replaced = Doubles\MockedRecord::new('replaced'));
+        $this->assertSame('replaced', $setup->container()->get('undefined'));
     }
 
     public function testBasicBuild_replaceContainerWithUndefinedId_AddsContainer()
     {
         $setup = $this->builder();
-        $setup->replaceContainer('foo', $replaced = Doubles\FakeContainer::new(['A' => 'replaced']));
-        $expected = new CompositeContainer($this->records(), ['foo' => $replaced]);
-        $this->assertEquals($expected, $setup->container());
+        $setup->replaceContainer('undefined', $replaced = Doubles\FakeContainer::new());
+        $this->assertSame($replaced, $setup->container()->get('undefined'));
     }
 
     protected function builder(array $records = [], array $containers = []): Setup\Build

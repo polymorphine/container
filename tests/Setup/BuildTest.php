@@ -21,65 +21,47 @@ use Polymorphine\Container\Tests\Doubles;
 
 abstract class BuildTest extends TestCase
 {
-    public function testSetup_container_ReturnsRecordContainerWithRecords()
+    public function testBuild_container_ReturnsRecordContainerWithDefinedRecords()
     {
         $records = ['foo' => Doubles\MockedRecord::new()];
-
-        $setup    = $this->builder($records);
-        $expected = new RecordContainer($this->records($records));
-        $this->assertEquals($expected, $setup->container());
+        $setup   = $this->builder($records);
+        $this->assertEquals(new RecordContainer($this->records($records)), $setup->container());
     }
 
-    public function testSetupWithSubContainers_container_ReturnsCompositeContainer()
+    public function testBuildWithSubContainers_container_ReturnsCompositeContainer()
     {
         $records    = ['foo' => Doubles\MockedRecord::new()];
         $containers = ['bar' => Doubles\FakeContainer::new()];
-
-        $setup    = $this->builder($records, $containers);
-        $expected = new CompositeContainer($this->records($records), $containers);
-        $this->assertEquals($expected, $setup->container());
+        $setup      = $this->builder($records, $containers);
+        $this->assertEquals(new CompositeContainer($this->records($records), $containers), $setup->container());
     }
 
     public function testBuild_addRecord_WillCreateContainerWithAddedRecords()
     {
-        $added = Doubles\MockedRecord::new('added');
-
         $setup = $this->builder();
-        $setup->addRecord('foo', $added);
-        $expected = new RecordContainer($this->records(['foo' => $added]));
-        $this->assertEquals($expected, $setup->container());
+        $setup->addRecord('foo', $added = Doubles\MockedRecord::new('added'));
+        $this->assertSame('added', $setup->container()->get('foo'));
     }
 
     public function testBuild_replaceRecord_WillCreateContainerWithReplacedRecords()
     {
-        $records  = ['foo' => Doubles\MockedRecord::new('original')];
-        $replaced = Doubles\MockedRecord::new('replaced');
-
-        $setup = $this->builder($records);
-        $setup->replaceRecord('foo', $replaced);
-        $expected = new RecordContainer($this->records(['foo' => $replaced]));
-        $this->assertEquals($expected, $setup->container());
+        $setup = $this->builder(['foo' => Doubles\MockedRecord::new('original')]);
+        $setup->replaceRecord('foo', $replaced = Doubles\MockedRecord::new('replaced'));
+        $this->assertSame('replaced', $setup->container()->get('foo'));
     }
 
     public function testBuild_addContainer_WillCreateContainerWithAddedContainers()
     {
-        $container = Doubles\FakeContainer::new();
-
         $setup = $this->builder();
-        $setup->addContainer('test', $container);
-        $expected = new CompositeContainer($this->records([]), ['test' => $container]);
-        $this->assertEquals($expected, $setup->container());
+        $setup->addContainer('foo', $container = Doubles\FakeContainer::new());
+        $this->assertSame($container, $setup->container()->get('foo'));
     }
 
     public function testBuild_replaceContainer_WillCreateContainerWithReplacedContainers()
     {
-        $original = Doubles\FakeContainer::new(['A' => 'original']);
-        $replaced = Doubles\FakeContainer::new(['A' => 'replaced']);
-
-        $setup = $this->builder([], ['foo' => $original]);
-        $setup->replaceContainer('foo', $replaced);
-        $expected = new CompositeContainer($this->records(), ['foo' => $replaced]);
-        $this->assertEquals($expected, $setup->container());
+        $setup = $this->builder([], ['foo' => Doubles\FakeContainer::new()]);
+        $setup->replaceContainer('foo', $replaced = Doubles\FakeContainer::new());
+        $this->assertSame($replaced, $setup->container()->get('foo'));
     }
 
     public function testBuild_decoratorWithRecordId_ReturnsWrapperForGivenRecord()
