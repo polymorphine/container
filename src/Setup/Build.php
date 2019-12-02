@@ -18,7 +18,7 @@ use Polymorphine\Container\Setup\Entry\Wrapper;
 use Psr\Container\ContainerInterface;
 
 
-abstract class Build implements Collection
+class Build implements Collection
 {
     protected $records;
     protected $containers;
@@ -65,5 +65,8 @@ abstract class Build implements Collection
         return new Entry\Wrapper($id, $this->records[$id], new Entry\ReplaceEntry($id, $this));
     }
 
-    abstract protected function records(): Records;
+    protected function records(): Records
+    {
+        return new Records($this->records);
+    }
 }

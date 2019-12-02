@@ -39,7 +39,7 @@ class ValidatedBuildTest extends BuildTest
         $setup->addRecord('defined', Doubles\MockedRecord::new());
     }
 
-    public function testValidatedBuild_addContainerWithAlreadyDefinedId_ThrowsException()
+    public function testBuild_addContainerWithAlreadyDefinedId_ThrowsException()
     {
         $setup = $this->builder([], ['defined' => Doubles\FakeContainer::new()]);
         $this->expectException(Setup\Exception\IntegrityConstraintException::class);

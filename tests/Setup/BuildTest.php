@@ -19,7 +19,7 @@ use Polymorphine\Container\CompositeContainer;
 use Polymorphine\Container\Tests\Doubles;
 
 
-abstract class BuildTest extends TestCase
+class BuildTest extends TestCase
 {
     public function testBuild_container_ReturnsRecordContainerWithDefinedRecords()
     {
@@ -78,7 +78,13 @@ abstract class BuildTest extends TestCase
         $setup->decorator('bar');
     }
 
-    abstract protected function builder(array $records = [], array $containers = []): Setup\Build;
+    protected function builder(array $records = [], array $containers = []): Setup\Build
+    {
+        return new Setup\Build($records, $containers);
+    }
 
-    abstract protected function records(array $records = []): Records;
+    protected function records(array $records = []): Records
+    {
+        return new Records($records);
+    }
 }

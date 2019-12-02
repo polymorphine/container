@@ -33,7 +33,7 @@ class Setup
      */
     public static function basic(array $records = [], array $containers = []): self
     {
-        return new self(new Setup\Build\BasicBuild($records, $containers));
+        return new self(new Setup\Build($records, $containers));
     }
 
     /**
