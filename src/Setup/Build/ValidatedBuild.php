@@ -20,6 +20,9 @@ use Psr\Container\ContainerInterface;
 
 class ValidatedBuild extends Build
 {
+    private const ITEM_RECORD    = 'record';
+    private const ITEM_CONTAINER = 'container';
+
     private $reservedIds = [];
 
     public function __construct(array $records = [], array $containers = [])
@@ -31,30 +34,52 @@ class ValidatedBuild extends Build
     public function addRecord(string $id, Records\Record $record): void
     {
         $this->checkRecordId($id);
+        if (isset($this->records[$id])) {
+            $this->implicitOverwrite($id, self::ITEM_RECORD);
+        }
         parent::addRecord($id, $record);
     }
 
     public function addContainer(string $id, ContainerInterface $container): void
     {
         $this->checkContainerId($id);
+        if (isset($this->containers[$id])) {
+            $this->implicitOverwrite($id, self::ITEM_CONTAINER);
+        }
         parent::addContainer($id, $container);
     }
 
     public function replaceRecord(string $id, Records\Record $record): void
     {
         $this->checkRecordId($id);
+        if (!isset($this->records[$id])) {
+            $this->replaceUndefined($id, self::ITEM_RECORD);
+        }
         parent::replaceRecord($id, $record);
     }
 
     public function replaceContainer(string $id, ContainerInterface $container): void
     {
         $this->checkContainerId($id);
+        if (!isset($this->containers[$id])) {
+            $this->replaceUndefined($id, self::ITEM_CONTAINER);
+        }
         parent::replaceContainer($id, $container);
     }
 
     protected function records(): Records
     {
         return new Records\TrackedRecords($this->records);
+    }
+
+    protected function implicitOverwrite(string $id, string $item): void
+    {
+        throw Exception\IntegrityConstraintException::alreadyDefined("`$id` $item");
+    }
+
+    protected function replaceUndefined(string $id, string $item): void
+    {
+        throw Exception\IntegrityConstraintException::undefined("`$id` $item");
     }
 
     private function validateState()

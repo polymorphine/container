@@ -38,33 +38,21 @@ abstract class Build implements Collection
 
     public function addRecord(string $id, Records\Record $record): void
     {
-        if (isset($this->records[$id])) {
-            throw Exception\IntegrityConstraintException::alreadyDefined("`$id` record");
-        }
         $this->records[$id] = $record;
     }
 
     public function addContainer(string $id, ContainerInterface $container): void
     {
-        if (isset($this->containers[$id])) {
-            throw Exception\IntegrityConstraintException::alreadyDefined("`$id` container");
-        }
         $this->containers[$id] = $container;
     }
 
     public function replaceRecord(string $id, Records\Record $record): void
     {
-        if (!isset($this->records[$id])) {
-            throw Exception\IntegrityConstraintException::undefined("`$id` record");
-        }
         $this->records[$id] = $record;
     }
 
     public function replaceContainer(string $id, ContainerInterface $container): void
     {
-        if (!isset($this->containers[$id])) {
-            throw Exception\IntegrityConstraintException::undefined("`$id` container");
-        }
         $this->containers[$id] = $container;
     }
 
