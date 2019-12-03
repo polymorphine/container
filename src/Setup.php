@@ -22,7 +22,7 @@ class Setup
 
     public function __construct(Build $build = null)
     {
-        $this->build = $build;
+        $this->build = $build ?: new Setup\Build();
     }
 
     /**
