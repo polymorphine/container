@@ -71,6 +71,20 @@ class BuildTest extends TestCase
         $this->assertEquals($expected, $setup->decorator('foo'));
     }
 
+    public function testBuild_addRecordWithAlreadyDefinedId_ThrowsException()
+    {
+        $setup = $this->builder(['defined' => Doubles\MockedRecord::new()]);
+        $this->expectException(Setup\Exception\IntegrityConstraintException::class);
+        $setup->addRecord('defined', Doubles\MockedRecord::new());
+    }
+
+    public function testBuild_addContainerWithAlreadyDefinedId_ThrowsException()
+    {
+        $setup = $this->builder([], ['defined' => Doubles\FakeContainer::new()]);
+        $this->expectException(Setup\Exception\IntegrityConstraintException::class);
+        $setup->addContainer('defined', Doubles\FakeContainer::new());
+    }
+
     public function testBuild_decoratorForUndefinedRecord_ThrowsException()
     {
         $setup = $this->builder(['foo' => Doubles\MockedRecord::new('not decorated')]);

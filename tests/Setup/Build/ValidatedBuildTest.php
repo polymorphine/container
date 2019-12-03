@@ -32,20 +32,6 @@ class ValidatedBuildTest extends BuildTest
         $this->builder([], ['foo' => ExampleImpl::new()]);
     }
 
-    public function testValidatedBuild_addRecordWithAlreadyDefinedId_ThrowsException()
-    {
-        $setup = $this->builder(['defined' => Doubles\MockedRecord::new()]);
-        $this->expectException(Setup\Exception\IntegrityConstraintException::class);
-        $setup->addRecord('defined', Doubles\MockedRecord::new());
-    }
-
-    public function testBuild_addContainerWithAlreadyDefinedId_ThrowsException()
-    {
-        $setup = $this->builder([], ['defined' => Doubles\FakeContainer::new()]);
-        $this->expectException(Setup\Exception\IntegrityConstraintException::class);
-        $setup->addContainer('defined', Doubles\FakeContainer::new());
-    }
-
     public function testValidatedBuild_replaceRecordWithUndefinedId_ThrowsException()
     {
         $setup = $this->builder();

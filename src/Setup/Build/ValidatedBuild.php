@@ -20,9 +20,6 @@ use Psr\Container\ContainerInterface;
 
 class ValidatedBuild extends Build
 {
-    private const ITEM_RECORD    = 'record';
-    private const ITEM_CONTAINER = 'container';
-
     private $reservedIds = [];
 
     public function __construct(array $records = [], array $containers = [])
@@ -34,18 +31,12 @@ class ValidatedBuild extends Build
     public function addRecord(string $id, Records\Record $record): void
     {
         $this->checkRecordId($id);
-        if (isset($this->records[$id])) {
-            $this->implicitOverwrite($id, self::ITEM_RECORD);
-        }
         parent::addRecord($id, $record);
     }
 
     public function addContainer(string $id, ContainerInterface $container): void
     {
         $this->checkContainerId($id);
-        if (isset($this->containers[$id])) {
-            $this->implicitOverwrite($id, self::ITEM_CONTAINER);
-        }
         parent::addContainer($id, $container);
     }
 
@@ -53,7 +44,7 @@ class ValidatedBuild extends Build
     {
         $this->checkRecordId($id);
         if (!isset($this->records[$id])) {
-            $this->replaceUndefined($id, self::ITEM_RECORD);
+            $this->replaceUndefined($id, 'record');
         }
         parent::replaceRecord($id, $record);
     }
@@ -62,7 +53,7 @@ class ValidatedBuild extends Build
     {
         $this->checkContainerId($id);
         if (!isset($this->containers[$id])) {
-            $this->replaceUndefined($id, self::ITEM_CONTAINER);
+            $this->replaceUndefined($id, 'container');
         }
         parent::replaceContainer($id, $container);
     }
@@ -70,16 +61,6 @@ class ValidatedBuild extends Build
     protected function records(): Records
     {
         return new Records\TrackedRecords($this->records);
-    }
-
-    protected function implicitOverwrite(string $id, string $item): void
-    {
-        throw Exception\IntegrityConstraintException::alreadyDefined("`$id` $item");
-    }
-
-    protected function replaceUndefined(string $id, string $item): void
-    {
-        throw Exception\IntegrityConstraintException::undefined("`$id` $item");
     }
 
     private function validateState()
@@ -133,5 +114,10 @@ class ValidatedBuild extends Build
         if (isset($this->reservedIds[$id])) {
             throw Exception\IntegrityConstraintException::alreadyDefined("`$id` record (or record prefix)");
         }
+    }
+
+    private function replaceUndefined(string $id, string $item): void
+    {
+        throw Exception\IntegrityConstraintException::undefined("`$id` $item");
     }
 }
