@@ -23,25 +23,23 @@ class MockedBuild extends Build
     public $container;
     public $wrapper;
 
-    private $addedRecords       = [];
-    private $replacedRecords    = [];
-    private $addedContainers    = [];
-    private $replacedContainers = [];
+    public $setRecords    = [];
+    public $setContainers = [];
 
-    private $replace;
+    private $defined;
 
-    public static function added(): self
+    public static function defined(): self
     {
-        $object = new self();
-        $object->replace = false;
-        return $object;
+        $build = new self();
+        $build->defined = true;
+        return $build;
     }
 
-    public static function replaced(): self
+    public static function undefined(): self
     {
-        $object = new self();
-        $object->replace = true;
-        return $object;
+        $build = new self();
+        $build->defined = false;
+        return $build;
     }
 
     public function container(): ContainerInterface
@@ -49,39 +47,24 @@ class MockedBuild extends Build
         return $this->container = new FakeContainer();
     }
 
+    public function has(string $id): bool
+    {
+        return $this->defined ?? parent::has($id);
+    }
+
     public function decorator(string $id): Wrapper
     {
         return $this->wrapper = new Wrapper($id, new MockedRecord(), new ReplaceEntry($id, $this));
     }
 
-    public function recordChanges(): array
+    public function setRecord(string $id, Records\Record $record): void
     {
-        return $this->replace ? $this->replacedRecords : $this->addedRecords;
+        $this->setRecords[] = [$id, $record];
     }
 
-    public function containerChanges(): array
+    public function setContainer(string $id, ContainerInterface $container): void
     {
-        return $this->replace ? $this->replacedContainers : $this->addedContainers;
-    }
-
-    public function addRecord(string $id, Records\Record $record): void
-    {
-        $this->addedRecords[] = [$id, $record];
-    }
-
-    public function addContainer(string $id, ContainerInterface $container): void
-    {
-        $this->addedContainers[] = [$id, $container];
-    }
-
-    public function replaceRecord(string $id, Records\Record $record): void
-    {
-        $this->replacedRecords[] = [$id, $record];
-    }
-
-    public function replaceContainer(string $id, ContainerInterface $container): void
-    {
-        $this->replacedContainers[] = [$id, $container];
+        $this->setContainers[] = [$id, $container];
     }
 
     protected function records(): Records

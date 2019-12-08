@@ -28,34 +28,16 @@ class ValidatedBuild extends Build
         $this->validateState();
     }
 
-    public function addRecord(string $id, Records\Record $record): void
+    public function setRecord(string $id, Records\Record $record): void
     {
         $this->checkRecordId($id);
-        parent::addRecord($id, $record);
+        parent::setRecord($id, $record);
     }
 
-    public function addContainer(string $id, ContainerInterface $container): void
+    public function setContainer(string $id, ContainerInterface $container): void
     {
         $this->checkContainerId($id);
-        parent::addContainer($id, $container);
-    }
-
-    public function replaceRecord(string $id, Records\Record $record): void
-    {
-        $this->checkRecordId($id);
-        if (!isset($this->records[$id])) {
-            throw Exception\IntegrityConstraintException::undefined($id);
-        }
-        parent::replaceRecord($id, $record);
-    }
-
-    public function replaceContainer(string $id, ContainerInterface $container): void
-    {
-        $this->checkContainerId($id);
-        if (!isset($this->containers[$id])) {
-            throw Exception\IntegrityConstraintException::undefined($id);
-        }
-        parent::replaceContainer($id, $container);
+        parent::setContainer($id, $container);
     }
 
     protected function records(): Records

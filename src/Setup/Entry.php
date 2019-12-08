@@ -38,7 +38,11 @@ abstract class Entry
      *
      * @throws Exception\IntegrityConstraintException
      */
-    abstract public function record(Record $record): void;
+    public function record(Record $record): void
+    {
+        if (!$this->hasWriteAccess()) { return; }
+        $this->builder->setRecord($this->id, $record);
+    }
 
     /**
      * Sets ContainerInterface instance as sub-container that may
@@ -51,7 +55,11 @@ abstract class Entry
      *
      * @throws Exception\IntegrityConstraintException
      */
-    abstract public function container(ContainerInterface $container): void;
+    public function container(ContainerInterface $container): void
+    {
+        if (!$this->hasWriteAccess()) { return; }
+        $this->builder->setContainer($this->id, $container);
+    }
 
     /**
      * Adds ValueRecord with given value into container records.
@@ -140,4 +148,6 @@ abstract class Entry
     {
         $this->record(new Record\ProductRecord($factoryId, $method, ...$arguments));
     }
+
+    abstract protected function hasWriteAccess(): bool;
 }

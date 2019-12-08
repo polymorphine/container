@@ -39,29 +39,15 @@ class BuildTest extends TestCase
     public function testBuild_addRecord_WillCreateContainerWithAddedRecords()
     {
         $setup = $this->builder();
-        $setup->addRecord('foo', $added = Doubles\MockedRecord::new('added'));
+        $setup->setRecord('foo', $added = Doubles\MockedRecord::new('added'));
         $this->assertSame('added', $setup->container()->get('foo'));
-    }
-
-    public function testBuild_replaceRecord_WillCreateContainerWithReplacedRecords()
-    {
-        $setup = $this->builder(['foo' => Doubles\MockedRecord::new('original')]);
-        $setup->replaceRecord('foo', $replaced = Doubles\MockedRecord::new('replaced'));
-        $this->assertSame('replaced', $setup->container()->get('foo'));
     }
 
     public function testBuild_addContainer_WillCreateContainerWithAddedContainers()
     {
         $setup = $this->builder();
-        $setup->addContainer('foo', $container = Doubles\FakeContainer::new());
+        $setup->setContainer('foo', $container = Doubles\FakeContainer::new());
         $this->assertSame($container, $setup->container()->get('foo'));
-    }
-
-    public function testBuild_replaceContainer_WillCreateContainerWithReplacedContainers()
-    {
-        $setup = $this->builder([], ['foo' => Doubles\FakeContainer::new()]);
-        $setup->replaceContainer('foo', $replaced = Doubles\FakeContainer::new());
-        $this->assertSame($replaced, $setup->container()->get('foo'));
     }
 
     public function testBuild_decoratorWithRecordId_ReturnsWrapperForGivenRecord()
@@ -69,20 +55,6 @@ class BuildTest extends TestCase
         $setup    = $this->builder(['foo' => $record = Doubles\MockedRecord::new('not decorated')]);
         $expected = new Setup\Entry\Wrapper('foo', $record, new Setup\Entry\ReplaceEntry('foo', $setup));
         $this->assertEquals($expected, $setup->decorator('foo'));
-    }
-
-    public function testBuild_addRecordWithAlreadyDefinedId_ThrowsException()
-    {
-        $setup = $this->builder(['defined' => Doubles\MockedRecord::new()]);
-        $this->expectException(Setup\Exception\IntegrityConstraintException::class);
-        $setup->addRecord('defined', Doubles\MockedRecord::new());
-    }
-
-    public function testBuild_addContainerWithAlreadyDefinedId_ThrowsException()
-    {
-        $setup = $this->builder([], ['defined' => Doubles\FakeContainer::new()]);
-        $this->expectException(Setup\Exception\IntegrityConstraintException::class);
-        $setup->addContainer('defined', Doubles\FakeContainer::new());
     }
 
     public function testBuild_decoratorForUndefinedRecord_ThrowsException()

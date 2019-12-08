@@ -17,35 +17,9 @@ use Psr\Container\ContainerInterface;
 
 interface Collection
 {
-    /**
-     * @param string         $id
-     * @param Records\Record $record
-     *
-     * @throws Exception\IntegrityConstraintException
-     */
-    public function addRecord(string $id, Records\Record $record): void;
+    public function has(string $id): bool;
 
-    /**
-     * @param string             $id
-     * @param ContainerInterface $container
-     *
-     * @throws Exception\IntegrityConstraintException
-     */
-    public function addContainer(string $id, ContainerInterface $container): void;
+    public function setRecord(string $id, Records\Record $record): void;
 
-    /**
-     * @param string         $id
-     * @param Records\Record $record
-     *
-     * @throws Exception\IntegrityConstraintException
-     */
-    public function replaceRecord(string $id, Records\Record $record): void;
-
-    /**
-     * @param string             $id
-     * @param ContainerInterface $container
-     *
-     * @throws Exception\IntegrityConstraintException
-     */
-    public function replaceContainer(string $id, ContainerInterface $container): void;
+    public function setContainer(string $id, ContainerInterface $container): void;
 }

@@ -11,20 +11,18 @@
 
 namespace Polymorphine\Container\Setup\Entry;
 
-use Polymorphine\Container\Records\Record;
 use Polymorphine\Container\Setup\Entry;
-use Psr\Container\ContainerInterface;
+use Polymorphine\Container\Setup\Exception;
 
 
 class AddEntry extends Entry
 {
-    public function record(Record $record): void
+    protected function hasWriteAccess(): bool
     {
-        $this->builder->addRecord($this->id, $record);
-    }
+        if ($this->builder->has($this->id)) {
+            throw Exception\IntegrityConstraintException::alreadyDefined($this->id);
+        }
 
-    public function container(ContainerInterface $container): void
-    {
-        $this->builder->addContainer($this->id, $container);
+        return true;
     }
 }

@@ -36,28 +36,17 @@ class Build implements Collection
             : new RecordContainer($this->records());
     }
 
-    public function addRecord(string $id, Records\Record $record): void
+    public function has(string $id): bool
     {
-        if (isset($this->records[$id])) {
-            throw Exception\IntegrityConstraintException::alreadyDefined($id);
-        }
-        $this->records[$id] = $record;
+        return isset($this->records[$id]) || isset($this->containers[$id]);
     }
 
-    public function addContainer(string $id, ContainerInterface $container): void
-    {
-        if (isset($this->containers[$id])) {
-            throw Exception\IntegrityConstraintException::alreadyDefined($id);
-        }
-        $this->containers[$id] = $container;
-    }
-
-    public function replaceRecord(string $id, Records\Record $record): void
+    public function setRecord(string $id, Records\Record $record): void
     {
         $this->records[$id] = $record;
     }
 
-    public function replaceContainer(string $id, ContainerInterface $container): void
+    public function setContainer(string $id, ContainerInterface $container): void
     {
         $this->containers[$id] = $container;
     }

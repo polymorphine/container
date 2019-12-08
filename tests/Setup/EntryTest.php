@@ -31,13 +31,13 @@ abstract class EntryTest extends TestCase
     {
         $setup = $this->builder();
         $entry = $this->entry('foo', $setup);
-        $this->assertSame([], $setup->recordChanges());
+        $this->assertSame([], $setup->setRecords);
         $entry->record($fooRecord = Doubles\MockedRecord::new());
-        $this->assertSame([['foo', $fooRecord]], $setup->recordChanges());
+        $this->assertSame([['foo', $fooRecord]], $setup->setRecords);
 
         $entry = $this->entry('bar', $setup);
         $entry->record($barRecord = Doubles\MockedRecord::new());
-        $this->assertSame([['foo', $fooRecord], ['bar', $barRecord]], $setup->recordChanges());
+        $this->assertSame([['foo', $fooRecord], ['bar', $barRecord]], $setup->setRecords);
     }
 
     public function testEntry_value_SetsSetupValueRecord()
@@ -47,7 +47,7 @@ abstract class EntryTest extends TestCase
 
         $entry->value('bar');
         $record = new Record\ValueRecord('bar');
-        $this->assertEquals([['foo', $record]], $setup->recordChanges());
+        $this->assertEquals([['foo', $record]], $setup->setRecords);
     }
 
     public function testEntry_callback_SetsSetupValueRecord()
@@ -60,7 +60,7 @@ abstract class EntryTest extends TestCase
 
         $entry->callback($callback);
         $record = new Record\CallbackRecord($callback);
-        $this->assertEquals([['foo', $record]], $changes = $setup->recordChanges());
+        $this->assertEquals([['foo', $record]], $changes = $setup->setRecords);
 
         /** @var Record $record */
         $record = $changes[0][1];
@@ -74,7 +74,7 @@ abstract class EntryTest extends TestCase
 
         $entry->instance(ExampleImpl::class, 'foo', 'bar');
         $record = new Record\InstanceRecord(ExampleImpl::class, 'foo', 'bar');
-        $this->assertEquals([['foo', $record]], $setup->recordChanges());
+        $this->assertEquals([['foo', $record]], $setup->setRecords);
     }
 
     public function testEntry_product_SetsSetupValueRecord()
@@ -84,7 +84,7 @@ abstract class EntryTest extends TestCase
 
         $entry->product('factory.id', 'create', 'bar', 'baz');
         $record = new Record\ProductRecord('factory.id', 'create', 'bar', 'baz');
-        $this->assertEquals([['foo', $record]], $setup->recordChanges());
+        $this->assertEquals([['foo', $record]], $setup->setRecords);
     }
 
     public function testEntry_wrappedInstance_SetsSetupValueRecord()
@@ -100,7 +100,7 @@ abstract class EntryTest extends TestCase
             [DecoratorExample::class, ['foo', 'baz']],
             [DecoratorExample::class, ['qux', 'foo']]
         ]);
-        $this->assertEquals([['foo', $record]], $setup->recordChanges());
+        $this->assertEquals([['foo', $record]], $setup->setRecords);
     }
 
     public function testEntry_wrappedInstanceWithNoReferenceToWrappedObject_ThrowsException()
@@ -118,17 +118,17 @@ abstract class EntryTest extends TestCase
         $setup = $this->builder();
         $entry = $this->entry('foo', $setup);
 
-        $this->assertSame([], $setup->containerChanges());
+        $this->assertSame([], $setup->setContainers);
 
         $fooContainer = Doubles\FakeContainer::new();
         $entry->container($fooContainer);
-        $this->assertSame([['foo', $fooContainer]], $setup->containerChanges());
+        $this->assertSame([['foo', $fooContainer]], $setup->setContainers);
 
         $entry = $this->entry('bar', $setup);
 
         $barContainer = Doubles\FakeContainer::new();
         $entry->container($barContainer);
-        $this->assertSame([['foo', $fooContainer], ['bar', $barContainer]], $setup->containerChanges());
+        $this->assertSame([['foo', $fooContainer], ['bar', $barContainer]], $setup->setContainers);
     }
 
     abstract protected function builder(): Doubles\MockedBuild;

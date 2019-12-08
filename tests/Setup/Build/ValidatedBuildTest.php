@@ -32,25 +32,11 @@ class ValidatedBuildTest extends BuildTest
         $this->builder([], ['foo' => ExampleImpl::new()]);
     }
 
-    public function testValidatedBuild_replaceRecordWithUndefinedId_ThrowsException()
-    {
-        $setup = $this->builder();
-        $this->expectException(Setup\Exception\IntegrityConstraintException::class);
-        $setup->replaceRecord('undefined', Doubles\MockedRecord::new());
-    }
-
-    public function testValidatedBuild_replaceContainerWithUndefinedId_ThrowsException()
-    {
-        $setup = $this->builder();
-        $this->expectException(Setup\Exception\IntegrityConstraintException::class);
-        $setup->replaceContainer('undefined', Doubles\FakeContainer::new());
-    }
-
     public function testValidatedBuild_addRecordWithDefinedContainerId_ThrowsException()
     {
         $setup = $this->builder([], ['defined' => Doubles\FakeContainer::new()]);
         $this->expectException(Setup\Exception\IntegrityConstraintException::class);
-        $setup->addRecord('defined', Doubles\MockedRecord::new());
+        $setup->setRecord('defined', Doubles\MockedRecord::new());
     }
 
     public function testValidatedBuild_InvalidContainerId_ThrowsException()
@@ -69,14 +55,14 @@ class ValidatedBuildTest extends BuildTest
     {
         $setup = $this->builder(['foo.bar' => Doubles\MockedRecord::new()]);
         $this->expectException(Setup\Exception\IntegrityConstraintException::class);
-        $setup->addContainer('foo', Doubles\FakeContainer::new());
+        $setup->setContainer('foo', Doubles\FakeContainer::new());
     }
 
     public function testValidatedBuild_addRecordMethodWithDefinedContainerPrefix_ThrowsException()
     {
         $setup = $this->builder([], ['defined' => Doubles\FakeContainer::new()]);
         $this->expectException(Setup\Exception\IntegrityConstraintException::class);
-        $setup->addRecord('defined.record', Doubles\MockedRecord::new());
+        $setup->setRecord('defined.record', Doubles\MockedRecord::new());
     }
 
     protected function builder(array $records = [], array $containers = []): Setup\Build

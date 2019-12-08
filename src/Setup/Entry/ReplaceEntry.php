@@ -11,20 +11,18 @@
 
 namespace Polymorphine\Container\Setup\Entry;
 
-use Polymorphine\Container\Records\Record;
 use Polymorphine\Container\Setup\Entry;
-use Psr\Container\ContainerInterface;
+use Polymorphine\Container\Setup\Exception;
 
 
 class ReplaceEntry extends Entry
 {
-    public function record(Record $record): void
+    protected function hasWriteAccess(): bool
     {
-        $this->builder->replaceRecord($this->id, $record);
-    }
+        if (!$this->builder->has($this->id)) {
+            throw Exception\IntegrityConstraintException::undefined($this->id);
+        }
 
-    public function container(ContainerInterface $container): void
-    {
-        $this->builder->replaceContainer($this->id, $container);
+        return true;
     }
 }

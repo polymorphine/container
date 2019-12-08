@@ -13,11 +13,28 @@ namespace Polymorphine\Container\Tests\Setup\Entry;
 
 use Polymorphine\Container\Tests\Setup\EntryTest;
 use Polymorphine\Container\Setup\Entry;
+use Polymorphine\Container\Setup\Exception;
 use Polymorphine\Container\Tests\Doubles;
 
 
 class AddEntryTest extends EntryTest
 {
+    public function testAddEntryWithDefinedId_container_ThrowsException()
+    {
+        $setup = Doubles\MockedBuild::defined();
+        $entry = $this->entry('foo', $setup);
+        $this->expectException(Exception\IntegrityConstraintException::class);
+        $entry->container(Doubles\FakeContainer::new());
+    }
+
+    public function testAddEntryWithDefinedId_record_ThrowsException()
+    {
+        $setup = Doubles\MockedBuild::defined();
+        $entry = $this->entry('foo', $setup);
+        $this->expectException(Exception\IntegrityConstraintException::class);
+        $entry->record(Doubles\MockedRecord::new());
+    }
+
     protected function entry(string $id, Doubles\MockedBuild $build = null): Entry
     {
         return new Entry\AddEntry($id, $build ?? $this->builder());
@@ -25,6 +42,6 @@ class AddEntryTest extends EntryTest
 
     protected function builder(): Doubles\MockedBuild
     {
-        return Doubles\MockedBuild::added();
+        return new Doubles\MockedBuild();
     }
 }
