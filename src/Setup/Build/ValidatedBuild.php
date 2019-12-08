@@ -44,7 +44,7 @@ class ValidatedBuild extends Build
     {
         $this->checkRecordId($id);
         if (!isset($this->records[$id])) {
-            $this->replaceUndefined($id, 'record');
+            throw Exception\IntegrityConstraintException::undefined($id);
         }
         parent::replaceRecord($id, $record);
     }
@@ -53,7 +53,7 @@ class ValidatedBuild extends Build
     {
         $this->checkContainerId($id);
         if (!isset($this->containers[$id])) {
-            $this->replaceUndefined($id, 'container');
+            throw Exception\IntegrityConstraintException::undefined($id);
         }
         parent::replaceContainer($id, $container);
     }
@@ -85,7 +85,7 @@ class ValidatedBuild extends Build
     private function checkRecordId(string $id): void
     {
         if (isset($this->containers[$id])) {
-            throw Exception\IntegrityConstraintException::alreadyDefined("`$id` container");
+            throw Exception\IntegrityConstraintException::alreadyDefined($id);
         }
 
         $separator = strpos($id, CompositeContainer::SEPARATOR);
@@ -112,12 +112,7 @@ class ValidatedBuild extends Build
         }
 
         if (isset($this->reservedIds[$id])) {
-            throw Exception\IntegrityConstraintException::alreadyDefined("`$id` record (or record prefix)");
+            throw Exception\IntegrityConstraintException::alreadyDefined($id);
         }
-    }
-
-    private function replaceUndefined(string $id, string $item): void
-    {
-        throw Exception\IntegrityConstraintException::undefined("`$id` $item");
     }
 }

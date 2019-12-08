@@ -39,7 +39,7 @@ class Build implements Collection
     public function addRecord(string $id, Records\Record $record): void
     {
         if (isset($this->records[$id])) {
-            $this->implicitOverwrite($id, 'record');
+            throw Exception\IntegrityConstraintException::alreadyDefined($id);
         }
         $this->records[$id] = $record;
     }
@@ -47,7 +47,7 @@ class Build implements Collection
     public function addContainer(string $id, ContainerInterface $container): void
     {
         if (isset($this->containers[$id])) {
-            $this->implicitOverwrite($id, 'container');
+            throw Exception\IntegrityConstraintException::alreadyDefined($id);
         }
         $this->containers[$id] = $container;
     }
@@ -74,10 +74,5 @@ class Build implements Collection
     protected function records(): Records
     {
         return new Records($this->records);
-    }
-
-    protected function implicitOverwrite(string $id, string $item): void
-    {
-        throw Exception\IntegrityConstraintException::alreadyDefined("`$id` $item");
     }
 }
