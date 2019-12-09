@@ -117,16 +117,16 @@ class Entry
      * add ComposedInstanceRecord to container records.
      *
      * @see Record\InstanceRecord
-     * @see Entry\Wrapper
+     * @see Wrapper
      *
      * @param string $className
      * @param string ...$dependencies
      *
-     * @return Entry\Wrapper
+     * @return Wrapper
      */
-    public function wrappedInstance(string $className, string ...$dependencies): Entry\Wrapper
+    public function wrappedInstance(string $className, string ...$dependencies): Wrapper
     {
-        return new Entry\Wrapper($this->id, new Record\InstanceRecord($className, ...$dependencies), $this);
+        return new Wrapper($this->id, new Record\InstanceRecord($className, ...$dependencies), $this);
     }
 
     /**

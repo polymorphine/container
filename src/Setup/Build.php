@@ -14,7 +14,6 @@ namespace Polymorphine\Container\Setup;
 use Polymorphine\Container\RecordContainer;
 use Polymorphine\Container\CompositeContainer;
 use Polymorphine\Container\Records;
-use Polymorphine\Container\Setup\Entry\Wrapper;
 use Psr\Container\ContainerInterface;
 
 
@@ -57,7 +56,7 @@ class Build implements Collection
             throw Exception\IntegrityConstraintException::undefined($id);
         }
 
-        return new Entry\Wrapper($id, $this->records[$id], new Entry($id, $this));
+        return new Wrapper($id, $this->records[$id], new Entry($id, $this));
     }
 
     protected function records(): Records

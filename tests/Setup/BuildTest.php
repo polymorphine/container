@@ -71,7 +71,7 @@ class BuildTest extends TestCase
     public function testBuild_decoratorWithRecordId_ReturnsWrapperForGivenRecord()
     {
         $setup    = $this->builder(['foo' => $record = Doubles\MockedRecord::new('not decorated')]);
-        $expected = new Setup\Entry\Wrapper('foo', $record, new Setup\Entry('foo', $setup));
+        $expected = new Setup\Wrapper('foo', $record, new Setup\Entry('foo', $setup));
         $this->assertEquals($expected, $setup->decorator('foo'));
     }
 

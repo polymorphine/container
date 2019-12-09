@@ -14,7 +14,7 @@ namespace Polymorphine\Container\Tests\Doubles;
 use Polymorphine\Container\Records;
 use Polymorphine\Container\Setup\Build;
 use Polymorphine\Container\Setup\Entry;
-use Polymorphine\Container\Setup\Entry\Wrapper;
+use Polymorphine\Container\Setup\Wrapper;
 use Psr\Container\ContainerInterface;
 
 

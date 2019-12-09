@@ -208,7 +208,7 @@ probably using container too extensively (see [recommended use](#recommended-use
 #### Composed entries
 ##### Record composition using Wrapper
 Entry may be built with multiple instance descriptors (same parameters as `InstanceRecord` uses)
-given in chained [`Wrapper`](src/Setup/Entry/Wrapper.php) calls:
+given in chained [`Wrapper`](src/Setup/Wrapper.php) calls:
 ```php
 $setup->add('A')
       ->wrappedInstance(SomeClass::class, 'B', 'C')

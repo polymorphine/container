@@ -115,9 +115,9 @@ class Setup
      *
      * @throws Exception\IntegrityConstraintException
      *
-     * @return Setup\Entry\Wrapper
+     * @return Setup\Wrapper
      */
-    public function decorate(string $id): Entry\Wrapper
+    public function decorate(string $id): Setup\Wrapper
     {
         return $this->build->decorator($id);
     }
