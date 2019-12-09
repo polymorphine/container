@@ -30,18 +30,32 @@ class SetupTest extends TestCase
         $this->assertSame($setup->container(), $build->container);
     }
 
-    public function testSetup_add_ReturnsAddEntryObject()
+    public function testSetup_addUndefinedId_ReturnsEntryObject()
     {
-        $setup    = $this->builder($build);
-        $expected = new Setup\Entry\AddEntry('foo', $build);
+        $setup    = new Setup($build = Doubles\MockedBuild::undefined());
+        $expected = new Setup\Entry('foo', $build);
         $this->assertEquals($expected, $setup->add('foo'));
     }
 
-    public function testSetup_replace_ReturnsReplaceEntryObject()
+    public function testSetup_addDefinedId_ThrowsException()
     {
-        $setup    = $this->builder($build);
-        $expected = new Setup\Entry\ReplaceEntry('foo', $build);
+        $setup = new Setup($build = Doubles\MockedBuild::defined());
+        $this->expectException(Setup\Exception\IntegrityConstraintException::class);
+        $setup->add('foo');
+    }
+
+    public function testSetup_replaceDefinedId_ReturnsEntryObject()
+    {
+        $setup    = new Setup($build = Doubles\MockedBuild::defined());
+        $expected = new Setup\Entry('foo', $build);
         $this->assertEquals($expected, $setup->replace('foo'));
+    }
+
+    public function testSetup_replaceUndefinedId_ThrowsException()
+    {
+        $setup = new Setup($build = Doubles\MockedBuild::undefined());
+        $this->expectException(Setup\Exception\IntegrityConstraintException::class);
+        $setup->replace('foo');
     }
 
     public function testSetup_decorate_ReturnsReplacingWrapper()

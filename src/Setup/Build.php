@@ -57,7 +57,7 @@ class Build implements Collection
             throw Exception\IntegrityConstraintException::undefined($id);
         }
 
-        return new Entry\Wrapper($id, $this->records[$id], new Entry\ReplaceEntry($id, $this));
+        return new Entry\Wrapper($id, $this->records[$id], new Entry($id, $this));
     }
 
     protected function records(): Records

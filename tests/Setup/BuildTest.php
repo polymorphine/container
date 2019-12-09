@@ -23,16 +23,16 @@ class BuildTest extends TestCase
 {
     public function testBuild_container_ReturnsRecordContainerWithDefinedRecords()
     {
-        $records = ['foo' => Doubles\MockedRecord::new()];
-        $setup   = $this->builder($records);
+        $setup = $this->builder($records = ['foo' => Doubles\MockedRecord::new()]);
         $this->assertEquals(new RecordContainer($this->records($records)), $setup->container());
     }
 
     public function testBuildWithSubContainers_container_ReturnsCompositeContainer()
     {
-        $records    = ['foo' => Doubles\MockedRecord::new()];
-        $containers = ['bar' => Doubles\FakeContainer::new()];
-        $setup      = $this->builder($records, $containers);
+        $setup = $this->builder(
+            $records = ['foo' => Doubles\MockedRecord::new()],
+            $containers = ['bar' => Doubles\FakeContainer::new()]
+        );
         $this->assertEquals(new CompositeContainer($this->records($records), $containers), $setup->container());
     }
 
@@ -50,10 +50,28 @@ class BuildTest extends TestCase
         $this->assertSame($container, $setup->container()->get('foo'));
     }
 
+    public function testBuild_has_ReturnsTrueForDefinedIds()
+    {
+        $setup = $this->builder(
+            ['record' => Doubles\MockedRecord::new()],
+            ['container' => Doubles\FakeContainer::new()]
+        );
+        $setup->setRecord('addedRecord', Doubles\MockedRecord::new());
+        $setup->setContainer('addedContainer', Doubles\FakeContainer::new());
+
+        $this->assertTrue($setup->has('record'));
+        $this->assertTrue($setup->has('container'));
+        $this->assertTrue($setup->has('addedRecord'));
+        $this->assertTrue($setup->has('addedContainer'));
+
+        $this->assertFalse($setup->has('undefined'));
+        $this->assertFalse($setup->has('Record'));
+    }
+
     public function testBuild_decoratorWithRecordId_ReturnsWrapperForGivenRecord()
     {
         $setup    = $this->builder(['foo' => $record = Doubles\MockedRecord::new('not decorated')]);
-        $expected = new Setup\Entry\Wrapper('foo', $record, new Setup\Entry\ReplaceEntry('foo', $setup));
+        $expected = new Setup\Entry\Wrapper('foo', $record, new Setup\Entry('foo', $setup));
         $this->assertEquals($expected, $setup->decorator('foo'));
     }
 

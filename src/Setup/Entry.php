@@ -19,7 +19,7 @@ use Psr\Container\ContainerInterface;
  * Write-only proxy with helper methods to instantiate and set
  * Record implementations for given Container item identifier.
  */
-abstract class Entry
+class Entry
 {
     protected $id;
     protected $builder;
@@ -40,7 +40,6 @@ abstract class Entry
      */
     public function record(Record $record): void
     {
-        if (!$this->hasWriteAccess()) { return; }
         $this->builder->setRecord($this->id, $record);
     }
 
@@ -57,7 +56,6 @@ abstract class Entry
      */
     public function container(ContainerInterface $container): void
     {
-        if (!$this->hasWriteAccess()) { return; }
         $this->builder->setContainer($this->id, $container);
     }
 
@@ -148,6 +146,4 @@ abstract class Entry
     {
         $this->record(new Record\ProductRecord($factoryId, $method, ...$arguments));
     }
-
-    abstract protected function hasWriteAccess(): bool;
 }

@@ -13,7 +13,7 @@ namespace Polymorphine\Container\Tests\Doubles;
 
 use Polymorphine\Container\Records;
 use Polymorphine\Container\Setup\Build;
-use Polymorphine\Container\Setup\Entry\ReplaceEntry;
+use Polymorphine\Container\Setup\Entry;
 use Polymorphine\Container\Setup\Entry\Wrapper;
 use Psr\Container\ContainerInterface;
 
@@ -54,7 +54,7 @@ class MockedBuild extends Build
 
     public function decorator(string $id): Wrapper
     {
-        return $this->wrapper = new Wrapper($id, new MockedRecord(), new ReplaceEntry($id, $this));
+        return $this->wrapper = new Wrapper($id, new MockedRecord(), new Entry($id, $this));
     }
 
     public function setRecord(string $id, Records\Record $record): void

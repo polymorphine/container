@@ -13,6 +13,7 @@ namespace Polymorphine\Container;
 
 use Polymorphine\Container\Setup\Build;
 use Polymorphine\Container\Setup\Entry;
+use Polymorphine\Container\Setup\Exception;
 use Psr\Container\ContainerInterface;
 
 
@@ -62,29 +63,39 @@ class Setup
     }
 
     /**
-     * Returns Entry object able to add new data to container configuration
+     * Returns Entry object adding new data to container configuration
      * for given identifier.
      *
      * @param string $id
+     *
+     * @throws Exception\IntegrityConstraintException
      *
      * @return Setup\Entry
      */
     public function add(string $id): Entry
     {
-        return new Entry\AddEntry($id, $this->build);
+        if ($this->build->has($id)) {
+            throw Exception\IntegrityConstraintException::alreadyDefined($id);
+        }
+        return new Entry($id, $this->build);
     }
 
     /**
-     * Returns Entry object able to replace data in container configuration
+     * Returns Entry object replacing data in container configuration
      * for given identifier.
      *
      * @param string $id
+     *
+     * @throws Exception\IntegrityConstraintException
      *
      * @return Setup\Entry
      */
     public function replace(string $id): Entry
     {
-        return new Entry\ReplaceEntry($id, $this->build);
+        if (!$this->build->has($id)) {
+            throw Exception\IntegrityConstraintException::undefined($id);
+        }
+        return new Entry($id, $this->build);
     }
 
     /**
@@ -102,7 +113,7 @@ class Setup
      *
      * @param string $id
      *
-     * @throws Setup\Exception\IntegrityConstraintException
+     * @throws Exception\IntegrityConstraintException
      *
      * @return Setup\Entry\Wrapper
      */
