@@ -39,7 +39,7 @@ class SetupTest extends TestCase
 
     public function testSetup_addDefinedId_ThrowsException()
     {
-        $setup = new Setup($build = Doubles\MockedBuild::defined());
+        $setup = new Setup(Doubles\MockedBuild::defined());
         $this->expectException(Setup\Exception\IntegrityConstraintException::class);
         $setup->add('foo');
     }
@@ -53,9 +53,20 @@ class SetupTest extends TestCase
 
     public function testSetup_replaceUndefinedId_ThrowsException()
     {
-        $setup = new Setup($build = Doubles\MockedBuild::undefined());
+        $setup = new Setup(Doubles\MockedBuild::undefined());
         $this->expectException(Setup\Exception\IntegrityConstraintException::class);
         $setup->replace('foo');
+    }
+
+    public function testSetup_setAnyIdentifier_ReturnsEntryObject()
+    {
+        $setup    = new Setup($build = Doubles\MockedBuild::undefined());
+        $expected = new Setup\Entry('foo', $build);
+        $this->assertEquals($expected, $setup->set('foo'));
+
+        $setup    = new Setup($build = Doubles\MockedBuild::defined());
+        $expected = new Setup\Entry('foo', $build);
+        $this->assertEquals($expected, $setup->set('foo'));
     }
 
     public function testSetup_decorate_ReturnsReplacingWrapper()
