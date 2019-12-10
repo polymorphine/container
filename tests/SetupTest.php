@@ -58,7 +58,7 @@ class SetupTest extends TestCase
         $setup->replace('foo');
     }
 
-    public function testSetup_setAnyIdentifier_ReturnsEntryObject()
+    public function testSetup_setForAnyIdentifier_ReturnsEntryObject()
     {
         $setup    = new Setup($build = Doubles\MockedBuild::undefined());
         $expected = new Setup\Entry('foo', $build);
@@ -67,6 +67,21 @@ class SetupTest extends TestCase
         $setup    = new Setup($build = Doubles\MockedBuild::defined());
         $expected = new Setup\Entry('foo', $build);
         $this->assertEquals($expected, $setup->set('foo'));
+    }
+
+    public function testSetup_fallbackForDefinedId_ReturnsInactiveEntryObject()
+    {
+        $setup    = new Setup($build = Doubles\MockedBuild::defined());
+        $expected = new Setup\Entry('foo', $build);
+        $this->assertNotEquals($expected, $entry = $setup->fallback('foo'));
+        $this->assertInstanceOf(Setup\Entry::class, $entry);
+    }
+
+    public function testSetup_fallbackForUndefinedId_ReturnsEntryObject()
+    {
+        $setup    = new Setup($build = Doubles\MockedBuild::undefined());
+        $expected = new Setup\Entry('foo', $build);
+        $this->assertEquals($expected, $setup->fallback('foo'));
     }
 
     public function testSetup_decorate_ReturnsReplacingWrapper()

@@ -114,6 +114,21 @@ class Setup
     }
 
     /**
+     * Returns Entry object adding new container configuration data
+     * for given identifier. For already defined identifiers returned
+     * entry will not change configuration.
+     *
+     * @param string $id
+     *
+     * @return Setup\Entry
+     */
+    public function fallback(string $id): Entry
+    {
+        $build = $this->build->has($id) ? new Build() : $this->build;
+        return new Entry($id, $build);
+    }
+
+    /**
      * Returns Wrapper object able to decorate existing Record and replacing
      * it with composition of InstanceRecords using given id as a reference
      * to one of their dependencies (reference to itself).
