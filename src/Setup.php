@@ -82,14 +82,14 @@ class Setup
      *
      * @param string $id
      *
-     * @throws Exception\IntegrityConstraintException
+     * @throws Exception\OverwriteRuleException
      *
      * @return Setup\Entry
      */
     public function add(string $id): Entry
     {
         if ($this->build->has($id)) {
-            throw Exception\IntegrityConstraintException::alreadyDefined($id);
+            throw Exception\OverwriteRuleException::alreadyDefined($id);
         }
         return new Entry($id, $this->build);
     }
@@ -101,14 +101,14 @@ class Setup
      *
      * @param string $id
      *
-     * @throws Exception\IntegrityConstraintException
+     * @throws Exception\OverwriteRuleException
      *
      * @return Setup\Entry
      */
     public function replace(string $id): Entry
     {
         if (!$this->build->has($id)) {
-            throw Exception\IntegrityConstraintException::undefined($id);
+            throw Exception\OverwriteRuleException::undefined($id);
         }
         return new Entry($id, $this->build);
     }
@@ -143,7 +143,7 @@ class Setup
      *
      * @param string $id
      *
-     * @throws Exception\IntegrityConstraintException
+     * @throws Exception\OverwriteRuleException
      *
      * @return Setup\Wrapper
      */

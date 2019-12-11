@@ -53,7 +53,7 @@ class Build implements Collection
     public function decorator(string $id): Wrapper
     {
         if (!isset($this->records[$id])) {
-            throw Exception\IntegrityConstraintException::undefined($id);
+            throw Exception\OverwriteRuleException::undefined($id);
         }
 
         return new Wrapper($id, $this->records[$id], new Entry($id, $this));

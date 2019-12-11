@@ -78,7 +78,7 @@ class BuildTest extends TestCase
     public function testBuild_decoratorForUndefinedRecord_ThrowsException()
     {
         $setup = $this->builder(['foo' => Doubles\MockedRecord::new('not decorated')]);
-        $this->expectException(Setup\Exception\IntegrityConstraintException::class);
+        $this->expectException(Setup\Exception\OverwriteRuleException::class);
         $setup->decorator('bar');
     }
 

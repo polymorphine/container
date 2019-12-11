@@ -31,11 +31,6 @@ class IntegrityConstraintException extends LogicException
         return new self("Container id cannot contain `$separator` separator - `$id` id given");
     }
 
-    public static function undefined(string $id): self
-    {
-        return new self("Cannot change undefined `$id` entry");
-    }
-
     public static function missingReference(string $id)
     {
         return new self("Wrapped `$id` entry should be referenced by decorating object");

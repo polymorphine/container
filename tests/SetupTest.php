@@ -40,7 +40,7 @@ class SetupTest extends TestCase
     public function testSetup_addDefinedId_ThrowsException()
     {
         $setup = new Setup(Doubles\MockedBuild::defined());
-        $this->expectException(Setup\Exception\IntegrityConstraintException::class);
+        $this->expectException(Setup\Exception\OverwriteRuleException::class);
         $setup->add('foo');
     }
 
@@ -54,7 +54,7 @@ class SetupTest extends TestCase
     public function testSetup_replaceUndefinedId_ThrowsException()
     {
         $setup = new Setup(Doubles\MockedBuild::undefined());
-        $this->expectException(Setup\Exception\IntegrityConstraintException::class);
+        $this->expectException(Setup\Exception\OverwriteRuleException::class);
         $setup->replace('foo');
     }
 
