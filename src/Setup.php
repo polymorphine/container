@@ -63,19 +63,6 @@ class Setup
     }
 
     /**
-     * Returns Entry object setting (add or replace) container configuration
-     * data for given identifier. No overwriting constraints are applied.
-     *
-     * @param string $id
-     *
-     * @return Setup\Entry
-     */
-    public function set(string $id): Entry
-    {
-        return new Entry($id, $this->build);
-    }
-
-    /**
      * Returns Entry object adding new container configuration data
      * for given identifier. For already defined identifiers Exception
      * will be thrown.

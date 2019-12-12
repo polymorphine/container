@@ -58,17 +58,6 @@ class SetupTest extends TestCase
         $setup->replace('foo');
     }
 
-    public function testSetup_setForAnyIdentifier_ReturnsEntryObject()
-    {
-        $setup    = new Setup($build = Doubles\MockedBuild::undefined());
-        $expected = new Setup\Entry('foo', $build);
-        $this->assertEquals($expected, $setup->set('foo'));
-
-        $setup    = new Setup($build = Doubles\MockedBuild::defined());
-        $expected = new Setup\Entry('foo', $build);
-        $this->assertEquals($expected, $setup->set('foo'));
-    }
-
     public function testSetup_fallbackForDefinedId_ReturnsInactiveEntryObject()
     {
         $setup    = new Setup($build = Doubles\MockedBuild::defined());
