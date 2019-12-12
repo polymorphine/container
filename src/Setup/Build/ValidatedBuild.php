@@ -24,8 +24,7 @@ class ValidatedBuild extends Build
 
     public function __construct(array $records = [], array $containers = [])
     {
-        parent::__construct($records, $containers);
-        $this->validateState();
+        parent::__construct($this->validRecords($records), $this->validContainers($containers));
     }
 
     public function setRecord(string $id, Records\Record $record): void
@@ -45,25 +44,6 @@ class ValidatedBuild extends Build
         return new Records\TrackedRecords($this->records);
     }
 
-    private function validateState()
-    {
-        foreach ($this->records as $id => $record) {
-            $this->checkRecord($id, $record);
-        }
-
-        foreach ($this->containers as $id => $container) {
-            $this->checkContainer($id, $container);
-        }
-    }
-
-    private function checkRecord(string $id, $value): void
-    {
-        if (!$value instanceof Records\Record) {
-            throw Exception\InvalidTypeException::recordExpected($id);
-        }
-        $this->checkRecordId($id);
-    }
-
     private function checkRecordId(string $id): void
     {
         $separator = strpos($id, CompositeContainer::SEPARATOR);
@@ -77,14 +57,6 @@ class ValidatedBuild extends Build
         $this->reservedIds[$reserved] = true;
     }
 
-    private function checkContainer(string $id, $value): void
-    {
-        if (!$value instanceof ContainerInterface) {
-            throw Exception\InvalidTypeException::containerExpected($id);
-        }
-        $this->checkContainerId($id);
-    }
-
     private function checkContainerId(string $id): void
     {
         if (strpos($id, CompositeContainer::SEPARATOR) !== false) {
@@ -94,5 +66,27 @@ class ValidatedBuild extends Build
         if (isset($this->reservedIds[$id])) {
             throw Exception\IntegrityConstraintException::alreadyDefined($id);
         }
+    }
+
+    private function validRecords(array $records): array
+    {
+        foreach ($records as $id => $record) {
+            $this->checkRecordId($id);
+            if (!$record instanceof Records\Record) {
+                throw Exception\InvalidTypeException::recordExpected($id);
+            }
+        }
+        return $records;
+    }
+
+    private function validContainers(array $containers): array
+    {
+        foreach ($containers as $id => $container) {
+            $this->checkContainerId($id);
+            if (!$container instanceof ContainerInterface) {
+                throw Exception\InvalidTypeException::containerExpected($id);
+            }
+        }
+        return $containers;
     }
 }
