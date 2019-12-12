@@ -30,18 +30,18 @@ class SetupTest extends TestCase
         $this->assertSame($setup->container(), $build->container);
     }
 
-    public function testSetup_addUndefinedId_ReturnsEntryObject()
+    public function testSetup_setUndefinedId_ReturnsEntryObject()
     {
         $setup    = new Setup($build = Doubles\MockedBuild::undefined());
         $expected = new Setup\Entry('foo', $build);
-        $this->assertEquals($expected, $setup->add('foo'));
+        $this->assertEquals($expected, $setup->set('foo'));
     }
 
-    public function testSetup_addDefinedId_ThrowsException()
+    public function testSetup_setDefinedId_ThrowsException()
     {
         $setup = new Setup(Doubles\MockedBuild::defined());
         $this->expectException(Setup\Exception\OverwriteRuleException::class);
-        $setup->add('foo');
+        $setup->set('foo');
     }
 
     public function testSetup_replaceDefinedId_ReturnsEntryObject()

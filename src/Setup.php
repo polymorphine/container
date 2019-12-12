@@ -73,7 +73,7 @@ class Setup
      *
      * @return Setup\Entry
      */
-    public function add(string $id): Entry
+    public function set(string $id): Entry
     {
         if ($this->build->has($id)) {
             throw Exception\OverwriteRuleException::alreadyDefined($id);
