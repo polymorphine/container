@@ -32,33 +32,20 @@ class ValidatedBuildTest extends BuildTest
         $this->builder([], ['foo' => ExampleImpl::new()]);
     }
 
-    public function testValidatedBuild_addRecordWithDefinedContainerId_ThrowsException()
-    {
-        $setup = $this->builder([], ['defined' => Doubles\FakeContainer::new()]);
-        $this->expectException(Setup\Exception\IntegrityConstraintException::class);
-        $setup->setRecord('defined', Doubles\MockedRecord::new());
-    }
-
     public function testValidatedBuild_InvalidContainerId_ThrowsException()
     {
         $this->expectException(Setup\Exception\IntegrityConstraintException::class);
         $this->builder([], ['foo.bar' => Doubles\FakeContainer::new()]);
     }
 
-    public function testValidatedBuild_ContainerIdTakenByRecord_ThrowsException()
-    {
-        $this->expectException(Setup\Exception\IntegrityConstraintException::class);
-        $this->builder(['foo' => Doubles\MockedRecord::new()], ['foo' => Doubles\FakeContainer::new()]);
-    }
-
-    public function testValidatedBuild_addContainerWithIdTakenByRecordsPrefix_ThrowsException()
+    public function testValidatedBuild_setContainerWithIdTakenByRecordsPrefix_ThrowsException()
     {
         $setup = $this->builder(['foo.bar' => Doubles\MockedRecord::new()]);
         $this->expectException(Setup\Exception\IntegrityConstraintException::class);
         $setup->setContainer('foo', Doubles\FakeContainer::new());
     }
 
-    public function testValidatedBuild_addRecordMethodWithDefinedContainerPrefix_ThrowsException()
+    public function testValidatedBuild_setRecordMethodWithDefinedContainerPrefix_ThrowsException()
     {
         $setup = $this->builder([], ['defined' => Doubles\FakeContainer::new()]);
         $this->expectException(Setup\Exception\IntegrityConstraintException::class);

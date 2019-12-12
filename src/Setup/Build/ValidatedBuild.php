@@ -66,12 +66,10 @@ class ValidatedBuild extends Build
 
     private function checkRecordId(string $id): void
     {
-        if (isset($this->containers[$id])) {
-            throw Exception\IntegrityConstraintException::alreadyDefined($id);
-        }
-
         $separator = strpos($id, CompositeContainer::SEPARATOR);
-        $reserved  = $separator === false ? $id : substr($id, 0, $separator);
+        if (!$separator) { return; }
+
+        $reserved = substr($id, 0, $separator);
         if (isset($this->containers[$reserved])) {
             throw Exception\IntegrityConstraintException::prefixConflict($reserved);
         }
