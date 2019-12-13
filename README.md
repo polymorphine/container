@@ -25,53 +25,48 @@
 This example will show how to set up simple container. It starts with instantiating
 [`Setup`](src/Setup.php) type object, and using its methods to set container's entries:
 ```php
-<?php
 use Polymorphine\Container\Setup;
 
-require_once 'vendor/autoload.php';
-
-$setup = Setup::basic(); //or
-$setup = new Setup();
-
+$setup = Setup::production();
 $setup->set('value')->value('Hello world!');
 $setup->set('domain')->value('http://api.example.com');
 $setup->set('direct.object')->value(new ClassInstance());
-
 $setup->set('deferred.object')->callback(function (ContainerInterface $c) {
     return new DeferredClassInstance($c->get('value'));
 });
-
 $setup->set('composed.factory')->instance(ComposedClass::class, 'direct.object', 'deferred.object');
 $setup->set('factory.product')->product('composed.factory', 'create', 'domain');
 
 $container = $setup->container();
+
 $container->has('composed.factory'); // true
-$container->get('factory.product'); // return type of ComposedClass::create() method
+$container->get('factory.product'); // return result of ComposedClass::create() call
 ```
 Instead configuring each entry using builder methods you can pass arrays of [`Record`](src/Records/Record.php)
-instances to `Setup` constructor:
+instances to one of `Setup` constructors:
 ```php
-<?php
-use Polymorphine\Container\Setup;
-use Polymorphine\Container\Records\Record;
-
-$setup = Setup::basic([
-    'value'            => new Record\ValueRecord('Hello world!'),
-    'domain'           => new Record\ValueRecord('http://api.example.com'),
-    'direct.object'    => new Record\ValueRecord(new ClassInstance()),
-    'deferred.object'  => new Record\CallbackRecord(function (ContainerInterface $c) {
-                              return new DeferredClassInstance($c->get('env.value'));
-                          }),
-    'composed.factory' => new Record\InstanceRecord(Factory::class, 'direct.object', 'deferred.object'),
-    'factory.product'  => new Record\ProductRecord('composed.factory', 'create', 'domain')
+$setup = Setup::production([
+   'value'            => new Record\ValueRecord('Hello world!'),
+   'domain'           => new Record\ValueRecord('http://api.example.com'),
+   'direct.object'    => new Record\ValueRecord(new ClassInstance()),
+   'deferred.object'  => new Record\CallbackRecord(function (ContainerInterface $c) {
+                             return new DeferredClassInstance($c->get('env.value'));
+                         }),
+   'composed.factory' => new Record\InstanceRecord(Factory::class, 'direct.object', 'deferred.object'),
+   'factory.product'  => new Record\ProductRecord('composed.factory', 'create', 'domain')
 ]);
-```
-...and instantiate container identical to previous example. Of course if all entries will be added
-this way Setup instance is not even necessary. Instantiating Container directly might be better
-idea (see: [Direct instantiation & container composition](#direct-instantiation--container-composition))
 
-`Setup::container()` may be called again with more entries added using `Setup` methods, but each time
-new Container instance will be produced. Container entries stored in Setup instance may not be removed,
+// add more entries here with set() methods
+// and instantiate container...
+
+$container = $setup->container();
+```
+Of course if all entries will be added with constructor `Setup` instantiation is not even necessary,
+and [Instantiating Container directly](#direct-instantiation--container-composition) might be better
+idea.
+
+`Setup::container()` may be called again with more entries added to `$setup`, but the call will return
+new, independent container instance. Container entries stored in Setup instance may not be removed,
 but can be changed preferably with [explicit method calls](#secure-setup--circular-reference-detection)
 or decorated by [*composed record*](#composed-entries) described below. It is also recommended that
 access to [`Setup`](src/Setup.php) was encapsulated within controlled scope - see:
@@ -115,10 +110,9 @@ Custom `Record` implementations might be mutable, return different values on sub
 calls or introduce various side effects, but such use of container is not recommended.
 
 #### Composite Container
-Both `Setup::addContainer()` and `Entry::container()` methods can be used to add another
-ContainerInterface instances allowing to create composite container wrapping multiple
-sub-containers which values (or containers themselves) may be accessed with container's
-id prefix (dot notation):
+`Entry::container()` methods can be used to add another ContainerInterface instances allowing to
+create composite container wrapping multiple sub-containers which values (or containers themselves)
+may be accessed with container's id prefix (dot notation):
 ```php
 $subContainer = new PSRContainerImplementation();
 $setup->set('env')->container($subContainer);
@@ -127,15 +121,15 @@ $container = $setup->container();
 $container->get('env') === $subContainer; //true
 $container->has('env.some.id') === $subContainer->has('some.id'); //true
 ```
-Passing array of ContainerInterface instances together with records `Setup` will also
-build composite container:
+Passing array of ContainerInterface instances together with records `Setup` will also build
+composite container:
 ```php
-$setup = Setup::basic($records, ['env' => new PSRContainerImplementation()]);
+$setup = Setup::production($records, ['env' => new PSRContainerImplementation()]);
 ```
 
 #### Secure setup & circular reference detection
-Because the way enclosed containers are accessed and because they're stored separately
-from Record instances some naming constraints are required:
+Because the way enclosed containers are accessed and because they're stored separately from
+Record instances some naming constraints are required:
 
 >_Sub-container identifier MUST be a string, MUST NOT contain separator (`.` by default)
 and MUST NOT be used as id prefix for stored `Record`._
@@ -144,25 +138,22 @@ Having container stored with `foo` identifier would make `foo.bar` record inacce
 The rules might be hard to follow with multiple entries and sub-containers, so runtime checks
 were implemented. To instantiate `Setup` with integrity checks use another static constructor:
 ```php
-$setup = Setup::validated(); //or
-$setup = new Setup\ValidatedSetup();
+$setup = Setup::development($records, $containers);
+```
+or pass [`ValidatedBuild`](src/Setup/Build/ValidatedBuild.php) instance to default constructor:
+```php
+$setup = new Setup(new Setup\Build\ValidatedBuild($records, $containers));
 ```
 
-
 ##### Inaccessible or accidentally overwritten entries
-`BasicSetup` (instantiated directly or with `Setup::basic()` method) won't check if given
+Basic `Setup` (instantiated directly or with `Setup::production()` method) won't check if given
 identifiers are already defined or whether they will cause name collision making some entries
 inaccessible (sub-containers with identifier used record entry prefix). It is possible to
-overwrite defined entries, but it is recommended to use explicit _replace_ methods like
-`Setup::replace()`, `Setup::replaceRecord()` and `Setup::replaceContainer()` corresponding to
-`Setup::add()`, `Setup::addRecord()` and `Setup::addContainer()`, respectively. That's because
-it allows you to configure container using `ValidatedSetup`.
+overwrite defined entries with explicit `Setup::replace()` method returning same `Entry` instance.
 
-Instantiating `ValidatedSetup` - directly or with `Setup::validated()` method - will enable
+Instantiating validated `Setup::development()` or directly with `ValidatedBuild` instance will enable
 runtime integrity checks for container configuration, and make sure that all defined identifiers
-can be accessed with `ContainerInterface::get()` method. It will also detect potentially redundant
-and suspicious usages like overwriting previously defined entry (passed through constructor) or
-calling one of _replace_ methods overwriting entry when it wasn't yet defined.
+can be accessed with `ContainerInterface::get()` method.
 
 ##### Circular references
 Records may refer to other container entries to be built (instantiated), but you could configure
@@ -172,13 +163,13 @@ and eventually blowing up the stack - for example:
 $setup->set('A')->compose(SomeClass::class, 'B');
 $setup->set('B')->compose(AnotherClass::class, 'C', 'A');
 ```
-Another feature that `ValidatedSetup` comes with is building container able to detect those circular
+Another feature that validated `Setup` comes with is building container able to detect those circular
 references and append call stack information to exceptions being thrown (for both circular references
 and missing entries). `ContainerInterface::get()` would throw `CircularReferenceException` immediately
 after recursive container call on deeper level would try to retrieve currently resolved record, which
 will allow to exit the endless loop.
 
-> These checks are not included in `BasicSetup`, because they should not be required in production
+> These checks are not included in `Setup::production()`, because they should not be required in production
 environment. Although it is recommended to use them during **development**.
 
 Integration tests are necessary in development, because misconfigured container will most likely crash
@@ -263,8 +254,7 @@ $container->get('pdo.user'); // root
 $container->get('pdo.options'); // [ PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8', ... ]
  ```
 As it was described in section on [composite container](#composite-container) you can use both
-record-based and config container as a single Container using `Entry::container()` or
-`Setup::addContainer()` method:
+record-based and config container as a single Container using `Entry::container()` method:
 ```php
 ...
 $setup = new Setup();
@@ -300,7 +290,7 @@ would result in cleaner design to encapsulate container, while giving possibilit
 it. This could be achieved by proxy object exposing only setup methods, which would also allow to
 limit unwanted _replace_ features.
 
-Calling `Setup::add()` or `Setup::replace()` returns write-only `Entry` helper object. Beside
+Calling `Setup::set()` or `Setup::replace()` returns write-only `Entry` helper object. Beside
 providing methods to define various implementations of `Record` or sub-containers for configured
 _container_ it allows to implement proxy with single method for each helper instead polluting
 top layer api with multiple setup methods. For example, if you have front controller bootstrap
