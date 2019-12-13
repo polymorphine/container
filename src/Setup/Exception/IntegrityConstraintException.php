@@ -16,9 +16,9 @@ use LogicException;
 
 class IntegrityConstraintException extends LogicException
 {
-    public static function alreadyDefined(string $resource): self
+    public static function alreadyDefined(string $id): self
     {
-        return new self("Cannot overwrite defined $resource");
+        return new self("Cannot overwrite defined `$id` entry");
     }
 
     public static function prefixConflict(string $prefix): self
@@ -29,11 +29,6 @@ class IntegrityConstraintException extends LogicException
     public static function unexpectedPrefixSeparator(string $separator, string $id): self
     {
         return new self("Container id cannot contain `$separator` separator - `$id` id given");
-    }
-
-    public static function undefined(string $id): self
-    {
-        return new self("Cannot change undefined `$id` Record");
     }
 
     public static function missingReference(string $id)

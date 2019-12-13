@@ -9,11 +9,9 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Polymorphine\Container\Setup\Entry;
+namespace Polymorphine\Container\Setup;
 
-use Polymorphine\Container\Setup\Entry;
 use Polymorphine\Container\Records\Record;
-use Polymorphine\Container\Setup\Exception;
 
 
 class Wrapper

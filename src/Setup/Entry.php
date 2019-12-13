@@ -11,7 +11,6 @@
 
 namespace Polymorphine\Container\Setup;
 
-use Polymorphine\Container\Setup;
 use Polymorphine\Container\Records\Record;
 use Psr\Container\ContainerInterface;
 
@@ -20,15 +19,15 @@ use Psr\Container\ContainerInterface;
  * Write-only proxy with helper methods to instantiate and set
  * Record implementations for given Container item identifier.
  */
-abstract class Entry
+class Entry
 {
     protected $id;
     protected $builder;
 
-    public function __construct(string $id, Setup $builder)
+    public function __construct(string $id, Collection $build)
     {
         $this->id      = $id;
-        $this->builder = $builder;
+        $this->builder = $build;
     }
 
     /**
@@ -39,7 +38,10 @@ abstract class Entry
      *
      * @throws Exception\IntegrityConstraintException
      */
-    abstract public function record(Record $record): void;
+    public function record(Record $record): void
+    {
+        $this->builder->setRecord($this->id, $record);
+    }
 
     /**
      * Sets ContainerInterface instance as sub-container that may
@@ -52,7 +54,10 @@ abstract class Entry
      *
      * @throws Exception\IntegrityConstraintException
      */
-    abstract public function container(ContainerInterface $container): void;
+    public function container(ContainerInterface $container): void
+    {
+        $this->builder->setContainer($this->id, $container);
+    }
 
     /**
      * Adds ValueRecord with given value into container records.
@@ -112,16 +117,16 @@ abstract class Entry
      * add ComposedInstanceRecord to container records.
      *
      * @see Record\InstanceRecord
-     * @see Entry\Wrapper
+     * @see Wrapper
      *
      * @param string $className
      * @param string ...$dependencies
      *
-     * @return Entry\Wrapper
+     * @return Wrapper
      */
-    public function wrappedInstance(string $className, string ...$dependencies): Entry\Wrapper
+    public function wrappedInstance(string $className, string ...$dependencies): Wrapper
     {
-        return new Entry\Wrapper($this->id, new Record\InstanceRecord($className, ...$dependencies), $this);
+        return new Wrapper($this->id, new Record\InstanceRecord($className, ...$dependencies), $this);
     }
 
     /**
