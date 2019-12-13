@@ -31,7 +31,7 @@ use Polymorphine\Container\Setup;
 require_once 'vendor/autoload.php';
 
 $setup = Setup::basic(); //or
-$setup = new Setup\BasicSetup();
+$setup = new Setup();
 
 $setup->set('value')->value('Hello world!');
 $setup->set('domain')->value('http://api.example.com');
@@ -48,22 +48,14 @@ $container = $setup->container();
 $container->has('composed.factory'); // true
 $container->get('factory.product'); // return type of ComposedClass::create() method
 ```
-`Setup::container()` may be called again with more entries added using `Setup` methods, but each time
-new Container instance will be produced. Container entries stored in Setup instance may not be removed,
-but can be changed preferably with [explicit method calls](#secure-setup--circular-reference-detection)
-or decorated by [*composed record*](#composed-entries) described below. It is also recommended that
-access to [`Setup`](src/Setup.php) was encapsulated within controlled scope - see:
-[Read and Write separation](#read-and-write-separation).
-
-Instead configuring each entry using builder methods you can pass [`Record`](src/Records/Record.php)
-instance to `Setup::addRecord()` method or array of those to `Setup::records()`:
+Instead configuring each entry using builder methods you can pass arrays of [`Record`](src/Records/Record.php)
+instances to `Setup` constructor:
 ```php
 <?php
 use Polymorphine\Container\Setup;
 use Polymorphine\Container\Records\Record;
 
-$setup = Setup::basic();
-$setup->addRecords([
+$setup = Setup::basic([
     'value'            => new Record\ValueRecord('Hello world!'),
     'domain'           => new Record\ValueRecord('http://api.example.com'),
     'direct.object'    => new Record\ValueRecord(new ClassInstance()),
@@ -73,9 +65,17 @@ $setup->addRecords([
     'composed.factory' => new Record\InstanceRecord(Factory::class, 'direct.object', 'deferred.object'),
     'factory.product'  => new Record\ProductRecord('composed.factory', 'create', 'domain')
 ]);
-
-// ...and instantiate container identical to previous example
 ```
+...and instantiate container identical to previous example. Of course if all entries will be added
+this way Setup instance is not even necessary. Instantiating Container directly might be better
+idea (see: [Direct instantiation & container composition](#direct-instantiation--container-composition))
+
+`Setup::container()` may be called again with more entries added using `Setup` methods, but each time
+new Container instance will be produced. Container entries stored in Setup instance may not be removed,
+but can be changed preferably with [explicit method calls](#secure-setup--circular-reference-detection)
+or decorated by [*composed record*](#composed-entries) described below. It is also recommended that
+access to [`Setup`](src/Setup.php) was encapsulated within controlled scope - see:
+[Read and Write separation](#read-and-write-separation).
 
 #### Records decide how it works internally
 Values returned from Container are all wrapped into [`Record`](src/Records/Record.php) abstraction
@@ -127,6 +127,13 @@ $container = $setup->container();
 $container->get('env') === $subContainer; //true
 $container->has('env.some.id') === $subContainer->has('some.id'); //true
 ```
+Passing array of ContainerInterface instances together with records `Setup` will also
+build composite container:
+```php
+$setup = Setup::basic($records, ['env' => new PSRContainerImplementation()]);
+```
+
+#### Secure setup & circular reference detection
 Because the way enclosed containers are accessed and because they're stored separately
 from Record instances some naming constraints are required:
 
@@ -140,34 +147,8 @@ were implemented. To instantiate `Setup` with integrity checks use another stati
 $setup = Setup::validated(); //or
 $setup = new Setup\ValidatedSetup();
 ```
-More on that in following sections.
 
-#### Preconfigured setup - constructor parameters
-Implementations of abstract `Setup` may be instantiated with already configured records or
-sub-containers as associative arrays passed to its constructors or static methods. Both will
-take `Recrod[]` and `ContainerInetrface[]` arrays.
 
-```php
-$records = [
-    'foo.bar' => new Record\ValueRecord(true),
-    // ...
-];
-$containers = [
-    'baz' => new PSRContainerImplementation(),
-    // ...
-];
-
-$setup = Setup::basic($records, $containers);
-```
-Of course using `Setup` makes no sense when all the records and containers are already in
-there and no new entries will be added (unless for runtime checks) - you may instantiate
-container directly (see: [direct instantiation](#direct-instantiation--container-composition)).
-Parameters for container won't be validated. This would be unnecessary performance cost,
-because application wouldn't work with invalid configuration anyway. However, In development
-environment those checks are valuable, because they allow to fail as early as possible and
-help localize the source of an error.
-
-#### Secure setup & circular reference detection
 ##### Inaccessible or accidentally overwritten entries
 `BasicSetup` (instantiated directly or with `Setup::basic()` method) won't check if given
 identifiers are already defined or whether they will cause name collision making some entries
