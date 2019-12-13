@@ -33,16 +33,16 @@ require_once 'vendor/autoload.php';
 $setup = Setup::basic(); //or
 $setup = new Setup\BasicSetup();
 
-$setup->add('value')->value('Hello world!');
-$setup->add('domain')->value('http://api.example.com');
-$setup->add('direct.object')->value(new ClassInstance());
+$setup->set('value')->value('Hello world!');
+$setup->set('domain')->value('http://api.example.com');
+$setup->set('direct.object')->value(new ClassInstance());
 
-$setup->add('deferred.object')->callback(function (ContainerInterface $c) {
+$setup->set('deferred.object')->callback(function (ContainerInterface $c) {
     return new DeferredClassInstance($c->get('value'));
 });
 
-$setup->add('composed.factory')->instance(ComposedClass::class, 'direct.object', 'deferred.object');
-$setup->add('factory.product')->product('composed.factory', 'create', 'domain');
+$setup->set('composed.factory')->instance(ComposedClass::class, 'direct.object', 'deferred.object');
+$setup->set('factory.product')->product('composed.factory', 'create', 'domain');
 
 $container = $setup->container();
 $container->has('composed.factory'); // true
@@ -88,24 +88,24 @@ package's Record implementations:
   without evaluation as well). To push value record mapped to given string `identifier` into container
   with setup object use `Entry::value()` method:
   ```php
-  $setup->add('identifier')->value($anything);
+  $setup->set('identifier')->value($anything);
   ```
 - `CallbackRecord`: Lazily invoked and cached value. Takes callback that will be given container
   as parameter, and value of this call will be cached and returned on subsequent calls. Records
   are added to setup with `Entry::callback()` method:
   ```php
-  $setup->add('identifier')->callback(function ($container) { return ... });
+  $setup->set('identifier')->callback(function ($container) { return ... });
   ```
 - `InstanceRecord`: Lazy instantiated (and cached) object of given class. Constructor parameters
   are passed as resolved aliases to other container entries. Setup with `Entry::instance()` method:
   ```php
-  $setup->add('identifier')->instance(Namespace\ClassName::class, 'dependency-identifier', 'another', ...);
+  $setup->set('identifier')->instance(Namespace\ClassName::class, 'dependency-identifier', 'another', ...);
   ```
 - `ProductRecord`: Similar to instance method, but object is created (and cached) by
   calling method given as string on container provided instance of factory, and container
   identifiers will resolve into arguments for this method. Setup with `Entry::product()` method:
   ```php
-  $setup->add('identifier')->create('factory.id', 'createMethod', 'container.param1', 'container.param2', ...);
+  $setup->set('identifier')->create('factory.id', 'createMethod', 'container.param1', 'container.param2', ...);
   ```
 - `ComposedInstanceRecord`: With `Entry::wrappedInstance()` method it is possible to build single
   entry in chained call allowing to compose multi layered structure of wrapped (decorated) instance
@@ -121,7 +121,7 @@ sub-containers which values (or containers themselves) may be accessed with cont
 id prefix (dot notation):
 ```php
 $subContainer = new PSRContainerImplementation();
-$setup->add('env')->container($subContainer);
+$setup->set('env')->container($subContainer);
 
 $container = $setup->container();
 $container->get('env') === $subContainer; //true
@@ -188,8 +188,8 @@ Records may refer to other container entries to be built (instantiated), but you
 entry `A` in a way that it will try to retrieve itself during build process starting endless loop
 and eventually blowing up the stack - for example:
 ```php
-$setup->add('A')->compose(SomeClass::class, 'B');
-$setup->add('B')->compose(AnotherClass::class, 'C', 'A');
+$setup->set('A')->compose(SomeClass::class, 'B');
+$setup->set('B')->compose(AnotherClass::class, 'C', 'A');
 ```
 Another feature that `ValidatedSetup` comes with is building container able to detect those circular
 references and append call stack information to exceptions being thrown (for both circular references
@@ -210,7 +210,7 @@ probably using container too extensively (see [recommended use](#recommended-use
 Entry may be built with multiple instance descriptors (same parameters as `InstanceRecord` uses)
 given in chained [`Wrapper`](src/Setup/Wrapper.php) calls:
 ```php
-$setup->add('A')
+$setup->set('A')
       ->wrappedInstance(SomeClass::class, 'B', 'C')
       ->with(AnotherClass::class, 'A', 'D')
       ->with(AndAnother::class, 'A')
@@ -227,7 +227,7 @@ dependencies), but a placeholder pointing wrapped entry in composition process.
 previously, using self-reference as one of its constructor parameters. Let's assume for example that
 in dev environment we want to log messages passed/returned by a library defined as 'my.library' record:
 ```php
- $setup->add('my.library')->callback(function (ContainerInterface $c) {
+ $setup->set('my.library')->callback(function (ContainerInterface $c) {
      return new MyLibrary($c->get('myLib.dependency'), ...);
  });
 
@@ -287,13 +287,13 @@ record-based and config container as a single Container using `Entry::container(
 ```php
 ...
 $setup = new Setup();
-$setup->add('env')->container($conatiner);
-$setup->add('direct.object')->value(new ClassInstance());
-$setup->add('deferred.object')->callback(function (ContainerInterface $c) {
+$setup->set('env')->container($conatiner);
+$setup->set('direct.object')->value(new ClassInstance());
+$setup->set('deferred.object')->callback(function (ContainerInterface $c) {
   return new DeferredClassInstance($c->get('env.value'));
 });
-$setup->add('factory.object')->instance(FactoryClass::class, 'direct.object', 'deferred.object');
-$setup->add('factory.product')->product('factory.object', 'create', 'env.domain');
+$setup->set('factory.object')->instance(FactoryClass::class, 'direct.object', 'deferred.object');
+$setup->set('factory.product')->product('factory.object', 'create', 'env.domain');
 
 $container = $setup->container();
 ```
@@ -331,7 +331,7 @@ class App
     ...
     public function config(string $name): Entry
     {
-        return $this->setup->add($name);
+        return $this->setup->set($name);
     }
     ...
 }
