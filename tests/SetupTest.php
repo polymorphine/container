@@ -20,8 +20,8 @@ class SetupTest extends TestCase
     public function testInstantiation()
     {
         $this->assertInstanceOf(Setup::class, $this->builder());
-        $this->assertInstanceOf(Setup::class, Setup::basic());
-        $this->assertInstanceOf(Setup::class, Setup::validated());
+        $this->assertInstanceOf(Setup::class, Setup::production());
+        $this->assertInstanceOf(Setup::class, Setup::development());
     }
 
     public function testSetup_container_ReturnsContainerFromBuild()

@@ -32,18 +32,22 @@ class Setup
      *
      * @return static
      */
-    public static function basic(array $records = [], array $containers = []): self
+    public static function production(array $records = [], array $containers = []): self
     {
         return new self(new Setup\Build($records, $containers));
     }
 
     /**
+     * Creates Setup with additional identifier collision checks, and
+     * Container created with such Setup will also detect circular
+     * references and add call stack paths to thrown exceptions.
+     *
      * @param Records\Record[]     $records
      * @param ContainerInterface[] $containers
      *
      * @return static
      */
-    public static function validated(array $records = [], array $containers = []): self
+    public static function development(array $records = [], array $containers = []): self
     {
         return new self(new Setup\Build\ValidatedBuild($records, $containers));
     }
