@@ -65,8 +65,8 @@ Of course if all entries will be added with constructor `Setup` instantiation is
 and [Instantiating Container directly](#direct-instantiation--container-composition) might be better
 idea.
 
-`Setup::container()` may be called again with more entries added to `$setup`, but the call will return
-new, independent container instance. Container entries stored in Setup instance may not be removed,
+`Setup::container()` may be called again after more entries were added to `$setup`, but the call will
+return new, independent container instance. Container entries stored in Setup instance may not be removed,
 but can be changed preferably with [explicit method calls](#secure-setup--circular-reference-detection)
 or decorated by [*composed record*](#composed-entries) described below. It is also recommended that
 access to [`Setup`](src/Setup.php) was encapsulated within controlled scope - see:
@@ -126,6 +126,16 @@ composite container:
 ```php
 $setup = Setup::production($records, ['env' => new PSRContainerImplementation()]);
 ```
+
+#### Overwriting setup entries
+Calling `Setup::set()` method will throw exception when given identifier is already defined.
+This way it will be assured that no unused entries were defined, and depending on config
+definitions are consistent with the ones used later in code.
+
+It is possible to overwrite existing entry with explicit `Setup::replace()` method, but this
+method will throw exception when replaced entry is not yet defined. Replacing defined entries
+should be used in **development environment** only, and as soon you establish final entry value
+it should be defined by constructor or `Setup::set()` method.
 
 #### Secure setup & circular reference detection
 Because the way enclosed containers are accessed and because they're stored separately from
