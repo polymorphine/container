@@ -109,24 +109,6 @@ package's Record implementations:
 Custom `Record` implementations might be mutable, return different values on subsequent
 calls or introduce various side effects, but such use of container is not recommended.
 
-#### Composite Container
-`Entry::container()` methods can be used to add another ContainerInterface instances allowing to
-create composite container wrapping multiple sub-containers which values (or containers themselves)
-may be accessed with container's id prefix (dot notation):
-```php
-$subContainer = new PSRContainerImplementation();
-$setup->set('env')->container($subContainer);
-
-$container = $setup->container();
-$container->get('env') === $subContainer; //true
-$container->has('env.some.id') === $subContainer->has('some.id'); //true
-```
-Passing array of ContainerInterface instances together with records `Setup` will also build
-composite container:
-```php
-$setup = Setup::production($records, ['env' => new PSRContainerImplementation()]);
-```
-
 #### Overwriting setup entries
 Calling `Setup::set()` method will throw exception when given identifier is already defined.
 This way it will be assured that no unused entries were defined, and depending on config
@@ -145,56 +127,6 @@ The only method that is safe to work with unknown configuration state is `Setup:
 definition will be ignored if entry for given identifier was already used. This method might be
 used in production environment or live server testing stage where config changes are being made, and
 application crash needs to be avoided by replacing it with some information or simplified version.
-
-#### Secure setup & circular reference detection
-Because the way enclosed containers are accessed and because they're stored separately from
-Record instances some naming constraints are required:
-
->_Sub-container identifier MUST be a string, MUST NOT contain separator (`.` by default)
-and MUST NOT be used as id prefix for stored `Record`._
-
-Having container stored with `foo` identifier would make `foo.bar` record inaccessible.
-The rules might be hard to follow with multiple entries and sub-containers, so runtime checks
-were implemented. To instantiate `Setup` with integrity checks use another static constructor:
-```php
-$setup = Setup::development($records, $containers);
-```
-or pass [`ValidatedBuild`](src/Setup/Build/ValidatedBuild.php) instance to default constructor:
-```php
-$setup = new Setup(new Setup\Build\ValidatedBuild($records, $containers));
-```
-
-##### Inaccessible or accidentally overwritten entries
-Basic `Setup` (instantiated directly or with `Setup::production()` method) won't check if given
-identifiers are already defined or whether they will cause name collision making some entries
-inaccessible (sub-containers with identifier used record entry prefix). It is possible to
-overwrite defined entries with explicit `Setup::replace()` method returning same `Entry` instance.
-
-Instantiating validated `Setup::development()` or directly with `ValidatedBuild` instance will enable
-runtime integrity checks for container configuration, and make sure that all defined identifiers
-can be accessed with `ContainerInterface::get()` method.
-
-##### Circular references
-Records may refer to other container entries to be built (instantiated), but you could configure
-entry `A` in a way that it will try to retrieve itself during build process starting endless loop
-and eventually blowing up the stack - for example:
-```php
-$setup->set('A')->compose(SomeClass::class, 'B');
-$setup->set('B')->compose(AnotherClass::class, 'C', 'A');
-```
-Another feature that validated `Setup` comes with is building container able to detect those circular
-references and append call stack information to exceptions being thrown (for both circular references
-and missing entries). `ContainerInterface::get()` would throw `CircularReferenceException` immediately
-after recursive container call on deeper level would try to retrieve currently resolved record, which
-will allow to exit the endless loop.
-
-> These checks are not included in `Setup::production()`, because they should not be required in production
-environment. Although it is recommended to use them during **development**.
-
-Integration tests are necessary in development, because misconfigured container will most likely crash
-the application, and it cannot be controlled by code anyway. This way some needless performance overhead
-might be eliminated from production, but if those checks are causing visible drop in performance you are
-probably using container too extensively (see [recommended use](#recommended-use) section).
 
 #### Composed entries
 ##### Record composition using Wrapper
@@ -231,6 +163,73 @@ in dev environment we want to log messages passed/returned by a library defined 
 Of course it should return the same type as overwritten record would, because all clients
 currently using it would crash (fail on type-checking). Unfortunately due to lazy instantiation
 container can't ensure correct decorator use and errors caused by hacks will emerge at runtime.
+
+#### Composite Container
+`Entry::container()` methods can be used to add another ContainerInterface instances allowing to
+create composite container wrapping multiple sub-containers which values (or containers themselves)
+may be accessed with container's id prefix (dot notation):
+```php
+$subContainer = new PSRContainerImplementation();
+$setup->set('env')->container($subContainer);
+
+$container = $setup->container();
+$container->get('env') === $subContainer; //true
+$container->has('env.some.id') === $subContainer->has('some.id'); //true
+```
+Passing array of ContainerInterface instances together with records `Setup` will also build
+composite container:
+```php
+$setup = Setup::production($records, ['env' => new PSRContainerImplementation()]);
+```
+
+#### Secure setup & circular reference detection
+Because the way enclosed containers are accessed and because they're stored separately from
+Record instances some naming constraints are required:
+
+>_Sub-container identifier MUST be a string, MUST NOT contain separator (`.` by default)
+and MUST NOT be used as id prefix for stored `Record`._
+
+Having container stored with `foo` identifier would make `foo.bar` record inaccessible.
+The rules might be hard to follow with multiple entries and sub-containers, so runtime checks
+were implemented. To instantiate `Setup` with integrity checks use another static constructor:
+```php
+$setup = Setup::development($records, $containers);
+```
+or pass [`ValidatedBuild`](src/Setup/Build/ValidatedBuild.php) instance to default constructor:
+```php
+$setup = new Setup(new Setup\Build\ValidatedBuild($records, $containers));
+```
+
+##### Inaccessible or accidentally overwritten entries
+Basic `Setup` (instantiated directly or with `Setup::production()` method) won't check if given
+identifiers are already defined or whether they will cause name collision making some entries
+inaccessible (sub-containers with identifier used record entry prefix).
+
+Instantiating validated `Setup::development()` or directly with `ValidatedBuild` instance will enable
+runtime integrity checks for container configuration, and make sure that all defined identifiers
+can be accessed with `ContainerInterface::get()` method.
+
+##### Circular references
+Records may refer to other container entries to be built (instantiated), but you could configure
+entry `A` in a way that it will try to retrieve itself during build process starting endless loop
+and eventually blowing up the stack - for example:
+```php
+$setup->set('A')->compose(SomeClass::class, 'B');
+$setup->set('B')->compose(AnotherClass::class, 'C', 'A');
+```
+Another feature that validated `Setup` comes with is building container able to detect those circular
+references and append call stack information to exceptions being thrown (for both circular references
+and missing entries). `ContainerInterface::get()` would throw `CircularReferenceException` immediately
+after recursive container call on deeper level would try to retrieve currently resolved record, which
+will allow to exit the endless loop.
+
+> These checks are not included in `Setup::production()`, because they should not be required in production
+environment. Although it is recommended to use them during **development**.
+
+Integration tests are necessary in development, because misconfigured container will most likely crash
+the application, and it cannot be controlled by code anyway. This way some needless performance overhead
+might be eliminated from production, but if those checks are causing visible drop in performance you are
+probably using container too extensively (see [recommended use](#recommended-use) section).
 
 #### Direct instantiation & container composition
 All `Setup` does, beside ability to validate configuration with `ValidatedSetup`, is providing helper
