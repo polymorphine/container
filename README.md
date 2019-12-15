@@ -133,9 +133,18 @@ This way it will be assured that no unused entries were defined, and depending o
 definitions are consistent with the ones used later in code.
 
 It is possible to overwrite existing entry with explicit `Setup::replace()` method, but this
-method will throw exception when replaced entry is not yet defined. Replacing defined entries
-should be used in **development environment** only, and as soon you establish final entry value
-it should be defined by constructor or `Setup::set()` method.
+method will throw exception when replaced entry is not yet defined. You can also redefine setup
+entry with `Setup::decorate()` method that will wrap it with an object decorating it. This
+feature was described in section on [decorating defined records](#decorating-defined-records).
+There might be some use cases where object decoration need to be resolved in configuration
+scope, but both of these methods are meant to be used primarily in **development environment**,
+and as soon final entry value can be established it should be defined by constructor or `Setup::set()`
+method.
+
+The only method that is safe to work with unknown configuration state is `Setup::fallback()`, which
+definition will be ignored if entry for given identifier was already used. This method might be
+used in production environment or live server testing stage where config changes are being made, and
+application crash needs to be avoided by replacing it with some information or simplified version.
 
 #### Secure setup & circular reference detection
 Because the way enclosed containers are accessed and because they're stored separately from
