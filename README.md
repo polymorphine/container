@@ -241,15 +241,15 @@ It's worth noticing however, that visible drop in performance by using those che
 will most likely mean that container is used too extensively - see [recommended use](#recommended-use) section.
 
 #### Direct instantiation & container composition
-All `Setup` does, beside ability to validate configuration with `ValidatedSetup`, is providing helper
-methods creating `Record` and sub-container entries creating various container compositions based on called
-methods. Container can also be instantiated directly - for example simple container containing only `Record`
-entries would be instantiated with as flat `Record[]` array (stored in `$records`) this way:
+`Setup` provides helper methods to create `Record` instances and collect them together, optionally with
+sub-container entries and additional validation checks creating immutable container composition.
+Creating container directly is also possible - for example simple container containing only `Record`
+entries would be instantiated with as flat `Record[]` array (here stored in `$records` variable) this way:
 ```php
 $container = new RecordContainer(new Records($records));
 ``` 
-When container needs circular reference checking and encapsulate some sub-containers (stored in `$containers`
-variable as flat `ContainerInterface[]` array) its instantiation would change into this composition:
+When container needs circular reference checking and encapsulate some sub-containers stored in `$containers`
+variable as flat `ContainerInterface[]` array its instantiation would change into this composition:
 ```php
 $container = new CompositeContainer(new TrackedRecords($records), $containers);
 ```
