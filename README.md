@@ -163,9 +163,10 @@ Of course it should return the same type as overwritten record would - otherwise
 currently using it would crash (fail on type-checking). Unfortunately due to lazy instantiation
 container can't ensure correct decorator use and errors caused by hacks will emerge at runtime.
 
+
 #### Composite Container
-`Entry::container()` methods can be used to add another ContainerInterface instances allowing to
-create composite container wrapping multiple sub-containers which values (or containers themselves)
+`Entry::container()` method can be used to add another ContainerInterface instances and create
+composite container by wrapping multiple sub-containers which values (or containers themselves)
 may be accessed with container's id prefix (dot notation):
 ```php
 $subContainer = new PSRContainerImplementation();
@@ -182,53 +183,62 @@ $setup = Setup::production($records, ['env' => new PSRContainerImplementation()]
 ```
 
 #### Secure setup & circular reference detection
+Secure setup is designed as a development tool that helps with setup debugging. It is instantiated
+either with `development` static constructor:
+```php
+$setup = Setup::development($records, $containers);
+```
+or with [`ValidatedBuild`](src/Setup/Build/ValidatedBuild.php) instance passed to default constructor:
+```php
+$setup = new Setup(new Setup\Build\ValidatedBuild($records, $containers));
+```
+
+##### Naming rules and inaccessible entries
 Because the way enclosed containers are accessed and because they're stored separately from
 Record instances some naming constraints are required:
 
 >_Sub-container identifier MUST be a string, MUST NOT contain separator (`.` by default)
 and MUST NOT be used as id prefix for stored `Record`._
 
-Having container stored with `foo` identifier would make `foo.bar` record inaccessible.
-The rules might be hard to follow with multiple entries and sub-containers, so runtime checks
-were implemented. To instantiate `Setup` with integrity checks use another static constructor:
-```php
-$setup = Setup::development($records, $containers);
-```
-or pass [`ValidatedBuild`](src/Setup/Build/ValidatedBuild.php) instance to default constructor:
-```php
-$setup = new Setup(new Setup\Build\ValidatedBuild($records, $containers));
-```
+Having container stored with `foo` identifier would make `foo.bar` record inaccessible, because
+this value would be assumed to come from `foo` container. The rules might be hard to follow with
+multiple entries and sub-containers, so runtime checks were implemented.
 
-##### Inaccessible or accidentally overwritten entries
-Basic `Setup` (instantiated directly or with `Setup::production()` method) won't check if given
-identifiers are already defined or whether they will cause name collision making some entries
-inaccessible (sub-containers with identifier used record entry prefix).
+Basic (production) `Setup` instantiated directly or with `Setup::production()` method won't check
+whether given identifiers are already defined or whether they will cause name collision that would
+make some entries inaccessible (sub-containers with identifier used record entry prefix).
 
 Instantiating validated `Setup::development()` or directly with `ValidatedBuild` instance will enable
 runtime integrity checks for container configuration, and make sure that all defined identifiers
 can be accessed with `ContainerInterface::get()` method.
 
 ##### Circular references
-Records may refer to other container entries to be built (instantiated), but you could configure
-entry `A` in a way that it will try to retrieve itself during build process starting endless loop
-and eventually blowing up the stack - for example:
+Because Records may refer to other container entries to be built (instantiated) a hard to spot
+bug might be introduced where entry `A` in order to be resolved will need to retrieve itself during
+build process starting endless loop and eventually blowing up the stack. For example:
 ```php
-$setup->set('A')->compose(SomeClass::class, 'B');
-$setup->set('B')->compose(AnotherClass::class, 'C', 'A');
+$setup->set('A')->instance(SomeClass::class, 'B');
+$setup->set('B')->instance(AnotherClass::class, 'C', 'A');
 ```
-Another feature that validated `Setup` comes with is building container able to detect those circular
-references and append call stack information to exceptions being thrown (for both circular references
-and missing entries). `ContainerInterface::get()` would throw `CircularReferenceException` immediately
-after recursive container call on deeper level would try to retrieve currently resolved record, which
-will allow to exit the endless loop.
+Both entries `A` and `B` refer each other, so instantiating `B` would need `A` that will attempt to
+instantiate `B` in nested context. Neither class can be instantiated, because its dependencies cannot
+be fully resolved (are currently being resolved on higher context level) - without detection the
+instantiation process would continue until call stack is overflown.
+
+Container able to detect those circular references and append call stack information to exceptions being
+thrown (for both circular references and missing entries) is another feature that `development` setup comes
+with.  `ContainerInterface::get()` would throw `CircularReferenceException` immediately after recursive
+container call on deeper context level would try to retrieve currently resolved record, which will allow
+to exit the endless loop.
 
 > These checks are not included in `Setup::production()`, because they should not be required in production
 environment. Although it is recommended to use them during **development**.
 
 Integration tests are necessary in development, because misconfigured container will most likely crash
-the application, and it cannot be controlled by code anyway. This way some needless performance overhead
-might be eliminated from production, but if those checks are causing visible drop in performance you are
-probably using container too extensively (see [recommended use](#recommended-use) section).
+the application, and it cannot be controlled by code in reliable way. Development setup will not prevent
+all the bugs that might happen, so it becomes needless performance overhead in production environment.
+It's worth noticing however, that visible drop in performance by using those checks in development stage
+will most likely mean that container is used too extensively - see [recommended use](#recommended-use) section.
 
 #### Direct instantiation & container composition
 All `Setup` does, beside ability to validate configuration with `ValidatedSetup`, is providing helper
