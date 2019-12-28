@@ -20,9 +20,4 @@ class OverwriteRuleException extends LogicException
     {
         return new self("Cannot overwrite defined `$id` entry");
     }
-
-    public static function undefined(string $id): self
-    {
-        return new self("Cannot change undefined `$id` entry");
-    }
 }

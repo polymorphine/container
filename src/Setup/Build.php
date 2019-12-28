@@ -50,15 +50,6 @@ class Build implements Collection
         $this->containers[$id] = $container;
     }
 
-    public function decorator(string $id): Wrapper
-    {
-        if (!isset($this->records[$id])) {
-            throw Exception\OverwriteRuleException::undefined($id);
-        }
-
-        return new Wrapper($id, $this->records[$id], new Entry($id, $this));
-    }
-
     protected function records(): Records
     {
         return new Records($this->records);
