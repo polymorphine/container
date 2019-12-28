@@ -315,15 +315,13 @@ section with extended take on the subject.
 
 #### Read and Write separation
 `Setup` builder-like API allows for setting up container and creating its instance, but it
-would result in cleaner design to encapsulate container, while giving possibility to configure
-it. This could be achieved by proxy object exposing only setup methods, which would also allow to
-limit unwanted _replace_ features.
+would result in cleaner design to have container encapsulated and still be able to configure it
+from outside scope. This could be achieved by proxy object exposing only setup methods.
 
-Calling `Setup::set()` or `Setup::replace()` returns write-only `Entry` helper object. Beside
-providing methods to define various implementations of `Record` or sub-containers for configured
-_container_ it allows to implement proxy with single method for each helper instead polluting
-top layer api with multiple setup methods. For example, if you have front controller bootstrap
-class similar to...
+Calling `Setup::set()` returns write-only `Entry` helper object. Beside providing methods to
+define various implementations of `Record` or sub-containers for configured _container_ it allows
+to implement proxy with single method instead polluting its interface with multiple setup methods.
+For example, if you have front controller bootstrap class similar to...
 ```php
 class App
 {
@@ -336,8 +334,9 @@ class App
     ...
 }
 ```
-Now You can push values into container from the scope of `App` class object, but cannot
-access container afterwards:
+...you can still use all helper methods provided by `Entry` object. Now You can push values into
+container from the scope of `App` class object, but cannot access container afterwards. `App`
+controls the `Setup` and will call `Setup::container()` to use on its own terms.
 ```php
 $app = new App(parse_ini_file('pdo.ini'));
 $app->config('database')->callback(function (ContainerInterface $c) {
@@ -345,61 +344,72 @@ $app->config('database')->callback(function (ContainerInterface $c) {
 });
 ```
 Nothing in outer scope will be able to use instance of container created within `App`.
-It is possible to achieve with some configuration efforts, but this is not recommended
-though, so it won't be covered in details.
-
-Example above allows only for adding new entries. To enable App client to decorate or
-replace stored entries `Setup::replace()` or `Setup::decorate()` methods should be added.
+It is possible to achieve with some configuration efforts, but this is not recommended,
+so details won't be explained here.
 
 #### Real advantage of container
 ##### Containers vs direct instantiation
-Instantiating container with setup commands used in [first example](README.md#container-setup) and
+Instantiating container with setup commands used in [main example](README.md#container-setup) and
 getting `factory.product` object will be equivalent to factory instantiated directly with
-`new` operator and calling `create()` method with `http://api.example.com` parameter:
+`new` operator and calling `create()` method on it with `http://api.example.com` parameter:
 ```php
 $factory = new ComposedClass(new ClassInstance(), new DeferredClassInstance('Hello world!'));
 $object  = $factory->create('http://api.example.com');
 ```
-As you can see the container does not give any visible advantage when it comes to creating object
-directly. Assuming this object is used only in single use-case scenario there won't be any, but
-for libraries used in various request contexts or reused in the structures where the same instance
+As you can see the container does not give any visible advantage here over creating object directly,
+and assuming this object is used only in single use-case scenario there won't be any.
+
+For libraries used in various request contexts or reused in the structures where the same instance
 should be passed (like database connection) having it configured in one place saves lots of trouble
 and repetition. Suppose that class is some api library that requires configuration and composition
 used by a few endpoints of your application - you would have to repeat this instantiation for each
-endpoint.
+endpoint. You can still solve this problem encapsulating instantiation within hardcoded factory
+class and replace `$container->get()` with single (static) call (and type-hinted result!)
 
-##### Containers vs decomposed factories
-Mentioned repetitiveness still can be avoided without reaching for container by encapsulating
-instantiation within hardcoded factory class and single (static) call instead calling container;
-However, you might not be able to tell up front which individual component of created object might
-be needed elsewhere and it would require to extract it from existing factory - with container you
-don't need to do that, because all components are also container's entries, and this flexibility
-is the only advantage of containers that cannot be compensated. For example authentication service
-might use session, so it's not enough to write factory for auth service, but one for session is
-also needed, because the latter might be used in different context - bunch of singleton factories
-would become hard to maintain.
+##### Containers vs decomposed factories and Singleton pattern
+Mentioned factories introduce another problem though. You might not be able to tell up front which
+individual component of created object might be needed elsewhere and it would be necessary to extract
+it from existing factory into another factory and call it in both places - the factory it was extracted
+from and the other part that needs this component. When the same instance is needed such factory in
+some cases would need to cache created object - most probably using [_Singleton pattern_](https://en.wikipedia.org/wiki/Singleton_pattern).
+
+_Singleton pattern_ is needed when same object needs to be provided in different scopes of the code.
+When only single factory uses it there's no need for singleton. The number of injection points doesn't
+matter since it can be passed in all of them as previously created local variable. Singleton pattern
+objects are available in global scope for any part of the code and this makes them hard to maintain
+since you don't really know where it is or will be used.
+
+For example authentication service might use session, so it's not enough to write factory for auth
+service, but one for session is also needed, because session might be used not only in many different
+contexts, but also in different application scopes (building both middleware and use case compositions).
+Having a number of singleton factories called in multiple places results in hard to comprehend code
+even when they're used in disciplined manner - that is only in composition layer ("main" partition).
+
+Container solves both decomposition and scope control problem, because all components can also be
+container entries and it's usage scope is strictly limited to the places it was injected. This
+flexibility is the only advantage of (standard) containers that cannot be easily replaced in other
+way. However some discipline regarding containers is also required. 
 
 ##### Containers and Service locator anti-pattern
-Factories mentioned above often utilize created object memoization (_Singleton Pattern_) and their
-use should be limited to certain scope, but same applies to containers.
 Containers shouldn't be injected as a wrapper providing direct (objects that will be called in the
 same scope) dependencies of the object, because that will expose dependency on container while hiding
 types of objects we really depend on.
 It may seem appealing that we can freely inject lazily invoked objects with possibility of not using
 them, but these unused objects, in vast majority of cases, should denote that our object's scope
 is too broad. Branching that leads to skipping method call (OOP message sending) on one of dependencies
-should be handled up front, which would make our class easy to read and test. Making exceptions for
+should be handled up front, which would make our class easy to test and read. Making exceptions for
 sake of easier implementation will quickly turn into standard practice (especially within larger
-or remote working teams), because consistency (with other bad code) will replace reasoning.
+or remote working teams), because consistency seems plausible even when it concerns bad practices.
+Healthy constraints are more reliable than expected reasoning.
 
 ##### Container in factory is harmless
-Dependency injection container should help with dependency injection, but not replace it.
-It's fine to **inject container into factory objects**, because factory itself does not make calls on
-objects container provides and it doesn't matter what objects factory is coupled to. Treat application
-objects composition as a form of configuration.
+Dependency injection container should help with dependency injection, but not replace it. It's fine to
+**inject container into main factory objects** in framework controlled scope, because factory itself
+does not make calls on objects container provides and it doesn't matter what objects factory is coupled to.
+Treat application objects composition as a form of configuration.
 
 #### Why no auto-wiring (yet)?
 Explicitly hardcoded class compositions whether instantiated directly or indirectly through container
-might be traded for convenient auto-wiring, but in my opinion its price includes important part of
+might be traded for convenient auto-wiring, but in my opinion its cost includes important part of
 polymorphism, which is resolving preconditions. This is not the price you pay up front, and while debt
 itself is not inherently bad, forgetting you have one until you can't pay it back definitely is.
