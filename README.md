@@ -256,7 +256,7 @@ $container = new CompositeContainer(new TrackedRecords($records), $containers);
 
 ### Configuration Container
 
-[`ConfigContainer`](src/ConfigContainer.php) that comes with this package is convenient
+[`ConfigContainer`](src/ConfigContainer.php) that comes with this package is a convenient
 way to store and retrieve values from multidimensional associative arrays using path notation.
 This container is instantiated directly with array passed to constructor, which values can be
 accessed by dot-separated keys on consecutive nesting levels. Example:
@@ -280,8 +280,10 @@ $container->get('pdo'); // ['dsn => 'mysql:dbname=testdb;host=localhost', 'user'
 $container->get('pdo.user'); // root
 $container->get('pdo.options'); // [ PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8', ... ]
  ```
-As it was described in section on [composite container](#composite-container) you can use both
-record-based and config container as a single Container using `Entry::container()` method:
+As it was described in [composite container](#composite-container) section you can use both
+record-based and config container as a single Container using `Entry::container()` method.
+Having above `$container` defined, you can recreate main example which uses its `value` and
+`domain` entries:
 ```php
 ...
 $setup = new Setup();
@@ -296,7 +298,7 @@ $setup->set('factory.product')->product('factory.object', 'create', 'env.domain'
 $container = $setup->container();
 ```
 Note additional path prefixes for `value` and `domain` within `deferred.object` and `factory.product`
-definitions compared to records used in previous example. These values are still fetched from
+definitions compared to records used in original example. These values are still fetched from
 `ConfigContainer`, but accessed through composite container using `env` prefix. This way values from
 both config and record containers encapsulated inside composite container can be retrieved:
 ```php
@@ -306,8 +308,8 @@ echo $container->get('env.pdo.user'); // root
 $object = $container->get('factory.product');
 ```
 Object created with `$container->get('factory.product')` will be the same as instantiated objects
-directly using `new` operator as shown in [Containers vs direct instantiation](#containers-vs-decomposed-factories)
-section with some more extended take on the subject.
+directly using `new` operator shown in [Containers vs direct instantiation](#containers-vs-decomposed-factories)
+section with extended take on the subject.
 
 ### Recommended use
 
