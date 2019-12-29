@@ -15,6 +15,18 @@ use Polymorphine\Container\Records\Record;
 use Psr\Container\ContainerInterface;
 
 
+/**
+ * Record using multiple object definitions wrapping each other.
+ *
+ * NOTICE: Object intended for internal instantiation through Setup
+ * methods. Instead directly created instance use more efficient methods
+ * of composing objects like factories or procedures encapsulated within
+ * callback function.
+ *
+ * @see CallbackRecord
+ *
+ * Returned value is cached and returned directly on subsequent calls.
+ */
 class ComposedInstanceRecord implements Record
 {
     private $recursiveId;

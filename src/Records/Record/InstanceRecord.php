@@ -30,8 +30,8 @@ class InstanceRecord implements Record
     private $object;
 
     /**
-     * @param string $className       class to instantiate
-     * @param string ...$dependencies container identifiers for class constructor parameters
+     * @param string $className       Class to instantiate
+     * @param string ...$dependencies Container identifiers for constructor parameters
      */
     public function __construct(string $className, string ...$dependencies)
     {
