@@ -17,7 +17,8 @@ use Psr\Container\ContainerInterface;
 /**
  * Container with multidimensional array values accessed using path notation identifiers.
  *
- * @example $instance->get('key.sub-key.id') === $config['key']['sub-key']['id']
+ * @example $container = new ConfigContainer($config);
+ *          $container->get('key.sub-key.id') === $config['key']['sub-key']['id']; //true
  */
 class ConfigContainer implements ContainerInterface
 {
@@ -26,8 +27,8 @@ class ConfigContainer implements ContainerInterface
     private $config;
 
     /**
-     * $config keys MUST NOT contain path separator on any level,
-     * because values stored under these keys will not be accessible.
+     * $config keys MUST NOT contain path separator (`.` character) on any level.
+     * Values stored under these keys will not be accessible.
      *
      * @param array $config Associative (multidimensional) array of config values
      */
