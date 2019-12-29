@@ -32,9 +32,9 @@ class ProductRecord implements Record
     private $product;
 
     /**
-     * @param string $factoryId    container identifier for factory object
-     * @param string $method       factory method name
-     * @param string ...$arguments container identifiers for method parameters
+     * @param string $factoryId    Container identifier for factory object
+     * @param string $method       Factory method name
+     * @param string ...$arguments Container identifiers for method parameters
      */
     public function __construct(string $factoryId, string $method, string ...$arguments)
     {

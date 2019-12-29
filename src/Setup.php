@@ -17,6 +17,10 @@ use Polymorphine\Container\Setup\Exception;
 use Psr\Container\ContainerInterface;
 
 
+/**
+ * Builder type class provides methods for collecting entries for container
+ * and creating its instance based on composition of provided values.
+ */
 class Setup
 {
     private $build;
@@ -27,8 +31,18 @@ class Setup
     }
 
     /**
-     * @param Records\Record[]     $records
-     * @param ContainerInterface[] $containers
+     * Creates Setup with predefined Record and ContainerInterface entries
+     * assuming correctness of provided data.
+     *
+     * Constraints for keys of array parameters:
+     * - Keys will become Container identifiers so they must be unique strings in
+     *   both arrays combined
+     * - $containers array keys cannot contain separator (default: `.` character)
+     * - keys of $records array cannot start with any of $containers separated
+     *   prefix. For example: ['foo.bar' => record] and ['foo' => container]
+     *
+     * @param Records\Record[]     $records    Flat associative with string identifier keys
+     * @param ContainerInterface[] $containers Flat associative with string identifier prefix keys
      *
      * @return static
      */
@@ -38,9 +52,12 @@ class Setup
     }
 
     /**
-     * Creates Setup with additional identifier collision checks, and
-     * Container created with such Setup will also detect circular
-     * references and add call stack paths to thrown exceptions.
+     * Creates Setup with predefined Record and ContainerInterface entries with
+     * additional (compared to production() method) identifier collision checks
+     * that will create Container in DEBUG mode detecting circular references
+     * and adding call stack paths to thrown exceptions.
+     *
+     * @see Setup::production()
      *
      * @param Records\Record[]     $records
      * @param ContainerInterface[] $containers

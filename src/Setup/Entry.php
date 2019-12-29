@@ -17,7 +17,8 @@ use Psr\Container\ContainerInterface;
 
 /**
  * Write-only proxy with helper methods to instantiate and set
- * Record implementations for given Container item identifier.
+ * Record implementations and sub-container instances for given
+ * Container identifier.
  */
 class Entry
 {
@@ -62,7 +63,7 @@ class Entry
     /**
      * Adds ValueRecord with given value into container records.
      *
-     * @see ValueRecord
+     * @see Record\ValueRecord
      *
      * @param $value
      *
@@ -77,7 +78,7 @@ class Entry
      * Adds CallbackRecord with given callable into container records.
      * Callback receives ContainerInterface instance as parameter.
      *
-     * @see CallbackRecord
+     * @see Record\CallbackRecord
      *
      * @param callable $callback function (ContainerInterface): mixed
      *
@@ -92,7 +93,7 @@ class Entry
      * Adds InstanceRecord to container records with given className
      * and its constructor parameters given as Container identifiers.
      *
-     * @see InstanceRecord
+     * @see Record\InstanceRecord
      *
      * @param string $className
      * @param string ...$dependencies
@@ -117,7 +118,6 @@ class Entry
      * add ComposedInstanceRecord to container records.
      *
      * @see Record\InstanceRecord
-     * @see Wrapper
      *
      * @param string $className
      * @param string ...$dependencies
@@ -134,7 +134,7 @@ class Entry
      * identifier of factory class, factory method name and container
      * identifiers of its parameters.
      *
-     * @see ProductRecord
+     * @see Record\ProductRecord
      *
      * @param string $factoryId
      * @param string $method

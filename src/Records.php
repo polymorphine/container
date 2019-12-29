@@ -15,14 +15,14 @@ use Psr\Container\ContainerInterface;
 
 
 /**
- * Container of Record strategies to produce container values.
+ * Collection of Record strategies to produce values retrieved from container.
  */
 class Records
 {
     private $records;
 
     /**
-     * @param Records\Record[] $records Associative (flat) array of Record entries
+     * @param Records\Record[] $records Flat associative with string identifier keys
      */
     public function __construct(array $records = [])
     {
@@ -31,7 +31,7 @@ class Records
 
     /**
      * Checks if Record is stored at given identifier without
-     * calling for its value.
+     * invoking its value.
      *
      * @param string $id
      *
@@ -44,8 +44,8 @@ class Records
 
     /**
      * Returns Record value stored at given identifier.
-     * ContainerInterface is given for possibility of producing
-     * Record's value using another container entries.
+     * Given $container allows for producing Record's value using
+     * other container entries with recursive call.
      *
      * @param string             $id
      * @param ContainerInterface $container
