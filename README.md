@@ -66,10 +66,8 @@ and [Instantiating Container directly](#direct-instantiation--container-composit
 idea.
 
 `Setup::container()` may be called again after more entries were added, but the call will return new,
-independent container instance. Container entries stored in Setup instance may not be removed, but
-can be changed or decorated with [explicit method calls](#secure-setup--circular-reference-detection).
-It is also recommended to encapsulate [`Setup`](src/Setup.php) within controlled scope ad described in
-section on [read and Write separation](#read-and-write-separation).
+independent container instance. It is also recommended to encapsulate [`Setup`](src/Setup.php) within
+controlled scope ad described in section on [read and Write separation](#read-and-write-separation).
 
 #### Records decide how it works internally
 Values returned from Container are initially wrapped into [`Record`](src/Records/Record.php) abstraction
@@ -107,25 +105,6 @@ implementations:
 Custom `Record` implementations might be mutable, return different values on subsequent calls
 or introduce various side effects, but it is not recommended.
 
-#### Overwriting setup entries
-Calling `Setup::set()` method will throw exception when given identifier is already defined.
-This way it will be assured that no unused entries were defined, and depending on config
-definitions are consistent with the ones used later in code.
-
-It is possible to overwrite existing entry with explicit `Setup::replace()` method. You can also
-redefine setup entry with `Setup::decorate()` method that will wrap it with an object decorating it.
-The second feature is described in [decorating defined records](#decorating-defined-records) section.
-These methods will throw exception when replaced entry is not yet defined and although there might be
-some use cases where object decoration needs to be resolved in configuration scope, both are meant to
-be used primarily in **development environment**. As soon final entry value can be established it
-should be passed to constructor or defined with `Setup::set()` method.
-
-The only method that is safe to work with unknown configuration state is `Setup::fallback()`. It will
-ignore given entry definition if its identifier was already defined. This method might be used in
-production environment or live server testing stage where config changes are being made, and application
-errors (using error handlers) need to be avoided by replacing it with some information output or simplified
-version.
-
 #### Composed entries
 ##### Record composition using Wrapper
 Entry may be built with multiple instance descriptors (same parameters as `InstanceRecord` uses)
@@ -142,27 +121,6 @@ Without it exception will be thrown because it wouldn't constitute composition b
 different instance that should've been defined with `Entry::instance()` method. This self-reference
 will not cause circular calls because it isn't used as standalone container entry (as identifiers for
 other dependencies), but a placeholder pointing wrapped instance in composition process.
-
-##### Decorating defined Records
-`Wrapper` can be also used to decorate existing record by calling `Setup::decorate()` method and, as
-previously, using self-reference as one of its constructor parameters. Let's assume for example that
-in development environment we want to log events of passing/returning messages by a library defined
-as 'my.library' record - here's how adding such feature might look like:
-```php
- $setup->set('my.library')->callback(function (ContainerInterface $c) {
-     return new MyLibrary($c->get('myLib.dependency'), ...);
- });
-
- if ($env === 'develop') {
-     $setup->decorate('my.library')
-           ->with(LoggedMyLibrary::class, 'my.library', 'logger.object')
-           ->compose();
- }
-```
-Of course it should return the same type as overwritten record would - otherwise all clients
-currently using it would crash (fail on type-checking). Unfortunately due to lazy instantiation
-container can't ensure correct decorator use and errors caused by hacks will emerge at runtime.
-
 
 #### Composite Container
 `Entry::container()` method can be used to add another ContainerInterface instances and create
@@ -308,7 +266,7 @@ echo $container->get('env.pdo.user'); // root
 $object = $container->get('factory.product');
 ```
 Object created with `$container->get('factory.product')` will be the same as instantiated objects
-directly using `new` operator shown in [Containers vs direct instantiation](#containers-vs-decomposed-factories)
+directly using `new` operator shown in [Containers vs direct instantiation](#containers-vs-direct-instantiation)
 section with extended take on the subject.
 
 ### Recommended use

@@ -68,20 +68,6 @@ class BuildTest extends TestCase
         $this->assertFalse($setup->has('Record'));
     }
 
-    public function testBuild_decoratorWithRecordId_ReturnsWrapperForGivenRecord()
-    {
-        $setup    = $this->builder(['foo' => $record = Doubles\MockedRecord::new('not decorated')]);
-        $expected = new Setup\Wrapper('foo', $record, new Setup\Entry('foo', $setup));
-        $this->assertEquals($expected, $setup->decorator('foo'));
-    }
-
-    public function testBuild_decoratorForUndefinedRecord_ThrowsException()
-    {
-        $setup = $this->builder(['foo' => Doubles\MockedRecord::new('not decorated')]);
-        $this->expectException(Setup\Exception\OverwriteRuleException::class);
-        $setup->decorator('bar');
-    }
-
     protected function builder(array $records = [], array $containers = []): Setup\Build
     {
         return new Setup\Build($records, $containers);
