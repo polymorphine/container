@@ -20,10 +20,8 @@ use Psr\Container\ContainerInterface;
 interface Record
 {
     /**
-     * Unwraps value requested from container.
-     *
-     * Container instance is passed as parameter because value
-     * may need other container entries to be created.
+     * Returns stored or resolved value optionally using passed
+     * ContainerInterface instance.
      *
      * @param ContainerInterface $container
      *
