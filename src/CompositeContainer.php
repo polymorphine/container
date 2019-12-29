@@ -27,12 +27,12 @@ class CompositeContainer implements ContainerInterface
     private $containers;
 
     /**
-     * Container identifiers cannot contain separator.
-     * Records will not be called when existing container
-     * identifier is used (as prefix).
+     * Container identifiers cannot contain separator and Records will
+     * not be called when their identifier or its prefix is used by
+     * existing container.
      *
      * @param Records              $records
-     * @param ContainerInterface[] $containers
+     * @param ContainerInterface[] $containers Flat associative with string identifier prefix keys
      */
     public function __construct(Records $records, array $containers)
     {
