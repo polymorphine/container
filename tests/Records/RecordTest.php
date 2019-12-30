@@ -26,7 +26,7 @@ class RecordTest extends TestCase
         $this->assertInstanceOf(Record::class, new Record\CallbackRecord(function () {}));
         $this->assertInstanceOf(Record::class, new Record\InstanceRecord(Fixtures\ExampleImpl::class, 'foo.id'));
         $this->assertInstanceOf(Record::class, new Record\ProductRecord('factory.id', 'create', 'foo.id'));
-        $this->assertInstanceOf(Record::class, new Record\ComposedInstanceRecord('foo.id', Doubles\MockedRecord::new(), []));
+        $this->assertInstanceOf(Record::class, new Record\ComposedInstanceRecord('foo.id', Doubles\MockedRecord::new(), null));
     }
 
     public function testValueRecord_value_ReturnsStoredValue()
@@ -81,11 +81,12 @@ class RecordTest extends TestCase
             'textB'    => 'twice'
         ]);
         $expected = new Fixtures\DecoratorExample(Fixtures\ExampleImpl::new('Test string'), 'wrapped twice');
-        $record = new Record\ComposedInstanceRecord('wrapped', new Record\ValueRecord('string'), [
-            [Fixtures\ExampleImpl::class, ['callback', 'wrapped']],
-            [Fixtures\DecoratorExample::class, ['wrapped', 'textA']],
-            [Fixtures\DecoratorExample::class, ['wrapped', 'textB']]
-        ]);
+
+        $record = new Record\ValueRecord('string');
+        $record = new Record\ComposedInstanceRecord(Fixtures\ExampleImpl::class, $record, 'callback', null);
+        $record = new Record\ComposedInstanceRecord(Fixtures\DecoratorExample::class, $record, null, 'textA');
+        $record = new Record\ComposedInstanceRecord(Fixtures\DecoratorExample::class, $record, null, 'textB');
+
         $this->assertEquals($expected, $record->value($container));
     }
 
@@ -107,14 +108,15 @@ class RecordTest extends TestCase
 
     public function lazyRecords()
     {
+        $composed = new Record\ValueRecord('foo');
+        $composed = new Record\ComposedInstanceRecord(Fixtures\ExampleImpl::class, $composed, 'callback', null);
+        $composed = new Record\ComposedInstanceRecord(Fixtures\DecoratorExample::class, $composed, null, 'stringA');
+
         return [
             [new Record\CallbackRecord(function () { return Fixtures\ExampleImpl::new(); })],
             [new Record\InstanceRecord(Fixtures\ExampleImpl::class, 'callback', 'stringA')],
             [new Record\ProductRecord('factory', 'create', 'stringA', 'stringB')],
-            [new Record\ComposedInstanceRecord('wrap', new Record\ValueRecord('foo'), [
-                [Fixtures\ExampleImpl::class, ['callback', 'wrap']],
-                [Fixtures\DecoratorExample::class, ['wrap', 'stringA']]
-            ])]
+            [$composed]
         ];
     }
 }

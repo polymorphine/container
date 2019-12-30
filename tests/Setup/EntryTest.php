@@ -95,10 +95,9 @@ class EntryTest extends TestCase
               ->with(Fixtures\DecoratorExample::class, 'foo', 'baz')
               ->with(Fixtures\DecoratorExample::class, 'qux', 'foo')
               ->compose();
-        $record = new Record\ComposedInstanceRecord('foo', new Record\InstanceRecord(Fixtures\ExampleImpl::class, 'bar'), [
-            [Fixtures\DecoratorExample::class, ['foo', 'baz']],
-            [Fixtures\DecoratorExample::class, ['qux', 'foo']]
-        ]);
+        $record = new Record\InstanceRecord(Fixtures\ExampleImpl::class, 'bar');
+        $record = new Record\ComposedInstanceRecord(Fixtures\DecoratorExample::class, $record, null, 'baz');
+        $record = new Record\ComposedInstanceRecord(Fixtures\DecoratorExample::class, $record, 'qux', null);
         $this->assertEquals([['foo', $record]], $setup->setRecords);
     }
 

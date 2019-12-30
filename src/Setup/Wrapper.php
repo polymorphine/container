@@ -22,12 +22,11 @@ class Wrapper
     private $id;
     private $record;
     private $entry;
-    private $wrappers = [];
 
-    public function __construct(string $wrappedId, Record $wrappedRecord, Entry $entry)
+    public function __construct(string $id, Record $record, Entry $entry)
     {
-        $this->id     = $wrappedId;
-        $this->record = $wrappedRecord;
+        $this->id     = $id;
+        $this->record = $record;
         $this->entry  = $entry;
     }
 
@@ -50,12 +49,8 @@ class Wrapper
      */
     public function with(string $className, string ...$dependencies): self
     {
-        $idx = array_search($this->id, $dependencies, true);
-        if ($idx === false) {
-            throw Exception\IntegrityConstraintException::missingReference($this->id);
-        }
-
-        $this->wrappers[] = [$className, $dependencies];
+        $dependencies = $this->clearWrapped($dependencies);
+        $this->record = new Record\ComposedInstanceRecord($className, $this->record, ...$dependencies);
         return $this;
     }
 
@@ -65,6 +60,22 @@ class Wrapper
      */
     public function compose(): void
     {
-        $this->entry->record(new Record\ComposedInstanceRecord($this->id, $this->record, $this->wrappers));
+        $this->entry->record($this->record);
+    }
+
+    private function clearWrapped(array $dependencies): array
+    {
+        $valid = false;
+        foreach ($dependencies as &$id) {
+            if ($id !== $this->id) { continue; }
+            $id    = null;
+            $valid = true;
+        }
+
+        if (!$valid) {
+            throw Exception\IntegrityConstraintException::missingReference($this->id);
+        }
+
+        return $dependencies;
     }
 }

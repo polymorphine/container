@@ -29,34 +29,34 @@ use Psr\Container\ContainerInterface;
  */
 class ComposedInstanceRecord implements Record
 {
-    private $recursiveId;
-    private $baseRecord;
-    private $wrappers;
-    private $cached;
+    private $className;
+    private $wrappedRecord;
+    private $dependencies;
+    private $object;
 
-    public function __construct(string $id, Record $baseRecord, array $wrappers)
+    public function __construct(string $className, Record $wrappedRecord, ?string ...$dependencies)
     {
-        $this->recursiveId = $id;
-        $this->baseRecord  = $baseRecord;
-        $this->wrappers    = $wrappers;
+        $this->className     = $className;
+        $this->wrappedRecord = $wrappedRecord;
+        $this->dependencies  = $dependencies;
     }
 
     public function value(ContainerInterface $container)
     {
-        if ($this->cached) { return $this->cached; }
-        $current = $this->baseRecord->value($container);
-        foreach ($this->wrappers as [$className, $dependencies]) {
-            $current = new $className(...$this->mapContainerRecords($current, $dependencies, $container));
-        }
-
-        return $this->cached = $current;
+        return $this->object ?: $this->object = $this->create($container);
     }
 
-    private function mapContainerRecords($current, array $identifiers, ContainerInterface $container): array
+    private function create(ContainerInterface $container)
+    {
+        $dependencies = $this->mapDependencies($container);
+        return new $this->className(...$dependencies);
+    }
+
+    private function mapDependencies(ContainerInterface $container): array
     {
         $dependencies = [];
-        foreach ($identifiers as $id) {
-            $dependencies[] = $id === $this->recursiveId ? $current : $container->get($id);
+        foreach ($this->dependencies as $id) {
+            $dependencies[] = $id ? $container->get($id) : $this->wrappedRecord->value($container);
         }
         return $dependencies;
     }
