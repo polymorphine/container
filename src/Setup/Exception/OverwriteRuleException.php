@@ -16,6 +16,11 @@ use LogicException;
 
 class OverwriteRuleException extends LogicException
 {
+    /**
+     * @param string $id
+     *
+     * @return static
+     */
     public static function alreadyDefined(string $id): self
     {
         return new self("Cannot overwrite defined `$id` entry");

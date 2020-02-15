@@ -17,11 +17,23 @@ use InvalidArgumentException;
 
 class RecordNotFoundException extends InvalidArgumentException implements NotFoundExceptionInterface
 {
+    /**
+     * @param string $id
+     *
+     * @return static
+     */
     public static function undefined(string $id): self
     {
         return new self("Record `$id` not defined");
     }
 
+    /**
+     * @param string                     $containerId
+     * @param string                     $id
+     * @param NotFoundExceptionInterface $previous
+     *
+     * @return static
+     */
     public static function notFoundInSubContainer(
         string $containerId,
         string $id,

@@ -22,12 +22,19 @@ class Build implements Collection
     protected $records;
     protected $containers;
 
+    /**
+     * @param array $records
+     * @param array $containers
+     */
     public function __construct(array $records = [], array $containers = [])
     {
         $this->records    = $records;
         $this->containers = $containers;
     }
 
+    /**
+     * @return ContainerInterface
+     */
     public function container(): ContainerInterface
     {
         return $this->containers

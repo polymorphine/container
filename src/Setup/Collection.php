@@ -17,9 +17,22 @@ use Psr\Container\ContainerInterface;
 
 interface Collection
 {
+    /**
+     * @param string $id
+     *
+     * @return bool
+     */
     public function has(string $id): bool;
 
+    /**
+     * @param string         $id
+     * @param Records\Record $record
+     */
     public function setRecord(string $id, Records\Record $record): void;
 
+    /**
+     * @param string             $id
+     * @param ContainerInterface $container
+     */
     public function setContainer(string $id, ContainerInterface $container): void;
 }

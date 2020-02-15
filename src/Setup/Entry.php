@@ -25,6 +25,10 @@ class Entry
     protected $id;
     protected $builder;
 
+    /**
+     * @param string     $id
+     * @param Collection $build
+     */
     public function __construct(string $id, Collection $build)
     {
         $this->id      = $id;
@@ -80,7 +84,7 @@ class Entry
      *
      * @see Record\CallbackRecord
      *
-     * @param callable $callback function (ContainerInterface): mixed
+     * @param callable $callback fn(ContainerInterface) => mixed
      *
      * @throws Exception\IntegrityConstraintException
      */

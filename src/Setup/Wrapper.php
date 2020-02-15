@@ -23,6 +23,11 @@ class Wrapper
     private $record;
     private $entry;
 
+    /**
+     * @param string $id
+     * @param Record $record
+     * @param Entry  $entry
+     */
     public function __construct(string $id, Record $record, Entry $entry)
     {
         $this->id     = $id;

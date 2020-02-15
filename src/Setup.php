@@ -25,6 +25,9 @@ class Setup
 {
     private $build;
 
+    /**
+     * @param null|Build $build
+     */
     public function __construct(Build $build = null)
     {
         $this->build = $build ?: new Setup\Build();

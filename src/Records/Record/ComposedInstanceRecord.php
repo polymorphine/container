@@ -34,6 +34,11 @@ class ComposedInstanceRecord implements Record
     private $dependencies;
     private $object;
 
+    /**
+     * @param string      $className
+     * @param Record      $wrappedRecord
+     * @param null|string ...$dependencies
+     */
     public function __construct(string $className, Record $wrappedRecord, ?string ...$dependencies)
     {
         $this->className     = $className;

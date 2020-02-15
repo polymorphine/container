@@ -22,6 +22,9 @@ class RecordContainer implements ContainerInterface
 {
     protected $records;
 
+    /**
+     * @param Records $records
+     */
     public function __construct(Records $records)
     {
         $this->records = $records;
