@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/Container package.
@@ -23,8 +23,8 @@ class CompositeContainer implements ContainerInterface
 {
     public const SEPARATOR = '.';
 
-    private $records;
-    private $containers;
+    private Records $records;
+    private array   $containers;
 
     /**
      * Container identifiers cannot contain separator and Records will
@@ -50,7 +50,7 @@ class CompositeContainer implements ContainerInterface
         return $this->records->get($id, $this);
     }
 
-    public function has($id)
+    public function has($id): bool
     {
         [$containerId, $itemId] = $this->splitId($id);
         if (isset($this->containers[$containerId])) {

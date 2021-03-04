@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/Container package.
@@ -22,8 +22,8 @@ use Psr\Container\ContainerInterface;
  */
 class Entry
 {
-    protected $id;
-    protected $builder;
+    protected string     $id;
+    protected Collection $builder;
 
     /**
      * @param string     $id

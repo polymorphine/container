@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/Container package.
@@ -19,12 +19,12 @@ use Psr\Container\ContainerInterface;
 
 class Build implements Collection
 {
-    protected $records;
-    protected $containers;
+    protected array $records;
+    protected array $containers;
 
     /**
-     * @param array $records
-     * @param array $containers
+     * @param Records\Record[]     $records
+     * @param ContainerInterface[] $containers
      */
     public function __construct(array $records = [], array $containers = [])
     {

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/Container package.
@@ -14,14 +14,14 @@ namespace Polymorphine\Container\Tests\Fixtures;
 
 class ExampleImpl implements Example
 {
-    private $string;
+    private string $string;
 
     public function __construct(callable $callback, string $name)
     {
         $this->string = $callback($name);
     }
 
-    public static function new(string $string = 'Example')
+    public static function new(string $string = 'Example'): self
     {
         return new self(function (string $string) { return $string; }, $string);
     }

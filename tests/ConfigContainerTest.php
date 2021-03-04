@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/Container package.
@@ -69,12 +69,12 @@ class ConfigContainerTest extends TestCase
         $container->get($id);
     }
 
-    public function undefinedEntries()
+    public function undefinedEntries(): array
     {
         return [['missing'], ['foo1.undefined'], ['foo1.bar2.missing'], ['foo2.bar.baz.qux'], ['foo3.more']];
     }
 
-    private function container(?array &$config = [])
+    private function container(?array &$config = []): ConfigContainer
     {
         if (!$config) {
             $config = [

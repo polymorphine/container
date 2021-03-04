@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/Container package.
@@ -19,7 +19,7 @@ use Psr\Container\ContainerInterface;
  */
 class Records
 {
-    private $records;
+    private array $records;
 
     /**
      * @param Records\Record[] $records Flat associative with string identifier keys

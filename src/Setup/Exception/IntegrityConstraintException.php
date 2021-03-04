@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/Container package.
@@ -50,9 +50,9 @@ class IntegrityConstraintException extends LogicException
     /**
      * @param string $id
      *
-     * @return IntegrityConstraintException
+     * @return static
      */
-    public static function missingReference(string $id)
+    public static function missingReference(string $id): self
     {
         return new self("Wrapped `$id` entry should be referenced by decorating object");
     }

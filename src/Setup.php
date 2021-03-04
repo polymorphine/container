@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/Container package.
@@ -23,14 +23,14 @@ use Psr\Container\ContainerInterface;
  */
 class Setup
 {
-    private $build;
+    private Build $build;
 
     /**
-     * @param null|Build $build
+     * @param Build|null $build
      */
     public function __construct(Build $build = null)
     {
-        $this->build = $build ?: new Setup\Build();
+        $this->build = $build ?: new Build();
     }
 
     /**
@@ -51,7 +51,7 @@ class Setup
      */
     public static function production(array $records = [], array $containers = []): self
     {
-        return new self(new Setup\Build($records, $containers));
+        return new self(new Build($records, $containers));
     }
 
     /**
@@ -69,7 +69,7 @@ class Setup
      */
     public static function development(array $records = [], array $containers = []): self
     {
-        return new self(new Setup\Build\ValidatedBuild($records, $containers));
+        return new self(new Build\ValidatedBuild($records, $containers));
     }
 
     /**
@@ -95,7 +95,7 @@ class Setup
      *
      * @throws Exception\OverwriteRuleException
      *
-     * @return Setup\Entry
+     * @return Entry
      */
     public function set(string $id): Entry
     {

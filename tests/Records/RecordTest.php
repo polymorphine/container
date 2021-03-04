@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/Container package.
@@ -106,7 +106,7 @@ class RecordTest extends TestCase
         $this->assertSame($record->value($container), $record->value($container));
     }
 
-    public function lazyRecords()
+    public function lazyRecords(): array
     {
         $composed = new Record\ValueRecord('foo');
         $composed = new Record\ComposedInstanceRecord(Fixtures\ExampleImpl::class, $composed, 'callback', null);

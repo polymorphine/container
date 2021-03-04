@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/Container package.
@@ -17,7 +17,7 @@ use Psr\Container\ContainerInterface;
 
 class FakeContainer implements ContainerInterface
 {
-    public $data = [];
+    public array $data = [];
 
     public function __construct(array $data = [])
     {
@@ -37,7 +37,7 @@ class FakeContainer implements ContainerInterface
         return $this->data[$id];
     }
 
-    public function has($id)
+    public function has($id): bool
     {
         return array_key_exists($id, $this->data);
     }

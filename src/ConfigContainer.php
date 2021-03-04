@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/Container package.
@@ -24,7 +24,7 @@ class ConfigContainer implements ContainerInterface
 {
     public const SEPARATOR = '.';
 
-    private $config;
+    private array $config;
 
     /**
      * $config keys MUST NOT contain path separator (`.` character) on any level.
@@ -51,7 +51,7 @@ class ConfigContainer implements ContainerInterface
         return $data;
     }
 
-    public function has($id)
+    public function has($id): bool
     {
         $data = &$this->config;
         $keys = explode(self::SEPARATOR, $id);

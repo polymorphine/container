@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/Container package.
@@ -20,13 +20,12 @@ use Psr\Container\ContainerInterface;
 
 class MockedBuild extends Build
 {
-    public $container;
-    public $wrapper;
+    public ContainerInterface $container;
+    public Wrapper            $wrapper;
+    public array              $setRecords    = [];
+    public array              $setContainers = [];
 
-    public $setRecords    = [];
-    public $setContainers = [];
-
-    private $defined;
+    private bool $defined;
 
     public static function defined(): self
     {
