@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/Container package.
@@ -18,7 +18,7 @@ use Psr\Container\ContainerInterface;
 class MockedRecord implements Record
 {
     public $value;
-    public $passedContainer;
+    public ContainerInterface $passedContainer;
 
     public function __construct($value = null)
     {

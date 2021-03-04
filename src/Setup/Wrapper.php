@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/Container package.
@@ -19,10 +19,15 @@ use Polymorphine\Container\Records\Record;
  */
 class Wrapper
 {
-    private $id;
-    private $record;
-    private $entry;
+    private string $id;
+    private Record $record;
+    private Entry  $entry;
 
+    /**
+     * @param string $id
+     * @param Record $record
+     * @param Entry  $entry
+     */
     public function __construct(string $id, Record $record, Entry $entry)
     {
         $this->id     = $id;

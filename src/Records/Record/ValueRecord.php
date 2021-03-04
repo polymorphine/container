@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/Container package.
@@ -22,6 +22,9 @@ class ValueRecord implements Record
 {
     private $value;
 
+    /**
+     * @param $value
+     */
     public function __construct($value)
     {
         $this->value = $value;

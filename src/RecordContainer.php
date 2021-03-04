@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/Container package.
@@ -20,8 +20,11 @@ use Psr\Container\ContainerInterface;
  */
 class RecordContainer implements ContainerInterface
 {
-    protected $records;
+    protected Records $records;
 
+    /**
+     * @param Records $records
+     */
     public function __construct(Records $records)
     {
         $this->records = $records;

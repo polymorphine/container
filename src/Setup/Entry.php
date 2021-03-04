@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/Container package.
@@ -22,9 +22,13 @@ use Psr\Container\ContainerInterface;
  */
 class Entry
 {
-    protected $id;
-    protected $builder;
+    protected string     $id;
+    protected Collection $builder;
 
+    /**
+     * @param string     $id
+     * @param Collection $build
+     */
     public function __construct(string $id, Collection $build)
     {
         $this->id      = $id;
@@ -80,7 +84,7 @@ class Entry
      *
      * @see Record\CallbackRecord
      *
-     * @param callable $callback function (ContainerInterface): mixed
+     * @param callable $callback fn(ContainerInterface) => mixed
      *
      * @throws Exception\IntegrityConstraintException
      */

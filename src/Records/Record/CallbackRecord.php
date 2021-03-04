@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/Container package.
@@ -27,7 +27,7 @@ class CallbackRecord implements Record
     private $callback;
 
     /**
-     * @param callable $callback function(ContainerInterface): mixed
+     * @param callable $callback fn(ContainerInterface) => mixed
      */
     public function __construct(callable $callback)
     {

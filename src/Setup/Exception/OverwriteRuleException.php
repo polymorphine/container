@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/Container package.
@@ -16,6 +16,11 @@ use LogicException;
 
 class OverwriteRuleException extends LogicException
 {
+    /**
+     * @param string $id
+     *
+     * @return static
+     */
     public static function alreadyDefined(string $id): self
     {
         return new self("Cannot overwrite defined `$id` entry");

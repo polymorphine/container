@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/Container package.
@@ -26,9 +26,9 @@ class ProductRecord implements Record
 {
     use ContainerMapMethod;
 
-    private $factoryId;
-    private $method;
-    private $arguments = [];
+    private string $factoryId;
+    private string $method;
+    private array  $arguments;
     private $product;
 
     /**
@@ -45,7 +45,7 @@ class ProductRecord implements Record
 
     public function value(ContainerInterface $container)
     {
-        return $this->product ?: $this->product = $this->create($container);
+        return $this->product ??= $this->create($container);
     }
 
     private function create(ContainerInterface $container)

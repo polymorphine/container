@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/Container package.
@@ -14,7 +14,7 @@ namespace Polymorphine\Container\Tests\Fixtures;
 
 class DecoratorExample implements Example
 {
-    private $string;
+    private string $string;
 
     public function __construct(Example $decorated, string $append = 'decorated')
     {

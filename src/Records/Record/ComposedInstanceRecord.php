@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/Container package.
@@ -29,11 +29,16 @@ use Psr\Container\ContainerInterface;
  */
 class ComposedInstanceRecord implements Record
 {
-    private $className;
-    private $wrappedRecord;
-    private $dependencies;
-    private $object;
+    private string $className;
+    private Record $wrappedRecord;
+    private array  $dependencies;
+    private object $object;
 
+    /**
+     * @param string      $className
+     * @param Record      $wrappedRecord
+     * @param string|null ...$dependencies
+     */
     public function __construct(string $className, Record $wrappedRecord, ?string ...$dependencies)
     {
         $this->className     = $className;
@@ -41,9 +46,9 @@ class ComposedInstanceRecord implements Record
         $this->dependencies  = $dependencies;
     }
 
-    public function value(ContainerInterface $container)
+    public function value(ContainerInterface $container): object
     {
-        return $this->object ?: $this->object = $this->create($container);
+        return $this->object ??= $this->create($container);
     }
 
     private function create(ContainerInterface $container)

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 /*
  * This file is part of Polymorphine/Container package.
@@ -91,7 +91,7 @@ class CompositeContainerTest extends TestCase
         $container->get($id);
     }
 
-    public function undefinedEntries()
+    public function undefinedEntries(): array
     {
         return [['foo.something'], ['bar'], ['foo.another'], ['bar.something.else']];
     }
@@ -131,7 +131,7 @@ class CompositeContainerTest extends TestCase
         $container->get('foo');
     }
 
-    private function container(array $records = [], array $containers = [])
+    private function container(array $records = [], array $containers = []): CompositeContainer
     {
         return new CompositeContainer(new Records($records), $containers);
     }
