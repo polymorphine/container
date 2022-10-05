@@ -2,15 +2,6 @@
     "name": "polymorphine/container",
     "description": "PSR-11 Container for libraries & configuration",
     "type": "library",
-    "minimum-stability": "dev",
-    "prefer-stable": true,
-    "require": {
-        "php": "^7.4 || ^8.0",
-        "psr/container": "^1.0"
-    },
-    "require-dev": {
-        "polymorphine/dev": "0.1.*"
-    },
     "license": "MIT",
     "authors": [
         {
@@ -18,6 +9,15 @@
             "email": "q3.shudder@gmail.com"
         }
     ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": "^7.4 || ^8.0",
+        "psr/container": "^1.0"
+    },
+    "require-dev": {
+        "polymorphine/dev": "0.2.*"
+    },
     "autoload": {
         "psr-4": {
             "Polymorphine\\Container\\": "src/"
@@ -30,9 +30,11 @@
     },
     "scripts": {
         "test-cs": [
-            "vendor/bin/php-cs-fixer --dry-run -v --config=cs-fixer.php.dist --path-mode=intersection fix src tests",
-            "vendor/bin/phpcs --extensions=php --standard=vendor/polymorphine/dev/phpcs.xml src",
-            "vendor/bin/phpcs --extensions=php --standard=vendor/polymorphine/dev/phpcs.xml --ignore=*/CodeSamples/* tests"
-        ]
+            "php-cs-fixer --dry-run -v --config=cs-fixer.php.dist --path-mode=intersection fix src tests",
+            "phpcs --extensions=php --standard=vendor/polymorphine/dev/phpcs.xml src",
+            "phpcs --extensions=php --standard=vendor/polymorphine/dev/phpcs.xml --ignore=*/code-samples/* tests"
+        ],
+        "test-php": "phpunit",
+        "test-skeleton": "polymorphine-skeleton check"
     }
 }

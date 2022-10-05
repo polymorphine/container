@@ -1,5 +1,5 @@
 # Polymorphine/Container
-[![Latest Stable Version](https://poser.pugx.org/polymorphine/container/version)](https://packagist.org/packages/polymorphine/container)
+[![Latest stable release](https://poser.pugx.org/polymorphine/container/version)](https://packagist.org/packages/polymorphine/container)
 [![Build status](https://github.com/polymorphine/container/workflows/build/badge.svg)](https://github.com/polymorphine/container/actions)
 [![Coverage status](https://coveralls.io/repos/github/polymorphine/container/badge.svg?branch=develop)](https://coveralls.io/github/polymorphine/container?branch=develop)
 [![PHP version](https://img.shields.io/packagist/php-v/polymorphine/container.svg)](https://packagist.org/packages/polymorphine/container)
@@ -19,7 +19,9 @@
   objects or functions ([more](#recommended-use))
 
 ### Installation with [Composer](https://getcomposer.org/)
-    php composer.phar require polymorphine/container
+```bash
+composer require polymorphine/container
+```
 
 ### Container setup
 This example will show how to set up simple container. It starts with instantiating
