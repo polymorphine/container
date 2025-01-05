@@ -134,7 +134,7 @@ class EntryTest extends TestCase
         return new Doubles\MockedBuild();
     }
 
-    private function entry(string $id, Doubles\MockedBuild $build = null): Entry
+    private function entry(string $id, ?Doubles\MockedBuild $build = null): Entry
     {
         return new Entry($id, $build ?? $this->builder());
     }

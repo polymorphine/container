@@ -28,7 +28,7 @@ class Setup
     /**
      * @param Build|null $build
      */
-    public function __construct(Build $build = null)
+    public function __construct(?Build $build = null)
     {
         $this->build = $build ?: new Build();
     }
