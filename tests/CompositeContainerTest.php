@@ -20,32 +20,37 @@ use Psr\Container\NotFoundExceptionInterface;
 
 class CompositeContainerTest extends TestCase
 {
-    public function testInstantiation()
+    public static function undefinedEntries(): array
+    {
+        return [['foo.something'], ['bar'], ['foo.another'], ['bar.something.else']];
+    }
+
+    public function test_Instantiation()
     {
         $this->assertInstanceOf(ContainerInterface::class, $this->container());
     }
 
-    public function testContainer_getRecordId_ReturnsRecordValue()
+    public function test_Get_WithRecordId_ReturnsRecordValue()
     {
         $container = $this->container(['foo' => Doubles\MockedRecord::new('fooValue')]);
         $this->assertSame('fooValue', $container->get('foo'));
     }
 
-    public function testContainer_getContainerId_ReturnsSubContainer()
+    public function test_Get_WithContainerId_ReturnsSubContainer()
     {
         $subContainer = Doubles\FakeContainer::new();
         $container    = $this->container(['foo' => Doubles\MockedRecord::new('fooValue')], ['sub' => $subContainer]);
         $this->assertSame($subContainer, $container->get('sub'));
     }
 
-    public function testContainer_getWithContainerPrefixedId_ReturnsSubContainerValue()
+    public function test_Get_WithContainerPrefixedId_ReturnsSubContainerValue()
     {
         $subContainer = Doubles\FakeContainer::new(['foo' => 'subFooValue']);
         $container    = $this->container(['foo' => Doubles\MockedRecord::new('fooValue')], ['sub' => $subContainer]);
         $this->assertSame('subFooValue', $container->get('sub.foo'));
     }
 
-    public function testContainerWithOverlappingEntries_getWithConflictedId_ReturnsValueFromContainer()
+    public function test_ForContainerWithOverlappingEntries_Get_WithConflictedId_ReturnsValueFromContainer()
     {
         $subContainer = Doubles\FakeContainer::new(['bar' => 'subFooValue']);
         $container    = $this->container(['foo' => Doubles\MockedRecord::new('inaccessible')], ['foo' => $subContainer]);
@@ -55,7 +60,7 @@ class CompositeContainerTest extends TestCase
         $this->assertSame('subFooValue', $container->get('foo.bar'));
     }
 
-    public function testContainer_has_ReturnsWhetherEntryIsDefinedAndAccessible()
+    public function test_Has_ReturnsWhetherEntryIsDefinedAndAccessible()
     {
         $container = $this->container([
             'foo.something' => Doubles\MockedRecord::new('inaccessible'),
@@ -72,12 +77,8 @@ class CompositeContainerTest extends TestCase
         $this->assertFalse($container->has('bar'));
     }
 
-    /**
-     * @dataProvider undefinedEntries
-     *
-     * @param string $id
-     */
-    public function testContainer_getForUndefinedEntry_ThrowsException(string $id)
+    /** @dataProvider undefinedEntries */
+    public function test_Get_WithUndefinedEntry_ThrowsException(string $id)
     {
         $container = $this->container([
             'foo.something' => Doubles\MockedRecord::new('inaccessible'),
@@ -91,12 +92,7 @@ class CompositeContainerTest extends TestCase
         $container->get($id);
     }
 
-    public function undefinedEntries(): array
-    {
-        return [['foo.something'], ['bar'], ['foo.another'], ['bar.something.else']];
-    }
-
-    public function testContainer_getEntryWithReferencesToContainer_ReturnsResolvedValue()
+    public function test_Get_EntryWithReferencesToContainer_ReturnsResolvedValue()
     {
         $container = $this->container([
             'foo' => Doubles\MockedRecord::new(function (ContainerInterface $c) {
@@ -113,7 +109,7 @@ class CompositeContainerTest extends TestCase
         $this->assertSame('subFoo + subBar', $container->get('foo'));
     }
 
-    public function testContainerWithTrackedRecords_getEntryWithUndefinedContainerReference_ThrowsExceptionWithFullCallStack()
+    public function test_ForContainerWithTrackedRecords_Get_EntryWithUndefinedContainerReference_ThrowsExceptionWithFullCallStack()
     {
         $records = [
             'foo' => Doubles\MockedRecord::new(function (ContainerInterface $c) { return $c->get('sub.foo') . $c->get('bar'); }),

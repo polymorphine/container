@@ -19,12 +19,17 @@ use Psr\Container\NotFoundExceptionInterface;
 
 class ConfigContainerTest extends TestCase
 {
-    public function testInstantiation()
+    public static function undefinedEntries(): array
+    {
+        return [['missing'], ['foo1.undefined'], ['foo1.bar2.missing'], ['foo2.bar.baz.qux'], ['foo3.more']];
+    }
+
+    public function test_Instantiation()
     {
         $this->assertInstanceOf(ContainerInterface::class, $this->container());
     }
 
-    public function testContainer_has_ReturnsTrueForDefinedKeyPaths()
+    public function test_Has_ReturnsTrueForDefinedKeyPaths()
     {
         $container = $this->container();
 
@@ -43,7 +48,7 @@ class ConfigContainerTest extends TestCase
         $this->assertFalse($container->has('foo3.more'));
     }
 
-    public function testContainer_getForDefinedKeyPath_ReturnsValueDefinedWithThisPath()
+    public function test_Get_ForDefinedKeyPath_ReturnsValueDefinedWithThisPath()
     {
         $container = $this->container($config);
 
@@ -57,21 +62,12 @@ class ConfigContainerTest extends TestCase
         $this->assertSame($config['foo3'], $container->get('foo3'));
     }
 
-    /**
-     * @dataProvider undefinedEntries
-     *
-     * @param string $id
-     */
-    public function testContainer_getUndefinedValue_ThrowsException(string $id)
+    /** @dataProvider undefinedEntries */
+    public function test_Get_ForUndefinedValue_ThrowsException(string $id)
     {
         $container = $this->container();
         $this->expectException(NotFoundExceptionInterface::class);
         $container->get($id);
-    }
-
-    public function undefinedEntries(): array
-    {
-        return [['missing'], ['foo1.undefined'], ['foo1.bar2.missing'], ['foo2.bar.baz.qux'], ['foo3.more']];
     }
 
     private function container(?array &$config = []): ConfigContainer

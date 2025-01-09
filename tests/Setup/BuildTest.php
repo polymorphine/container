@@ -21,13 +21,13 @@ use Polymorphine\Container\Tests\Doubles;
 
 class BuildTest extends TestCase
 {
-    public function testBuild_container_ReturnsRecordContainerWithDefinedRecords()
+    public function test_Container_ReturnsRecordContainerWithDefinedRecords()
     {
         $setup = $this->builder($records = ['foo' => Doubles\MockedRecord::new()]);
         $this->assertEquals(new RecordContainer($this->records($records)), $setup->container());
     }
 
-    public function testBuildWithSubContainers_container_ReturnsCompositeContainer()
+    public function test_ForBuildWithSubContainers_Container_ReturnsCompositeContainer()
     {
         $setup = $this->builder(
             $records = ['foo' => Doubles\MockedRecord::new()],
@@ -36,21 +36,21 @@ class BuildTest extends TestCase
         $this->assertEquals(new CompositeContainer($this->records($records), $containers), $setup->container());
     }
 
-    public function testBuild_addRecord_WillCreateContainerWithAddedRecords()
+    public function test_AddRecord_WillCreateContainerWithAddedRecords()
     {
         $setup = $this->builder();
-        $setup->setRecord('foo', $added = Doubles\MockedRecord::new('added'));
+        $setup->setRecord('foo', Doubles\MockedRecord::new('added'));
         $this->assertSame('added', $setup->container()->get('foo'));
     }
 
-    public function testBuild_addContainer_WillCreateContainerWithAddedContainers()
+    public function test_AddContainer_WillCreateContainerWithAddedContainers()
     {
         $setup = $this->builder();
         $setup->setContainer('foo', $container = Doubles\FakeContainer::new());
         $this->assertSame($container, $setup->container()->get('foo'));
     }
 
-    public function testBuild_has_ReturnsTrueForDefinedIds()
+    public function test_Has_ReturnsTrueForDefinedIds()
     {
         $setup = $this->builder(
             ['record' => Doubles\MockedRecord::new()],

@@ -20,32 +20,32 @@ use Polymorphine\Container\Setup;
 
 class ValidatedBuildTest extends BuildTest
 {
-    public function testValidatedBuild_InstantiationWithInvalidRecordType_ThrowsException()
+    public function test_ValidatedBuild_InstantiationWithInvalidRecordType_ThrowsException()
     {
         $this->expectException(Setup\Exception\InvalidTypeException::class);
         $this->builder(['foo' => ExampleImpl::new()]);
     }
 
-    public function testValidatedBuild_InstantiationWithInvalidContainerType_ThrowsException()
+    public function test_ValidatedBuild_InstantiationWithInvalidContainerType_ThrowsException()
     {
         $this->expectException(Setup\Exception\InvalidTypeException::class);
         $this->builder([], ['foo' => ExampleImpl::new()]);
     }
 
-    public function testValidatedBuild_InvalidContainerId_ThrowsException()
+    public function test_ValidatedBuild_InvalidContainerId_ThrowsException()
     {
         $this->expectException(Setup\Exception\IntegrityConstraintException::class);
         $this->builder([], ['foo.bar' => Doubles\FakeContainer::new()]);
     }
 
-    public function testValidatedBuild_setContainerWithIdTakenByRecordsPrefix_ThrowsException()
+    public function test_ValidatedBuild_setContainerWithIdTakenByRecordsPrefix_ThrowsException()
     {
         $setup = $this->builder(['foo.bar' => Doubles\MockedRecord::new()]);
         $this->expectException(Setup\Exception\IntegrityConstraintException::class);
         $setup->setContainer('foo', Doubles\FakeContainer::new());
     }
 
-    public function testValidatedBuild_setRecordMethodWithDefinedContainerPrefix_ThrowsException()
+    public function test_ValidatedBuild_setRecordMethodWithDefinedContainerPrefix_ThrowsException()
     {
         $setup = $this->builder([], ['defined' => Doubles\FakeContainer::new()]);
         $this->expectException(Setup\Exception\IntegrityConstraintException::class);

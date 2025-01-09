@@ -17,36 +17,34 @@ use Polymorphine\Container\Setup;
 
 class SetupTest extends TestCase
 {
-    public function testInstantiation()
+    public function test_Instantiation()
     {
         $this->assertInstanceOf(Setup::class, $this->builder());
         $this->assertInstanceOf(Setup::class, Setup::production());
         $this->assertInstanceOf(Setup::class, Setup::development());
     }
 
-    public function testSetup_container_ReturnsContainerFromBuild()
+    public function test_Container_ReturnsContainerFromBuild()
     {
         $setup = $this->builder($build);
         $this->assertSame($setup->container(), $build->container);
     }
 
-    public function testSetup_setUndefinedId_ReturnsEntryObject()
+    public function test_Set_ForUndefinedId_ReturnsEntryObject()
     {
-        $setup    = new Setup($build = Doubles\MockedBuild::undefined());
-        $expected = new Setup\Entry('foo', $build);
-        $this->assertEquals($expected, $setup->set('foo'));
+        $build = Doubles\MockedBuild::undefined();
+        $this->assertEquals(new Setup\Entry('foo', $build), $this->builder($build)->set('foo'));
     }
 
-    public function testSetup_setDefinedId_ThrowsException()
+    public function test_Set_ForDefinedId_ThrowsException()
     {
         $setup = new Setup(Doubles\MockedBuild::defined());
         $this->expectException(Setup\Exception\OverwriteRuleException::class);
         $setup->set('foo');
     }
 
-    private function builder(?Setup\Build &$build = null): Setup
+    private function builder(?Doubles\MockedBuild &$build = null): Setup
     {
-        $build = new Doubles\MockedBuild();
-        return new Setup($build);
+        return new Setup($build ??= new Doubles\MockedBuild());
     }
 }
