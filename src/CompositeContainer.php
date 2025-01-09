@@ -43,34 +43,28 @@ class CompositeContainer implements ContainerInterface
     public function get($id)
     {
         [$containerId, $itemId] = $this->splitId($id);
-        if (isset($this->containers[$containerId])) {
-            return $itemId ? $this->fromContainer($containerId, $itemId) : $this->containers[$containerId];
+        $subContainer = $this->containers[$containerId] ?? null;
+        if (!$subContainer) {
+            return $this->records->get($id, $this);
         }
 
-        return $this->records->get($id, $this);
+        try {
+            return $itemId ? $subContainer->get($itemId) : $subContainer;
+        } catch (NotFoundExceptionInterface $e) {
+            throw Exception\RecordNotFoundException::notFoundInSubContainer($containerId, $itemId, $e);
+        }
     }
 
     public function has($id): bool
     {
         [$containerId, $itemId] = $this->splitId($id);
-        if (isset($this->containers[$containerId])) {
-            return $itemId ? $this->containers[$containerId]->has($itemId) : true;
-        }
+        $subContainer = $this->containers[$containerId] ?? null;
 
-        return $this->records->has($id);
+        return !$subContainer ? $this->records->has($id) : !$itemId || $subContainer->has($itemId);
     }
 
     private function splitId(string $id): array
     {
         return explode(static::SEPARATOR, $id, 2) + [false, null];
-    }
-
-    private function fromContainer(string $containerId, string $id)
-    {
-        try {
-            return $this->containers[$containerId]->get($id);
-        } catch (NotFoundExceptionInterface $e) {
-            throw Exception\RecordNotFoundException::notFoundInSubContainer($containerId, $id, $e);
-        }
     }
 }
