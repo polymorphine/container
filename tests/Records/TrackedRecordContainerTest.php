@@ -22,7 +22,7 @@ use Psr\Container\NotFoundExceptionInterface;
 
 class TrackedRecordContainerTest extends RecordContainerTest
 {
-    public function testTrackedContainer_getUndefinedRecordValue_ThrowsExceptionWithCallStack()
+    public function test_Get_ForUndefinedRecordValue_ThrowsExceptionWithCallStack()
     {
         $container = $this->container([
             'foo' => MockedRecord::new(function (ContainerInterface $c) { return $c->get('bar'); }),
@@ -35,7 +35,7 @@ class TrackedRecordContainerTest extends RecordContainerTest
         $container->get('foo');
     }
 
-    public function testTrackedContainer_getSelfReferencedRecord_ThrowsExceptionWithCallStack()
+    public function test_Get_ForSelfReferencedRecord_ThrowsExceptionWithCallStack()
     {
         $container = $this->container([
             'foo' => MockedRecord::new(function (ContainerInterface $c) { return $c->get('bar'); }),
@@ -48,7 +48,7 @@ class TrackedRecordContainerTest extends RecordContainerTest
         $container->get('foo');
     }
 
-    public function testTrackedContainer_getRecordValueWithEncapsulatedSelfReference_ReturnsRecordValue()
+    public function test_Get_ForRecordValueWithEncapsulatedSelfReference_ReturnsRecordValue()
     {
         $container = $this->container([
             'foo' => MockedRecord::new(function (ContainerInterface $c) { return $c->get('bar'); }),

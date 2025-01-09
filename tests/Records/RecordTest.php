@@ -20,7 +20,7 @@ use Psr\Container\ContainerInterface;
 
 class RecordTest extends TestCase
 {
-    public function testInstantiation()
+    public function test_Instantiation()
     {
         $this->assertInstanceOf(Record::class, new Record\ValueRecord('foo'));
         $this->assertInstanceOf(Record::class, new Record\CallbackRecord(function () {}));
@@ -29,28 +29,28 @@ class RecordTest extends TestCase
         $this->assertInstanceOf(Record::class, new Record\ComposedInstanceRecord('foo.id', Doubles\MockedRecord::new(), null));
     }
 
-    public function testValueRecord_value_ReturnsStoredValue()
+    public function test_ValueRecord_Value_ReturnsStoredValue()
     {
         $expected = 'test string';
         $record   = new Record\ValueRecord($expected);
         $this->assertSame($expected, $record->value(Doubles\FakeContainer::new()));
     }
 
-    public function testCallbackRecord_value_ReturnsInvokedCallbackResult()
+    public function test_CallbackRecord_Value_ReturnsInvokedCallbackResult()
     {
         $expected = 'test string';
         $record   = new Record\CallbackRecord(function () use ($expected) { return $expected; });
         $this->assertSame($expected, $record->value(Doubles\FakeContainer::new()));
     }
 
-    public function testCallbackRecord_value_CanGetValueFromContainer()
+    public function test_CallbackRecord_Value_CanGetValueFromContainer()
     {
         $expected = 'test string';
         $record   = new Record\CallbackRecord(function (ContainerInterface $c) { return $c->get('expected'); });
         $this->assertSame($expected, $record->value(Doubles\FakeContainer::new(['expected' => $expected])));
     }
 
-    public function testInstanceRecord_value_ReturnsInstantiatedObject()
+    public function test_InstanceRecord_Value_ReturnsInstantiatedObject()
     {
         $container = Doubles\FakeContainer::new([
             'callback' => function (string $string) { return 'Test ' . $string; },
@@ -61,7 +61,7 @@ class RecordTest extends TestCase
         $this->assertEquals($expected, $record->value($container));
     }
 
-    public function testProductRecord_value_ReturnsFactoryCreatedObject()
+    public function test_ProductRecord_Value_ReturnsFactoryCreatedObject()
     {
         $container = Doubles\FakeContainer::new([
             'stringA' => 'Test',
@@ -73,7 +73,7 @@ class RecordTest extends TestCase
         $this->assertEquals($expected, $record->value($container));
     }
 
-    public function testComposedInstanceRecord_value_ReturnsComposedObject()
+    public function test_ComposedInstanceRecord_Value_ReturnsComposedObject()
     {
         $container = Doubles\FakeContainer::new([
             'callback' => function (string $string) { return 'Test ' . $string; },
@@ -95,7 +95,7 @@ class RecordTest extends TestCase
      *
      * @param Record $record
      */
-    public function testLazyRecordValuesAreCached(Record $record)
+    public function test_LazyRecord_ValuesAreCached(Record $record)
     {
         $container = Doubles\FakeContainer::new([
             'stringA'  => 'foo',

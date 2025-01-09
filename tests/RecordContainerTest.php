@@ -21,12 +21,12 @@ use Psr\Container\NotFoundExceptionInterface;
 
 class RecordContainerTest extends TestCase
 {
-    public function testInstantiation()
+    public function test_Instantiation()
     {
         $this->assertInstanceOf(ContainerInterface::class, $this->container());
     }
 
-    public function testContainer_hasForDefinedRecords_ReturnsTrue()
+    public function test_Has_ForDefinedRecords_ReturnsTrue()
     {
         $container = $this->container($records = [
             'foo' => MockedRecord::new('foo'),
@@ -40,7 +40,7 @@ class RecordContainerTest extends TestCase
         }
     }
 
-    public function testContainer_hasForUndefinedRecords_ReturnsFalse()
+    public function test_Has_ForUndefinedRecords_ReturnsFalse()
     {
         $container = $this->container($records = [
             'foo' => MockedRecord::new('foo'),
@@ -52,7 +52,7 @@ class RecordContainerTest extends TestCase
         }
     }
 
-    public function testContainer_get_ReturnsValueFromRecord()
+    public function test_Get_ReturnsValueFromRecord()
     {
         $container = $this->container($records = [
             'foo' => MockedRecord::new('foo'),
@@ -66,14 +66,14 @@ class RecordContainerTest extends TestCase
         }
     }
 
-    public function testContainer_getForUndefinedRecord_ThrowsException()
+    public function test_Get_ForUndefinedRecord_ThrowsException()
     {
         $container = $this->container(['foo' => MockedRecord::new('example')]);
         $this->expectException(NotFoundExceptionInterface::class);
         $container->get('undefined');
     }
 
-    public function testContainer_get_PassesItselfToBuiltRecord()
+    public function test_Get_PassesItselfToBuiltRecord()
     {
         $container = $this->container(['foo' => $record = MockedRecord::new('example')]);
         $container->get('foo');

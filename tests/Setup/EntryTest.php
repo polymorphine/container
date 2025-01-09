@@ -21,12 +21,12 @@ use Polymorphine\Container\Tests\Doubles;
 
 class EntryTest extends TestCase
 {
-    public function testInstantiation()
+    public function test_Instantiation()
     {
         $this->assertInstanceOf(Entry::class, $this->entry('id'));
     }
 
-    public function testEntry_record_ChangesSetupRecords()
+    public function test_Record_ChangesSetupRecords()
     {
         $setup = $this->builder();
         $entry = $this->entry('foo', $setup);
@@ -39,7 +39,7 @@ class EntryTest extends TestCase
         $this->assertSame([['foo', $fooRecord], ['bar', $barRecord]], $setup->setRecords);
     }
 
-    public function testEntry_value_SetsSetupValueRecord()
+    public function test_Value_SetsSetupValueRecord()
     {
         $setup = $this->builder();
         $entry = $this->entry('foo', $setup);
@@ -49,7 +49,7 @@ class EntryTest extends TestCase
         $this->assertEquals([['foo', $record]], $setup->setRecords);
     }
 
-    public function testEntry_callback_SetsSetupValueRecord()
+    public function test_Callback_SetsSetupValueRecord()
     {
         $setup = $this->builder();
         $entry = $this->entry('foo', $setup);
@@ -66,7 +66,7 @@ class EntryTest extends TestCase
         $this->assertSame($object, $record->value(Doubles\FakeContainer::new()));
     }
 
-    public function testEntry_instance_SetsSetupValueRecord()
+    public function test_Instance_SetsSetupValueRecord()
     {
         $setup = $this->builder();
         $entry = $this->entry('foo', $setup);
@@ -76,7 +76,7 @@ class EntryTest extends TestCase
         $this->assertEquals([['foo', $record]], $setup->setRecords);
     }
 
-    public function testEntry_product_SetsSetupValueRecord()
+    public function test_Product_SetsSetupValueRecord()
     {
         $setup = $this->builder();
         $entry = $this->entry('foo', $setup);
@@ -86,7 +86,7 @@ class EntryTest extends TestCase
         $this->assertEquals([['foo', $record]], $setup->setRecords);
     }
 
-    public function testEntry_wrappedInstance_SetsSetupValueRecord()
+    public function test_WrappedInstance_SetsSetupValueRecord()
     {
         $setup = $this->builder();
         $entry = $this->entry('foo', $setup);
@@ -101,7 +101,7 @@ class EntryTest extends TestCase
         $this->assertEquals([['foo', $record]], $setup->setRecords);
     }
 
-    public function testEntry_wrappedInstanceWithNoReferenceToWrappedObject_ThrowsException()
+    public function test_WrappedInstance_WithNoReferenceToWrappedObject_ThrowsException()
     {
         $setup = $this->builder();
         $entry = $this->entry('foo', $setup);
@@ -111,7 +111,7 @@ class EntryTest extends TestCase
         $wrapper->with(Fixtures\DecoratorExample::class, 'not-foo', 'baz');
     }
 
-    public function testEntry_container_SetsSetupContainer()
+    public function test_Container_SetsSetupContainer()
     {
         $setup = $this->builder();
         $entry = $this->entry('foo', $setup);
