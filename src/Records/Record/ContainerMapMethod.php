@@ -18,6 +18,6 @@ trait ContainerMapMethod
 {
     private function containerValues(array $identifiers, ContainerInterface $container): array
     {
-        return array_map(function ($id) use ($container) { return $container->get($id); }, $identifiers);
+        return array_map(fn ($id) => $container->get($id), $identifiers);
     }
 }
