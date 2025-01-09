@@ -20,6 +20,11 @@ use Psr\Container\NotFoundExceptionInterface;
 
 class CompositeContainerTest extends TestCase
 {
+    public static function undefinedEntries(): array
+    {
+        return [['foo.something'], ['bar'], ['foo.another'], ['bar.something.else']];
+    }
+
     public function test_Instantiation()
     {
         $this->assertInstanceOf(ContainerInterface::class, $this->container());
@@ -72,11 +77,7 @@ class CompositeContainerTest extends TestCase
         $this->assertFalse($container->has('bar'));
     }
 
-    /**
-     * @dataProvider undefinedEntries
-     *
-     * @param string $id
-     */
+    /** @dataProvider undefinedEntries */
     public function test_Get_WithUndefinedEntry_ThrowsException(string $id)
     {
         $container = $this->container([
@@ -89,11 +90,6 @@ class CompositeContainerTest extends TestCase
 
         $this->expectException(NotFoundExceptionInterface::class);
         $container->get($id);
-    }
-
-    public function undefinedEntries(): array
-    {
-        return [['foo.something'], ['bar'], ['foo.another'], ['bar.something.else']];
     }
 
     public function test_Get_EntryWithReferencesToContainer_ReturnsResolvedValue()
