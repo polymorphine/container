@@ -32,9 +32,8 @@ class SetupTest extends TestCase
 
     public function test_Set_ForUndefinedId_ReturnsEntryObject()
     {
-        $setup    = new Setup($build = Doubles\MockedBuild::undefined());
-        $expected = new Setup\Entry('foo', $build);
-        $this->assertEquals($expected, $setup->set('foo'));
+        $build = Doubles\MockedBuild::undefined();
+        $this->assertEquals(new Setup\Entry('foo', $build), $this->builder($build)->set('foo'));
     }
 
     public function test_Set_ForDefinedId_ThrowsException()
@@ -44,9 +43,8 @@ class SetupTest extends TestCase
         $setup->set('foo');
     }
 
-    private function builder(?Setup\Build &$build = null): Setup
+    private function builder(?Doubles\MockedBuild &$build = null): Setup
     {
-        $build = new Doubles\MockedBuild();
-        return new Setup($build);
+        return new Setup($build ??= new Doubles\MockedBuild());
     }
 }

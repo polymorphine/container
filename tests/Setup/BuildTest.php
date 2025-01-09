@@ -39,7 +39,7 @@ class BuildTest extends TestCase
     public function test_AddRecord_WillCreateContainerWithAddedRecords()
     {
         $setup = $this->builder();
-        $setup->setRecord('foo', $added = Doubles\MockedRecord::new('added'));
+        $setup->setRecord('foo', Doubles\MockedRecord::new('added'));
         $this->assertSame('added', $setup->container()->get('foo'));
     }
 

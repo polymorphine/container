@@ -42,7 +42,7 @@ class RecordContainerTest extends TestCase
 
     public function test_Has_ForUndefinedRecords_ReturnsFalse()
     {
-        $container = $this->container($records = [
+        $container = $this->container([
             'foo' => MockedRecord::new('foo'),
             'bar' => MockedRecord::new('')
         ]);
@@ -62,7 +62,7 @@ class RecordContainerTest extends TestCase
         ]);
 
         foreach ($records as $id => $record) {
-            $this->assertSame($records[$id]->value, $container->get($id));
+            $this->assertSame($record->value, $container->get($id));
         }
     }
 
