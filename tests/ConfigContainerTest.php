@@ -19,11 +19,6 @@ use Psr\Container\NotFoundExceptionInterface;
 
 class ConfigContainerTest extends TestCase
 {
-    public static function undefinedEntries(): array
-    {
-        return [['missing'], ['foo1.undefined'], ['foo1.bar2.missing'], ['foo2.bar.baz.qux'], ['foo3.more']];
-    }
-
     public function test_Instantiation()
     {
         $this->assertInstanceOf(ContainerInterface::class, $this->container());
@@ -68,6 +63,11 @@ class ConfigContainerTest extends TestCase
         $container = $this->container();
         $this->expectException(NotFoundExceptionInterface::class);
         $container->get($id);
+    }
+
+    public static function undefinedEntries(): array
+    {
+        return [['missing'], ['foo1.undefined'], ['foo1.bar2.missing'], ['foo2.bar.baz.qux'], ['foo3.more']];
     }
 
     private function container(?array &$config = []): ConfigContainer

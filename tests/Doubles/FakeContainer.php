@@ -17,16 +17,16 @@ use Psr\Container\ContainerInterface;
 
 class FakeContainer implements ContainerInterface
 {
+    public static function new(array $data = []): self
+    {
+        return new self($data);
+    }
+
     public array $data = [];
 
     public function __construct(array $data = [])
     {
         $this->data = $data;
-    }
-
-    public static function new(array $data = []): self
-    {
-        return new self($data);
     }
 
     public function get($id)

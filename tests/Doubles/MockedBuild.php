@@ -20,13 +20,6 @@ use Psr\Container\ContainerInterface;
 
 class MockedBuild extends Build
 {
-    public ContainerInterface $container;
-    public Wrapper            $wrapper;
-    public array              $setRecords    = [];
-    public array              $setContainers = [];
-
-    private bool $defined;
-
     public static function defined(): self
     {
         $build = new self();
@@ -40,6 +33,13 @@ class MockedBuild extends Build
         $build->defined = false;
         return $build;
     }
+
+    public ContainerInterface $container;
+    public Wrapper            $wrapper;
+    public array              $setRecords    = [];
+    public array              $setContainers = [];
+
+    private bool $defined;
 
     public function container(): ContainerInterface
     {

@@ -20,20 +20,6 @@ use Psr\Container\ContainerInterface;
 
 class RecordTest extends TestCase
 {
-    public static function lazyRecords(): array
-    {
-        $composed = new Record\ValueRecord('foo');
-        $composed = new Record\ComposedInstanceRecord(Fixtures\ExampleImpl::class, $composed, 'callback', null);
-        $composed = new Record\ComposedInstanceRecord(Fixtures\DecoratorExample::class, $composed, null, 'stringA');
-
-        return [
-            [new Record\CallbackRecord(function () { return Fixtures\ExampleImpl::new(); })],
-            [new Record\InstanceRecord(Fixtures\ExampleImpl::class, 'callback', 'stringA')],
-            [new Record\ProductRecord('factory', 'create', 'stringA', 'stringB')],
-            [$composed]
-        ];
-    }
-
     public function test_Instantiation()
     {
         $this->assertInstanceOf(Record::class, new Record\ValueRecord('foo'));
@@ -114,5 +100,19 @@ class RecordTest extends TestCase
             'factory'  => new Fixtures\FactoryExample()
         ]);
         $this->assertSame($record->value($container), $record->value($container));
+    }
+
+    public static function lazyRecords(): iterable
+    {
+        $composed = new Record\ValueRecord('foo');
+        $composed = new Record\ComposedInstanceRecord(Fixtures\ExampleImpl::class, $composed, 'callback', null);
+        $composed = new Record\ComposedInstanceRecord(Fixtures\DecoratorExample::class, $composed, null, 'stringA');
+
+        return [
+            [new Record\CallbackRecord(function () { return Fixtures\ExampleImpl::new(); })],
+            [new Record\InstanceRecord(Fixtures\ExampleImpl::class, 'callback', 'stringA')],
+            [new Record\ProductRecord('factory', 'create', 'stringA', 'stringB')],
+            [$composed]
+        ];
     }
 }

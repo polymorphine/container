@@ -14,16 +14,16 @@ namespace Polymorphine\Container\Tests\Fixtures;
 
 class ExampleImpl implements Example
 {
+    public static function new(string $string = 'Example'): self
+    {
+        return new self(function (string $string) { return $string; }, $string);
+    }
+
     private string $string;
 
     public function __construct(callable $callback, string $name)
     {
         $this->string = $callback($name);
-    }
-
-    public static function new(string $string = 'Example'): self
-    {
-        return new self(function (string $string) { return $string; }, $string);
     }
 
     public function getString(): string

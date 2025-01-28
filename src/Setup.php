@@ -23,16 +23,6 @@ use Psr\Container\ContainerInterface;
  */
 class Setup
 {
-    private Build $build;
-
-    /**
-     * @param Build|null $build
-     */
-    public function __construct(?Build $build = null)
-    {
-        $this->build = $build ?: new Build();
-    }
-
     /**
      * Creates Setup with predefined Record and ContainerInterface entries
      * assuming correctness of provided data.
@@ -70,6 +60,16 @@ class Setup
     public static function development(array $records = [], array $containers = []): self
     {
         return new self(new Build\ValidatedBuild($records, $containers));
+    }
+
+    private Build $build;
+
+    /**
+     * @param Build|null $build
+     */
+    public function __construct(?Build $build = null)
+    {
+        $this->build = $build ?: new Build();
     }
 
     /**

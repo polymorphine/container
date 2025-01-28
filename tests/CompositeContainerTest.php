@@ -20,11 +20,6 @@ use Psr\Container\NotFoundExceptionInterface;
 
 class CompositeContainerTest extends TestCase
 {
-    public static function undefinedEntries(): array
-    {
-        return [['foo.something'], ['bar'], ['foo.another'], ['bar.something.else']];
-    }
-
     public function test_Instantiation()
     {
         $this->assertInstanceOf(ContainerInterface::class, $this->container());
@@ -125,6 +120,11 @@ class CompositeContainerTest extends TestCase
         $this->expectException(NotFoundExceptionInterface::class);
         $this->expectExceptionMessage('Sub-container `sub.undefined` entry not found [call stack: foo->bar->sub.undefined]');
         $container->get('foo');
+    }
+
+    public static function undefinedEntries(): array
+    {
+        return [['foo.something'], ['bar'], ['foo.another'], ['bar.something.else']];
     }
 
     private function container(array $records = [], array $containers = []): CompositeContainer

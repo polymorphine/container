@@ -17,17 +17,17 @@ use Psr\Container\ContainerInterface;
 
 class MockedRecord implements Record
 {
+    public static function new($value = 'test'): self
+    {
+        return new self($value);
+    }
+
     public $value;
     public ContainerInterface $passedContainer;
 
     public function __construct($value = null)
     {
         $this->value = $value;
-    }
-
-    public static function new($value = 'test'): self
-    {
-        return new self($value);
     }
 
     public function value(ContainerInterface $container)
